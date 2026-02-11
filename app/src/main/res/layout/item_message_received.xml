@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layout_marginTop="@dimen/spacing_xs"
+    android:layout_marginBottom="@dimen/spacing_xs">
+
+    <!-- Sender Avatar -->
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/iv_avatar"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginEnd="@dimen/spacing_small"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_person_placeholder"
+        app:shapeAppearanceOverlay="@style/CircularShape"
+        tools:src="@tools:sample/avatars"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Message Bubble -->
+        <LinearLayout
+            android:id="@+id/message_bubble"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxWidth="280dp"
+            android:orientation="vertical"
+            android:background="@drawable/bg_message_received"
+            android:padding="@dimen/spacing_medium">
+
+            <TextView
+                android:id="@+id/tv_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/text_body_large"
+                android:lineSpacingExtra="2dp"
+                tools:text="Hi! I'm doing great, thanks!"/>
+
+        </LinearLayout>
+
+        <!-- Timestamp -->
+        <TextView
+            android:id="@+id/tv_timestamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xs"
+            android:layout_marginStart="@dimen/spacing_xs"
+            android:textSize="@dimen/text_label_small"
+            android:textColor="@color/text_hint"
+            tools:text="2:31 PM"/>
+
+    </LinearLayout>
+
+</LinearLayout>

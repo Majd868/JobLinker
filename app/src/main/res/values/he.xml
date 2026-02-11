@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name3">JobLinker</string>
+    <string name="login3">התחברות</string>
+    <string name="register3">הרשמה</string>
+    <string name="logout3">התנתקות</string>
+    <string name="email3">דוא״ל</string>
+    <string name="password3">סיסמה</string>
+    <string name="jobs3">משרות</string>
+    <string name="chats3">צ\'אטים</string>
+    <string name="profile3">פרופיל</string>
+    <string name="settings3">הגדרות</string>
+    <string name="edit_profile3">עריכת פרופיל</string>
+    <string name="save_changes3">שמור שינויים</string>
+    <string name="full_name3">שם מלא</string>
+    <string name="phone_number3">מספר טלפון</string>
+    <string name="bio3">אודות</string>
+    <string name="location3">מיקום</string>
+    <string name="country3">מדינה</string>
+    <string name="city3">עיר</string>
+    <string name="language3">שפה</string>
+    <string name="currency3">מטבע</string>
+    <string name="user_role3">תפקיד משתמש</string>
+    <string name="job_seeker3">מחפש עבודה</string>
+    <string name="employer3">מעסיק</string>
+</resources>

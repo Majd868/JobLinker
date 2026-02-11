@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_gradient_primary"
+    tools:context=".activities.CallActivity">
+
+    <!-- Remote Video Container (For Video Calls) -->
+    <FrameLayout
+        android:id="@+id/remote_video_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+
+    <!-- User Avatar -->
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/iv_user_avatar"
+        android:layout_width="@dimen/avatar_size_xlarge"
+        android:layout_height="@dimen/avatar_size_xlarge"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_person_placeholder"
+        app:shapeAppearanceOverlay="@style/CircularShape"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="0.3"
+        tools:src="@tools:sample/avatars"/>
+
+    <!-- Pulse Animation View -->
+    <View
+        android:id="@+id/view_pulse"
+        android:layout_width="@dimen/avatar_size_xlarge"
+        android:layout_height="@dimen/avatar_size_xlarge"
+        android:background="@drawable/pulse_animation"
+        android:visibility="visible"
+        app:layout_constraintTop_toTopOf="@id/iv_user_avatar"
+        app:layout_constraintBottom_toBottomOf="@id/iv_user_avatar"
+        app:layout_constraintStart_toStartOf="@id/iv_user_avatar"
+        app:layout_constraintEnd_toEndOf="@id/iv_user_avatar"/>
+
+    <!-- User Name -->
+    <TextView
+        android:id="@+id/tv_user_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_large"
+        style="@style/TextAppearance.JobLinker.HeadlineMedium"
+        android:textColor="@color/text_white"
+        app:layout_constraintTop_toBottomOf="@id/iv_user_avatar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:text="John Doe"/>
+
+    <!-- Call Status -->
+    <TextView
+        android:id="@+id/tv_call_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_small"
+        style="@style/TextAppearance.JobLinker.BodyLarge"
+        android:textColor="@color/text_white"
+        android:alpha="0.8"
+        app:layout_constraintTop_toBottomOf="@id/tv_user_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:text="Calling..."/>
+
+    <!-- Call Timer -->
+    <TextView
+        android:id="@+id/tv_call_timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_small"
+        style="@style/TextAppearance.JobLinker.BodyLarge"
+        android:textColor="@color/text_white"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/tv_call_status"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:text="00:45"
+        tools:visibility="visible"/>
+
+    <!-- Local Video Container (Self View for Video Calls) -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/local_video_container"
+        android:layout_width="120dp"
+        android:layout_height="160dp"
+        android:layout_margin="@dimen/spacing_medium"
+        app:cardCornerRadius="@dimen/image_corner_radius"
+        app:cardElevation="4dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Call Controls -->
+    <LinearLayout
+        android:id="@+id/layout_controls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:padding="@dimen/spacing_large"
+        android:layout_marginBottom="@dimen/spacing_xl"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- Mute Button -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btn_mute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/spacing_small"
+            android:contentDescription="@string/mute"
+            android:src="@drawable/ic_mic"
+            app:tint="@color/text_white"
+            app:backgroundTint="@color/secondary"
+            app:fabSize="normal"/>
+
+        <!-- Hang Up Button -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btn_hang_up"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/spacing_small"
+            android:contentDescription="@string/hang_up"
+            android:src="@drawable/ic_call_end"
+            app:tint="@color/text_white"
+            app:backgroundTint="@color/error"
+            app:fabSize="normal"
+            app:fabCustomSize="64dp"/>
+
+        <!-- Speaker Button -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btn_speaker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/spacing_small"
+            android:contentDescription="@string/speaker"
+            android:src="@drawable/ic_volume_up"
+            app:tint="@color/text_white"
+            app:backgroundTint="@color/secondary"
+            app:fabSize="normal"/>
+
+    </LinearLayout>
+
+    <!-- Video Toggle Button (Only for Video Calls) -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btn_video_toggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/spacing_medium"
+        android:contentDescription="@string/video"
+        android:src="@drawable/ic_videocam"
+        android:visibility="gone"
+        app:tint="@color/text_white"
+        app:backgroundTint="@color/secondary"
+        app:fabSize="mini"
+        app:layout_constraintBottom_toTopOf="@id/layout_controls"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

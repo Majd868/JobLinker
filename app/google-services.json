@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "943441972422",
+    "project_id": "joblinker-93157",
+    "storage_bucket": "joblinker-93157.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:943441972422:android:da8155746881c4c7c3dbc7",
+        "android_client_info": {
+          "package_name": "com.example.joblinker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDXC0-HtrprRkqHKjWqXdy39WEYpvcegg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

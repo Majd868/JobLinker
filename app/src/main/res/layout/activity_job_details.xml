@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/surface">
+
+    <!-- App Bar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/primary"
+            app:title="@string/job_details"
+            app:titleTextColor="@color/text_white"
+            app:navigationIcon="@drawable/ic_back"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Content -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Job Header Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/spacing_medium"
+                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:cardElevation="@dimen/card_elevation">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/card_padding">
+
+                    <!-- Company Logo -->
+                    <ImageView
+                        android:id="@+id/iv_company_logo"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_company_placeholder"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"/>
+
+                    <!-- Job Title -->
+                    <TextView
+                        android:id="@+id/tv_job_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_medium"
+                        android:layout_marginEnd="@dimen/spacing_medium"
+                        style="@style/TextAppearance.JobLinker.HeadlineSmall"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        app:layout_constraintStart_toEndOf="@id/iv_company_logo"
+                        app:layout_constraintEnd_toStartOf="@id/btn_save"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:text="Senior Software Engineer"/>
+
+                    <!-- Save Button -->
+                    <ImageButton
+                        android:id="@+id/btn_save"
+                        android:layout_width="@dimen/min_touch_target"
+                        android:layout_height="@dimen/min_touch_target"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_bookmark_border"
+                        android:contentDescription="@string/save"
+                        app:tint="@color/secondary"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"/>
+
+                    <!-- Company Name -->
+                    <TextView
+                        android:id="@+id/tv_company_name"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_xs"
+                        style="@style/TextAppearance.JobLinker.BodyLarge"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        app:layout_constraintStart_toStartOf="@id/tv_job_title"
+                        app:layout_constraintEnd_toEndOf="@id/tv_job_title"
+                        app:layout_constraintTop_toBottomOf="@id/tv_job_title"
+                        tools:text="Google Inc."/>
+
+                    <!-- Location -->
+                    <TextView
+                        android:id="@+id/tv_location"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_xs"
+                        style="@style/TextAppearance.JobLinker.BodyMedium"
+                        android:drawableStart="@drawable/ic_location"
+                        android:drawablePadding="@dimen/spacing_xs"
+                        android:drawableTint="@color/text_hint"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        app:layout_constraintStart_toStartOf="@id/tv_job_title"
+                        app:layout_constraintEnd_toEndOf="@id/tv_job_title"
+                        app:layout_constraintTop_toBottomOf="@id/tv_company_name"
+                        tools:text="San Francisco, CA"/>
+
+                    <!-- Salary -->
+                    <TextView
+                        android:id="@+id/tv_salary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_medium"
+                        style="@style/TextAppearance.JobLinker.BodyLarge"
+                        android:textColor="@color/accent"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/iv_company_logo"
+                        tools:text="$120,000 - $180,000"/>
+
+                    <!-- Posted Time -->
+                    <TextView
+                        android:id="@+id/tv_posted_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/TextAppearance.JobLinker.LabelSmall"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/tv_salary"
+                        tools:text="2 days ago"/>
+
+                    <!-- Chips -->
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_category"
+                        style="@style/Widget.Material3.Chip.Assist"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_small"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tv_salary"
+                        tools:text="Tech"/>
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_job_type"
+                        style="@style/Widget.Material3.Chip.Assist"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_small"
+                        app:layout_constraintStart_toEndOf="@id/chip_category"
+                        app:layout_constraintTop_toTopOf="@id/chip_category"
+                        tools:text="Full-time"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Job Description Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_medium"
+                android:layout_marginEnd="@dimen/spacing_medium"
+                android:layout_marginBottom="@dimen/spacing_medium"
+                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:cardElevation="@dimen/card_elevation">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/card_padding">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/job_description"
+                        style="@style/TextAppearance.JobLinker.HeadlineSmall"
+                        android:layout_marginBottom="@dimen/spacing_small"/>
+
+                    <TextView
+                        android:id="@+id/tv_description"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/TextAppearance.JobLinker.BodyLarge"
+                        android:lineSpacingExtra="4dp"
+                        tools:text="We are looking for an experienced software engineer..."/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Required Skills Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_medium"
+                android:layout_marginEnd="@dimen/spacing_medium"
+                android:layout_marginBottom="@dimen/spacing_medium"
+                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:cardElevation="@dimen/card_elevation">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/card_padding">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/required_skills"
+                        style="@style/TextAppearance.JobLinker.HeadlineSmall"
+                        android:layout_marginBottom="@dimen/spacing_small"/>
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chip_group_skills"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Job Info Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_medium"
+                android:layout_marginEnd="@dimen/spacing_medium"
+                android:layout_marginBottom="@dimen/spacing_medium"
+                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:cardElevation="@dimen/card_elevation">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/card_padding">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/job_information"
+                        style="@style/TextAppearance.JobLinker.HeadlineSmall"
+                        android:layout_marginBottom="@dimen/spacing_medium"/>
+
+                    <!-- Deadline -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="@dimen/spacing_small">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Application Deadline:"
+                            style="@style/TextAppearance.JobLinker.BodyMedium"/>
+
+                        <TextView
+                            android:id="@+id/tv_deadline"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/TextAppearance.JobLinker.BodyMedium"
+                            android:textStyle="bold"
+                            tools:text="Dec 31, 2025"/>
+
+                    </LinearLayout>
+
+                    <!-- Applications -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="@dimen/spacing_small">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Total Applications:"
+                            style="@style/TextAppearance.JobLinker.BodyMedium"/>
+
+                        <TextView
+                            android:id="@+id/tv_applications"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/TextAppearance.JobLinker.BodyMedium"
+                            android:textStyle="bold"
+                            tools:text="45"/>
+
+                    </LinearLayout>
+
+                    <!-- Views -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Views:"
+                            style="@style/TextAppearance.JobLinker.BodyMedium"/>
+
+                        <TextView
+                            android:id="@+id/tv_views"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/TextAppearance.JobLinker.BodyMedium"
+                            android:textStyle="bold"
+                            tools:text="328"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Employer Info Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/layout_employer_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_medium"
+                android:layout_marginEnd="@dimen/spacing_medium"
+                android:layout_marginBottom="@dimen/spacing_medium"
+                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:cardElevation="@dimen/card_elevation">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/card_padding">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/employer_information"
+                        style="@style/TextAppearance.JobLinker.HeadlineSmall"
+                        android:layout_marginBottom="@dimen/spacing_medium"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:id="@+id/iv_employer_avatar"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:src="@drawable/ic_person_placeholder"
+                            android:contentDescription="@string/employer"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginStart="@dimen/spacing_medium">
+
+                            <TextView
+                                android:id="@+id/tv_employer_name"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                style="@style/TextAppearance.JobLinker.BodyLarge"
+                                android:textStyle="bold"
+                                tools:text="John Doe"/>
+
+                            <TextView
+                                android:id="@+id/tv_employer_email"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                style="@style/TextAppearance.JobLinker.BodyMedium"
+                                android:textColor="@color/text_secondary"
+                                tools:text="john@company.com"/>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_contact_employer"
+                        style="@style/Widget.JobLinker.Button.Secondary"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/button_height"
+                        android:layout_marginTop="@dimen/spacing_medium"
+                        android:text="@string/contact_employer"
+                        app:icon="@drawable/ic_message"/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Bottom Spacer -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="80dp"/>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Bottom Action Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="bottom"
+        android:padding="@dimen/spacing_medium"
+        android:background="@color/background"
+        android:elevation="8dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_share"
+            style="@style/Widget.JobLinker.Button.Secondary"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="@dimen/button_height"
+            android:layout_marginEnd="@dimen/spacing_small"
+            android:text="@string/share"
+            app:icon="@drawable/ic_share"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_apply"
+            style="@style/Widget.JobLinker.Button.Primary"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="@dimen/button_height"
+            android:text="@string/apply_now"/>
+
+    </LinearLayout>
+
+    <!-- Progress Bar -->
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="@style/Widget.JobLinker.ProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

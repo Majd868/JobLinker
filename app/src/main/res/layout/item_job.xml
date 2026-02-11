@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="@dimen/spacing_medium"
+    android:layout_marginEnd="@dimen/spacing_medium"
+    android:layout_marginTop="@dimen/spacing_small"
+    android:layout_marginBottom="@dimen/spacing_small"
+    app:cardCornerRadius="@dimen/card_corner_radius"
+    app:cardElevation="@dimen/card_elevation"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/card_padding">
+
+        <!-- Company Logo -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/iv_company_logo"
+            android:layout_width="@dimen/avatar_size_small"
+            android:layout_height="@dimen/avatar_size_small"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_company_placeholder"
+            app:shapeAppearanceOverlay="@style/RoundedSquare"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@tools:sample/avatars"/>
+
+        <!-- Job Title -->
+        <TextView
+            android:id="@+id/tv_job_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_medium"
+            android:layout_marginEnd="@dimen/spacing_medium"
+            style="@style/TextAppearance.JobLinker.HeadlineSmall"
+            android:maxLines="2"
+            android:ellipsize="end"
+            app:layout_constraintStart_toEndOf="@id/iv_company_logo"
+            app:layout_constraintEnd_toStartOf="@id/btn_save"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Senior Software Engineer"/>
+
+        <!-- Company Name -->
+        <TextView
+            android:id="@+id/tv_company_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xs"
+            style="@style/TextAppearance.JobLinker.BodyMedium"
+            android:maxLines="1"
+            android:ellipsize="end"
+            app:layout_constraintStart_toStartOf="@id/tv_job_title"
+            app:layout_constraintEnd_toEndOf="@id/tv_job_title"
+            app:layout_constraintTop_toBottomOf="@id/tv_job_title"
+            tools:text="Google Inc."/>
+
+        <!-- Location -->
+        <ImageView
+            android:id="@+id/ic_location"
+            android:layout_width="@dimen/icon_size_small"
+            android:layout_height="@dimen/icon_size_small"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:src="@drawable/ic_location"
+            android:contentDescription="@string/country"
+            app:tint="@color/text_hint"
+            app:layout_constraintStart_toStartOf="@id/tv_job_title"
+            app:layout_constraintTop_toBottomOf="@id/tv_company_name"/>
+
+        <TextView
+            android:id="@+id/tv_location"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_xs"
+            style="@style/TextAppearance.JobLinker.LabelSmall"
+            android:maxLines="1"
+            android:ellipsize="end"
+            app:layout_constraintStart_toEndOf="@id/ic_location"
+            app:layout_constraintEnd_toStartOf="@id/chip_job_type"
+            app:layout_constraintTop_toTopOf="@id/ic_location"
+            app:layout_constraintBottom_toBottomOf="@id/ic_location"
+            tools:text="San Francisco, CA"/>
+
+        <!-- Save Button -->
+        <ImageButton
+            android:id="@+id/btn_save"
+            android:layout_width="@dimen/min_touch_target"
+            android:layout_height="@dimen/min_touch_target"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_bookmark_border"
+            android:contentDescription="@string/save"
+            app:tint="@color/secondary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <!-- Salary -->
+        <TextView
+            android:id="@+id/tv_salary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_medium"
+            style="@style/TextAppearance.JobLinker.BodyLarge"
+            android:textColor="@color/accent"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ic_location"
+            tools:text="$120,000 - $180,000"/>
+
+        <!-- Category Chip -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_category"
+            style="@style/Widget.Material3.Chip.Assist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:textSize="@dimen/text_label_small"
+            app:chipBackgroundColor="@color/surface_dark"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_salary"
+            tools:text="Tech"/>
+
+        <!-- Job Type Chip -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_job_type"
+            style="@style/Widget.Material3.Chip.Assist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_small"
+            android:textSize="@dimen/text_label_small"
+            app:chipBackgroundColor="@color/surface_dark"
+            app:layout_constraintStart_toEndOf="@id/chip_category"
+            app:layout_constraintTop_toTopOf="@id/chip_category"
+            app:layout_constraintBottom_toBottomOf="@id/chip_category"
+            tools:text="Full-time"/>
+
+        <!-- Posted Time -->
+        <TextView
+            android:id="@+id/tv_posted_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/TextAppearance.JobLinker.LabelSmall"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/chip_category"
+            app:layout_constraintBottom_toBottomOf="@id/chip_category"
+            tools:text="2 days ago"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name4">JobLinker</string>
+    <string name="login4">Iniciar sesión</string>
+    <string name="register4">Registrarse</string>
+    <string name="logout4">Cerrar sesión</string>
+    <string name="email4">Correo electrónico</string>
+    <string name="password4">Contraseña</string>
+    <string name="jobs4">Empleos</string>
+    <string name="chats4">Chats</string>
+    <string name="profile4">Perfil</string>
+    <string name="settings4">Configuración</string>
+    <string name="edit_profile4">Editar perfil</string>
+    <string name="save_changes4">Guardar cambios</string>
+    <string name="full_name4">Nombre completo</string>
+    <string name="phone_number4">Número de teléfono</string>
+    <string name="bio4">Biografía</string>
+    <string name="location4">Ubicación</string>
+    <string name="country4">País</string>
+    <string name="city4">Ciudad</string>
+    <string name="language4">Idioma</string>
+    <string name="currency4">Moneda</string>
+    <string name="user_role4">Rol de usuario</string>
+    <string name="job_seeker4">Buscador de empleo</string>
+    <string name="employer4">Empleador</string>
+</resources>

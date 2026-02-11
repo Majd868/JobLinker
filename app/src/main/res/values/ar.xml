@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name2">JobLinker</string>
+    <string name="login2">تسجيل الدخول</string>
+    <string name="register2">التسجيل</string>
+    <string name="logout2">تسجيل الخروج</string>
+    <string name="email2">البريد الإلكتروني</string>
+    <string name="password2">كلمة المرور</string>
+    <string name="jobs2">الوظائف</string>
+    <string name="chats2">المحادثات</string>
+    <string name="profile2">الملف الشخصي</string>
+    <string name="settings2">الإعدادات</string>
+    <string name="edit_profile2">تعديل الملف الشخصي</string>
+    <string name="save_changes2">حفظ التغييرات</string>
+    <string name="full_name2">الاسم الكامل</string>
+    <string name="phone_number2">رقم الهاتف</string>
+    <string name="bio2">نبذة عني</string>
+    <string name="location2">الموقع</string>
+    <string name="country2">الدولة</string>
+    <string name="city2">المدينة</string>
+    <string name="language2">اللغة</string>
+    <string name="currency2">العملة</string>
+    <string name="user_role2">دور المستخدم</string>
+    <string name="job_seeker2">باحث عن عمل</string>
+    <string name="employer2">صاحب عمل</string>
+</resources>

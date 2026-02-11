@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="end"
+    android:layout_marginTop="@dimen/spacing_xs"
+    android:layout_marginBottom="@dimen/spacing_xs">
+
+    <!-- Message Bubble -->
+    <LinearLayout
+        android:id="@+id/message_bubble"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxWidth="280dp"
+        android:orientation="vertical"
+        android:background="@drawable/bg_message_sent"
+        android:padding="@dimen/spacing_medium">
+
+        <TextView
+            android:id="@+id/tv_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_white"
+            android:textSize="@dimen/text_body_large"
+            android:lineSpacingExtra="2dp"
+            tools:text="Hello! How are you?" />
+
+    </LinearLayout>
+
+    <!-- Timestamp and Status -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/spacing_xs"
+        android:layout_marginEnd="@dimen/spacing_xs"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tv_timestamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/text_label_small"
+            android:textColor="@color/text_hint"
+            tools:text="2:30 PM" />
+
+        <ImageView
+            android:id="@+id/iv_status"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginStart="@dimen/spacing_xs"
+            android:src="@drawable/ic_check_double"
+            android:contentDescription="@string/send"
+            app:tint="@color/primary" />
+
+    </LinearLayout>
+
+</LinearLayout>

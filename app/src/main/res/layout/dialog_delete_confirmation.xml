@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="@dimen/spacing_medium">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_delete_confirmation"
+        style="@style/Widget.JobLinker.TextInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Type DELETE to confirm">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_delete_confirmation"
+            style="@style/Widget.JobLinker.TextInputEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapCharacters"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+</LinearLayout>

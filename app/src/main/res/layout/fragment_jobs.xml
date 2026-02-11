@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/surface">
+
+    <!-- Search Bar Card -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/spacing_medium"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="@color/background"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="@dimen/spacing_small"
+            android:gravity="center_vertical">
+
+            <!-- Search Icon -->
+            <ImageView
+                android:id="@+id/ic_search"
+                android:layout_width="@dimen/icon_size"
+                android:layout_height="@dimen/icon_size"
+                android:layout_marginStart="@dimen/spacing_small"
+                android:layout_marginEnd="@dimen/spacing_small"
+                android:src="@drawable/ic_search"
+                android:contentDescription="@string/cd_search_button"
+                app:tint="@color/text_hint"/>
+
+            <!-- Search EditText -->
+            <EditText
+                android:id="@+id/et_search"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="48dp"
+                android:background="@android:color/transparent"
+                android:hint="@string/search_jobs"
+                android:textSize="@dimen/text_body_large"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_hint"
+                android:inputType="text"
+                android:imeOptions="actionSearch"
+                android:maxLines="1"
+                android:paddingStart="0dp"
+                android:paddingEnd="@dimen/spacing_small"/>
+
+            <!-- Filter Button -->
+            <ImageButton
+                android:id="@+id/btn_filter"
+                android:layout_width="@dimen/min_touch_target"
+                android:layout_height="@dimen/min_touch_target"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_filter"
+                android:contentDescription="@string/cd_filter_button"
+                app:tint="@color/primary"/>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Filter Chips Horizontal ScrollView -->
+    <HorizontalScrollView
+        android:id="@+id/scroll_chips"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_small"
+        android:scrollbars="none"
+        android:clipToPadding="false"
+        android:paddingStart="@dimen/spacing_medium"
+        android:paddingEnd="@dimen/spacing_medium"
+        app:layout_constraintTop_toBottomOf="@id/card_search"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chip_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:singleSelection="true"
+            app:checkedChip="@id/chip_all"
+            app:chipSpacingHorizontal="@dimen/spacing_small">
+
+            <!-- All Chip -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_all"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/all"
+                android:checked="true"
+                app:chipBackgroundColor="@color/chip_background_selector"
+                app:chipStrokeColor="@color/primary"
+                app:chipStrokeWidth="1dp"/>
+
+            <!-- Full-time Chip -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_full_time"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/full_time"
+                app:chipBackgroundColor="@color/chip_background_selector"
+                app:chipStrokeColor="@color/primary"
+                app:chipStrokeWidth="1dp"/>
+
+            <!-- Part-time Chip -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_part_time"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/part_time"
+                app:chipBackgroundColor="@color/chip_background_selector"
+                app:chipStrokeColor="@color/primary"
+                app:chipStrokeWidth="1dp"/>
+
+            <!-- Remote Chip -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_remote"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/remote"
+                app:chipBackgroundColor="@color/chip_background_selector"
+                app:chipStrokeColor="@color/primary"
+                app:chipStrokeWidth="1dp"/>
+
+            <!-- Contract Chip -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_contract"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/contract"
+                app:chipBackgroundColor="@color/chip_background_selector"
+                app:chipStrokeColor="@color/primary"
+                app:chipStrokeWidth="1dp"/>
+
+            <!-- Internship Chip -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_internship"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/internship"
+                app:chipBackgroundColor="@color/chip_background_selector"
+                app:chipStrokeColor="@color/primary"
+                app:chipStrokeWidth="1dp"/>
+
+        </com.google.android.material.chip.ChipGroup>
+
+    </HorizontalScrollView>
+
+    <!-- Jobs RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_jobs"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/spacing_small"
+        android:clipToPadding="false"
+        android:paddingTop="@dimen/spacing_small"
+        android:paddingBottom="@dimen/spacing_medium"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintTop_toBottomOf="@id/scroll_chips"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:listitem="@layout/item_job"/>
+
+    <!-- Empty State -->
+    <LinearLayout
+        android:id="@+id/layout_empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone"
+        android:padding="@dimen/spacing_large"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:visibility="visible">
+
+        <!-- Empty Icon -->
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_briefcase"
+            android:alpha="0.3"
+            android:contentDescription="@string/jobs"
+            app:tint="@color/text_hint"/>
+
+        <!-- Empty Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_results"
+            style="@style/TextAppearance.JobLinker.HeadlineSmall"
+            android:textColor="@color/text_primary"
+            android:layout_marginTop="@dimen/spacing_medium"/>
+
+        <!-- Empty Message -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Try adjusting your filters or search"
+            style="@style/TextAppearance.JobLinker.BodyMedium"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:layout_marginTop="@dimen/spacing_small"/>
+
+    </LinearLayout>
+
+    <!-- Progress Bar -->
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="@style/Widget.JobLinker.ProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:visibility="visible"/>
+
+    <!-- Floating Action Button (For Employers Only) -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_post_job"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/fab_margin"
+        android:contentDescription="@string/post_job"
+        android:src="@drawable/ic_add"
+        android:visibility="gone"
+        app:tint="@color/text_white"
+        app:backgroundTint="@color/primary"
+        app:elevation="6dp"
+        app:fabSize="normal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:visibility="visible"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

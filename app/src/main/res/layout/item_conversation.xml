@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/spacing_medium"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- Avatar Container -->
+    <FrameLayout
+        android:id="@+id/frame_avatar"
+        android:layout_width="@dimen/avatar_size_small"
+        android:layout_height="@dimen/avatar_size_small"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Avatar Image -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/iv_avatar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_person_placeholder"
+            app:shapeAppearanceOverlay="@style/CircularShape"
+            tools:src="@tools:sample/avatars"/>
+
+        <!-- Online Indicator -->
+        <View
+            android:id="@+id/view_online"
+            android:layout_width="@dimen/online_indicator_size"
+            android:layout_height="@dimen/online_indicator_size"
+            android:layout_gravity="bottom|end"
+            android:background="@drawable/ic_online_indicator"
+            android:visibility="gone"/>
+
+    </FrameLayout>
+
+    <!-- User Name -->
+    <TextView
+        android:id="@+id/tv_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_medium"
+        android:layout_marginEnd="@dimen/spacing_small"
+        style="@style/TextAppearance.JobLinker.HeadlineSmall"
+        android:textSize="16sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        app:layout_constraintStart_toEndOf="@id/frame_avatar"
+        app:layout_constraintEnd_toStartOf="@id/tv_timestamp"
+        app:layout_constraintTop_toTopOf="@id/frame_avatar"
+        tools:text="John Doe"/>
+
+    <!-- Last Message Preview -->
+    <TextView
+        android:id="@+id/tv_last_message"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_xs"
+        style="@style/TextAppearance.JobLinker.BodyMedium"
+        android:maxLines="2"
+        android:ellipsize="end"
+        app:layout_constraintStart_toStartOf="@id/tv_name"
+        app:layout_constraintEnd_toEndOf="@id/tv_name"
+        app:layout_constraintTop_toBottomOf="@id/tv_name"
+        tools:text="Hey! I saw your job posting..."/>
+
+    <!-- Timestamp -->
+    <TextView
+        android:id="@+id/tv_timestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/TextAppearance.JobLinker.LabelSmall"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/tv_name"
+        tools:text="2:30 PM"/>
+
+    <!-- Unread Badge -->
+    <TextView
+        android:id="@+id/tv_unread_count"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="@dimen/spacing_xs"
+        android:background="@drawable/bg_badge"
+        android:gravity="center"
+        android:textColor="@color/text_white"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_timestamp"
+        tools:text="3"
+        tools:visibility="visible"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

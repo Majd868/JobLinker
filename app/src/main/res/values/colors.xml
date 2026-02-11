@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ==================== PRIMARY COLORS ==================== -->
+    <color name="primary">#2563EB</color>
+    <color name="primary_dark">#1E40AF</color>
+    <color name="primary_light">#3B82F6</color>
+    <color name="primary_variant">#1D4ED8</color>
+
+    <!-- ==================== SECONDARY COLORS ==================== -->
+    <color name="secondary">#8B5CF6</color>
+    <color name="secondary_dark">#7C3AED</color>
+    <color name="secondary_light">#A78BFA</color>
+    <color name="secondary_variant">#6D28D9</color>
+
+    <!-- ==================== ACCENT COLORS ==================== -->
+    <color name="accent">#10B981</color>
+    <color name="accent_dark">#059669</color>
+    <color name="accent_light">#34D399</color>
+
+    <!-- ==================== BACKGROUND COLORS ==================== -->
+    <color name="background">#FFFFFF</color>
+    <color name="surface">#F8FAFC</color>
+    <color name="surface_dark">#F1F5F9</color>
+    <color name="surface_light">#FEFEFE</color>
+
+    <!-- ==================== TEXT COLORS ==================== -->
+    <color name="text_primary">#0F172A</color>
+    <color name="text_secondary">#475569</color>
+    <color name="text_hint">#94A3B8</color>
+    <color name="text_disabled">#CBD5E1</color>
+    <color name="text_white">#FFFFFF</color>
+    <color name="text_black">#000000</color>
+
+    <!-- ==================== SEMANTIC COLORS ==================== -->
+    <color name="success">#10B981</color>
+    <color name="warning">#F59E0B</color>
+    <color name="error">#EF4444</color>
+    <color name="info">#3B82F6</color>
+
+    <!-- ==================== UI ELEMENT COLORS ==================== -->
+    <color name="divider">#E2E8F0</color>
+    <color name="border">#CBD5E1</color>
+    <color name="ripple">#1A2563EB</color>
+    <color name="overlay">#80000000</color>
+
+    <!-- ==================== BOTTOM NAVIGATION COLORS ==================== -->
+    <color name="bottom_nav_color">#2563EB</color>
+    <color name="bottom_nav_selected">#2563EB</color>
+    <color name="bottom_nav_unselected">#94A3B8</color>
+
+    <!-- ==================== CHIP COLORS ==================== -->
+    <color name="chip_background">#E0E7FF</color>
+    <color name="chip_text">#3730A3</color>
+    <color name="chip_stroke">#C7D2FE</color>
+
+    <!-- ==================== CARD COLORS ==================== -->
+    <color name="card_background">#FFFFFF</color>
+    <color name="card_stroke">#E2E8F0</color>
+
+    <!-- ==================== STATUS COLORS ==================== -->
+    <color name="online">#10B981</color>
+    <color name="offline">#94A3B8</color>
+    <color name="away">#F59E0B</color>
+    <color name="busy">#EF4444</color>
+
+    <!-- ==================== TRANSPARENT COLORS ==================== -->
+    <color name="transparent">#00000000</color>
+    <color name="black_overlay_50">#80000000</color>
+    <color name="black_overlay_30">#4D000000</color>
+    <color name="white_overlay_50">#80FFFFFF</color>
+
+    <!-- ==================== SHADOW COLORS ==================== -->
+    <color name="shadow_light">#1A000000</color>
+    <color name="shadow_medium">#33000000</color>
+    <color name="shadow_dark">#4D000000</color>
+
+    <!-- ==================== MESSAGE BUBBLE COLORS ==================== -->
+    <color name="message_sent_bg">#2563EB</color>
+    <color name="message_sent_text">#FFFFFF</color>
+    <color name="message_received_bg">#F1F5F9</color>
+    <color name="message_received_text">#0F172A</color>
+
+    <!-- ==================== BADGE COLORS ==================== -->
+    <color name="badge_red">#EF4444</color>
+    <color name="badge_green">#10B981</color>
+    <color name="badge_blue">#3B82F6</color>
+    <color name="badge_yellow">#F59E0B</color>
+
+    <!-- ==================== GRADIENT COLORS ==================== -->
+    <color name="gradient_start">#2563EB</color>
+    <color name="gradient_end">#7C3AED</color>
+
+    <!-- ==================== LEGACY MATERIAL COLORS ==================== -->
+    <color name="colorPrimary">#2563EB</color>
+    <color name="colorPrimaryDark">#1E40AF</color>
+    <color name="colorAccent">#10B981</color>
+
+    <color name="purple_200">#BBDEFB</color>
+    <color name="purple_500">#2196F3</color>
+    <color name="purple_700">#1976D2</color>
+
+    <color name="teal_200">#80CBC4</color>
+    <color name="teal_700">#00796B</color>
+
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+
+</resources>

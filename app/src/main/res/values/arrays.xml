@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Job Categories -->
+    <string-array name="job_categories">
+        <item>Tech</item>
+        <item>Marketing</item>
+        <item>Sales</item>
+        <item>Design</item>
+        <item>Finance</item>
+        <item>Healthcare</item>
+        <item>Education</item>
+        <item>Engineering</item>
+        <item>Customer Service</item>
+        <item>Human Resources</item>
+        <item>Legal</item>
+        <item>Operations</item>
+        <item>Other</item>
+    </string-array>
+
+    <!-- Employment Types -->
+    <string-array name="employment_types">
+        <item>Full-time</item>
+        <item>Part-time</item>
+        <item>Remote</item>
+        <item>Contract</item>
+        <item>Internship</item>
+    </string-array>
+
+    <!-- Countries -->
+    <string-array name="countries">
+        <item>United States</item>
+        <item>United Kingdom</item>
+        <item>Canada</item>
+        <item>Australia</item>
+        <item>Germany</item>
+        <item>France</item>
+        <item>Spain</item>
+        <item>Italy</item>
+        <item>Netherlands</item>
+        <item>Sweden</item>
+        <item>Norway</item>
+        <item>Denmark</item>
+        <item>Finland</item>
+        <item>Switzerland</item>
+        <item>Austria</item>
+        <item>Belgium</item>
+        <item>Ireland</item>
+        <item>Poland</item>
+        <item>Czech Republic</item>
+        <item>Portugal</item>
+        <item>Greece</item>
+        <item>India</item>
+        <item>China</item>
+        <item>Japan</item>
+        <item>South Korea</item>
+        <item>Singapore</item>
+        <item>Malaysia</item>
+        <item>Thailand</item>
+        <item>Indonesia</item>
+        <item>Philippines</item>
+        <item>Vietnam</item>
+        <item>United Arab Emirates</item>
+        <item>Saudi Arabia</item>
+        <item>Israel</item>
+        <item>Turkey</item>
+        <item>Egypt</item>
+        <item>South Africa</item>
+        <item>Nigeria</item>
+        <item>Kenya</item>
+        <item>Brazil</item>
+        <item>Argentina</item>
+        <item>Mexico</item>
+        <item>Chile</item>
+        <item>Colombia</item>
+        <item>Peru</item>
+        <item>New Zealand</item>
+    </string-array>
+
+    <!-- Currencies -->
+    <string-array name="currencies">
+        <item>USD - US Dollar</item>
+        <item>EUR - Euro</item>
+        <item>GBP - British Pound</item>
+        <item>CAD - Canadian Dollar</item>
+        <item>AUD - Australian Dollar</item>
+        <item>JPY - Japanese Yen</item>
+        <item>CNY - Chinese Yuan</item>
+        <item>INR - Indian Rupee</item>
+        <item>CHF - Swiss Franc</item>
+        <item>SEK - Swedish Krona</item>
+        <item>NOK - Norwegian Krone</item>
+        <item>DKK - Danish Krone</item>
+        <item>ILS - Israeli Shekel</item>
+        <item>AED - UAE Dirham</item>
+        <item>SAR - Saudi Riyal</item>
+        <item>SGD - Singapore Dollar</item>
+        <item>HKD - Hong Kong Dollar</item>
+        <item>NZD - New Zealand Dollar</item>
+        <item>KRW - South Korean Won</item>
+        <item>MXN - Mexican Peso</item>
+        <item>BRL - Brazilian Real</item>
+        <item>ZAR - South African Rand</item>
+    </string-array>
+</resources>
