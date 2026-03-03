@@ -1,16 +1,14 @@
-package com.joblinker.fragments;
+package com.example.joblinker.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -107,15 +105,25 @@ public class RegisterStep1Fragment extends Fragment {
         // Save to RegisterActivity
         if (getActivity() instanceof RegisterActivity) {
             RegisterActivity activity = (RegisterActivity) getActivity();
+
+            // 1. Get the existing User object and update it
             User user = activity.getRegistrationUser();
+            if (user == null) {
+                user = new User(); // Fallback just in case it's null
+            }
+
             user.setUserName(fullName);
             user.setUserEmail(email);
             user.setUserPhone(phone);
             user.setUserRole(role);
-            // Password will be used for registration, not stored in User object
+
+            // 2. Save the User object back to Activity
             activity.setRegistrationUser(user);
+
+            // 3. THIS WAS MISSING: Save the password to the Activity!
+            activity.setRegistrationPassword(password);
         }
 
-        return true;
+        return true; // Proceed to next step
     }
 }

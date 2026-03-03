@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -14,17 +13,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.joblinker.R;
+import com.example.joblinker.firebase.JobLinkerFirebaseManager;
+import com.example.joblinker.models.User;
+import com.example.joblinker.utils.ImageUtils;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.ListenerRegistration;
 
-import com.example.joblinker.R;
+// NOTE: keep these imports as in your project (your code used com.joblinker.* for Message/MessageAdapter)
 import com.joblinker.adapters.MessageAdapter;
-import com.example.joblinker.firebase.JobLinkerFirebaseManager;
 import com.joblinker.models.Message;
-import com.example.joblinker.models.User;
-import com.example.joblinker.utils.ImageUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +45,7 @@ public class ChatActivity extends AppCompatActivity {
     private FloatingActionButton btnSend;
 
     private MessageAdapter messageAdapter;
-    private List<Message> messages;
+    private final List<Message> messages = new ArrayList<>();
     private JobLinkerFirebaseManager firebaseManager;
     private ListenerRegistration messageListener;
 
@@ -62,9 +62,7 @@ public class ChatActivity extends AppCompatActivity {
 
         firebaseManager = JobLinkerFirebaseManager.getInstance();
         currentUserId = firebaseManager.getCurrentUserId();
-        messages = new ArrayList<>();
 
-        // Get intent data
         getIntentData();
 
         initializeViews();
@@ -101,7 +99,6 @@ public class ChatActivity extends AppCompatActivity {
         etMessage = findViewById(R.id.et_message);
         btnSend = findViewById(R.id.btn_send);
 
-        // Set user info
         tvUserName.setText(otherUserName);
         ImageUtils.loadCircularImage(this, otherUserAvatar, ivUserAvatar);
     }
@@ -128,12 +125,10 @@ public class ChatActivity extends AppCompatActivity {
 
         btnVideoCall.setOnClickListener(v -> initiateCall("video"));
 
-        btnAttachment.setOnClickListener(v -> {
-            // TODO: Implement attachment functionality
-            Toast.makeText(this, "Attachment feature coming soon", Toast.LENGTH_SHORT).show();
-        });
+        btnAttachment.setOnClickListener(v ->
+                Toast.makeText(this, "Attachment feature coming soon", Toast.LENGTH_SHORT).show()
+        );
 
-        // Text change listener for typing indicator
         etMessage.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -156,9 +151,11 @@ public class ChatActivity extends AppCompatActivity {
                         messages.clear();
                         messages.addAll(messageList);
                         messageAdapter.notifyDataSetChanged();
-                        recyclerMessages.scrollToPosition(messages.size() - 1);
 
-                        // Mark messages as read
+                        if (!messages.isEmpty()) {
+                            recyclerMessages.scrollToPosition(messages.size() - 1);
+                        }
+
                         markMessagesAsRead();
                     }
 
@@ -185,7 +182,7 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(String error) {
-                // Handle error
+                // Ignore / handle error if needed
             }
         });
     }
@@ -204,7 +201,12 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onSuccess(String messageId) {
                 etMessage.setText("");
-                // Message will be added via listener
+
+                // TEMP: show it immediately (remove later after fixing listener)
+                message.setMessageId(messageId);
+                messages.add(message);
+                messageAdapter.notifyItemInserted(messages.size() - 1);
+                recyclerMessages.scrollToPosition(messages.size() - 1);
             }
 
             @Override
@@ -217,7 +219,10 @@ public class ChatActivity extends AppCompatActivity {
 
     private void markMessagesAsRead() {
         for (Message message : messages) {
-            if (!message.isMessageRead() && message.getMessageReceiverId().equals(currentUserId)) {
+            if (!message.isMessageRead()
+                    && message.getMessageReceiverId() != null
+                    && message.getMessageReceiverId().equals(currentUserId)) {
+
                 firebaseManager.markMessageAsRead(message.getMessageId(),
                         new JobLinkerFirebaseManager.VoidCallback() {
                             @Override
@@ -227,7 +232,7 @@ public class ChatActivity extends AppCompatActivity {
 
                             @Override
                             public void onFailure(String error) {
-                                // Handle error
+                                // Ignore / handle error if needed
                             }
                         });
             }

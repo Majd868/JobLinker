@@ -1,6 +1,5 @@
 package com.example.joblinker.activities;
 
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -8,18 +7,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.widget.NestedScrollView;
-
-import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
 
 import com.example.joblinker.R;
 import com.example.joblinker.firebase.JobLinkerFirebaseManager;
@@ -28,6 +21,11 @@ import com.example.joblinker.models.User;
 import com.example.joblinker.utils.DateTimeHelper;
 import com.example.joblinker.utils.ImageUtils;
 import com.example.joblinker.utils.SharedPreferencesManager;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 
 public class JobDetailsActivity extends AppCompatActivity {
 
@@ -57,7 +55,7 @@ public class JobDetailsActivity extends AppCompatActivity {
     private TextView tvViews;
 
     // Employer Info
-    private LinearLayout layoutEmployerInfo;
+    private MaterialCardView layoutEmployerInfo; // <-- FIX: was LinearLayout
     private ImageView ivEmployerAvatar;
     private TextView tvEmployerName;
     private TextView tvEmployerEmail;

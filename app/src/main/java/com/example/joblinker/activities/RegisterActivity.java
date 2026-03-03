@@ -11,12 +11,11 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
-import com.google.firebase.auth.FirebaseUser;
 
 import com.example.joblinker.R;
 import com.example.joblinker.adapters.RegisterPagerAdapter;
 import com.example.joblinker.firebase.JobLinkerFirebaseManager;
-import com.joblinker.fragments.RegisterStep1Fragment;
+import com.example.joblinker.fragments.RegisterStep1Fragment;
 import com.example.joblinker.fragments.RegisterStep2Fragment;
 import com.example.joblinker.fragments.RegisterStep3Fragment;
 import com.example.joblinker.models.User;
@@ -34,8 +33,10 @@ public class RegisterActivity extends AppCompatActivity {
     private SharedPreferencesManager prefsManager;
 
     private int currentStep = 0;
+
+    // THESE HOLD YOUR DATA ACROSS ALL FRAGMENTS
     private User registrationUser;
-    private String registrationPassword; // Store temporarily for registration
+    private String registrationPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +45,8 @@ public class RegisterActivity extends AppCompatActivity {
 
         firebaseManager = JobLinkerFirebaseManager.getInstance();
         prefsManager = SharedPreferencesManager.getInstance(this);
+
+        // Initialize the User object so it's never null
         registrationUser = new User();
 
         initializeViews();
@@ -121,34 +124,36 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
+    // --- MAGIC FIX 1: Correctly get ViewPager2 Fragments ---
+    private Fragment getCurrentFragment() {
+        long itemId = pagerAdapter.getItemId(viewPager.getCurrentItem());
+        return getSupportFragmentManager().findFragmentByTag("f" + itemId);
+    }
+
+    // --- MAGIC FIX 2: Use the safe fragment getter ---
     private boolean validateCurrentStep() {
-        Fragment currentFragment = getSupportFragmentManager()
-                .findFragmentByTag("f" + viewPager.getCurrentItem());
+        Fragment currentFragment = getCurrentFragment();
 
         if (currentFragment instanceof RegisterStep1Fragment) {
             return ((RegisterStep1Fragment) currentFragment).validateAndSaveData();
         } else if (currentFragment instanceof RegisterStep2Fragment) {
             return ((RegisterStep2Fragment) currentFragment).validateAndSaveData();
         } else if (currentFragment instanceof RegisterStep3Fragment) {
-            // Validation and registration handled in fragment
             return true;
         }
 
-        return true;
+        // If fragment is null, return FALSE so they can't skip validation
+        return false;
     }
 
     private void completeRegistration() {
-        Fragment currentFragment = getSupportFragmentManager()
-                .findFragmentByTag("f" + viewPager.getCurrentItem());
+        Fragment currentFragment = getCurrentFragment();
 
         if (currentFragment instanceof RegisterStep3Fragment) {
             ((RegisterStep3Fragment) currentFragment).validateAndCompleteRegistration();
         }
     }
 
-    /**
-     * Called by RegisterStep3Fragment when registration is complete
-     */
     public void onRegistrationComplete() {
         Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
         navigateToMain();
@@ -178,20 +183,11 @@ public class RegisterActivity extends AppCompatActivity {
         this.registrationPassword = password;
     }
 
+    // --- ADDED THIS METHOD BACK IN ---
     public void moveToNextStep() {
         if (currentStep < 2) {
             viewPager.setCurrentItem(currentStep + 1, true);
         }
-    }
-
-    public void moveToPreviousStep() {
-        if (currentStep > 0) {
-            viewPager.setCurrentItem(currentStep - 1, true);
-        }
-    }
-
-    public int getCurrentStep() {
-        return currentStep;
     }
 
     @Override

@@ -5,7 +5,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-import com.joblinker.fragments.RegisterStep1Fragment;
+import com.example.joblinker.fragments.RegisterStep1Fragment;
 import com.example.joblinker.fragments.RegisterStep2Fragment;
 import com.example.joblinker.fragments.RegisterStep3Fragment;
 
