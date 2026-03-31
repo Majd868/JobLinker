@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Night-mode colour overrides.
+    Only values that differ from the default light palette are listed here.
+    Android will automatically pick these when the device is in dark mode.
+-->
+<resources>
+
+    <!-- Backgrounds -->
+    <color name="background">#121212</color>
+    <color name="surface">#1E1E1E</color>
+    <color name="surface_dark">#2C2C2C</color>
+    <color name="surface_light">#1A1A1A</color>
+
+    <!-- Text -->
+    <color name="text_primary">#EAEAEA</color>
+    <color name="text_secondary">#A0A0A0</color>
+    <color name="text_hint">#6B6B6B</color>
+    <color name="text_disabled">#444444</color>
+
+    <!-- Cards & Borders -->
+    <color name="card_background">#1E1E1E</color>
+    <color name="card_stroke">#333333</color>
+    <color name="divider">#2A2A2A</color>
+    <color name="border">#3A3A3A</color>
+
+    <!-- Primary stays the same but slightly lighter to contrast dark bg -->
+    <color name="primary">#3B82F6</color>
+    <color name="primary_dark">#2563EB</color>
+    <color name="primary_light">#60A5FA</color>
+
+    <!-- Chips -->
+    <color name="chip_background">#1E293B</color>
+    <color name="chip_text">#93C5FD</color>
+    <color name="chip_stroke">#1E40AF</color>
+
+    <!-- Message bubbles -->
+    <color name="message_sent_bg">#2563EB</color>
+    <color name="message_received_bg">#2C2C2C</color>
+    <color name="message_received_text">#EAEAEA</color>
+
+    <!-- Bottom nav -->
+    <color name="bottom_nav_color">#3B82F6</color>
+    <color name="bottom_nav_unselected">#6B6B6B</color>
+
+</resources>

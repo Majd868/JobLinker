@@ -162,6 +162,19 @@
 
     </HorizontalScrollView>
 
+    <!-- Result count label: "12 jobs found" -->
+    <TextView
+        android:id="@+id/tv_result_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_medium"
+        android:layout_marginTop="@dimen/spacing_xs"
+        style="@style/TextAppearance.JobLinker.LabelSmall"
+        android:textColor="@color/text_secondary"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/scroll_chips"
+        app:layout_constraintStart_toStartOf="parent"/>
+
     <!-- Jobs RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_jobs"
@@ -172,7 +185,7 @@
         android:paddingTop="@dimen/spacing_small"
         android:paddingBottom="@dimen/spacing_medium"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintTop_toBottomOf="@id/scroll_chips"
+        app:layout_constraintTop_toBottomOf="@id/tv_result_count"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -215,7 +228,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Try adjusting your filters or search"
+            android:text="@string/try_adjust_filters"
             style="@style/TextAppearance.JobLinker.BodyMedium"
             android:textAlignment="center"
             android:gravity="center"

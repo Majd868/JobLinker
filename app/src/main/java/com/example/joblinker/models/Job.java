@@ -11,6 +11,7 @@ public class Job implements Serializable {
     private String jobEmployerId;
     private String jobCategory;
     private String jobType; // Full-time, Part-time, Remote, Contract, Internship
+    private String employmentType; // On-site, Hybrid, Remote (work arrangement)
     private String jobCountry;
     private String jobCity;
     private String jobDescription;
@@ -75,6 +76,10 @@ public class Job implements Serializable {
 
     public String getJobType() {
         return jobType;
+    }
+
+    public String getEmploymentType() {
+        return employmentType;
     }
 
     public String getJobCountry() {
@@ -173,6 +178,10 @@ public class Job implements Serializable {
 
     public void setJobType(String jobType) {
         this.jobType = jobType;
+    }
+
+    public void setEmploymentType(String employmentType) {
+        this.employmentType = employmentType;
     }
 
     public void setJobCountry(String jobCountry) {

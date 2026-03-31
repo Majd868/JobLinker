@@ -25,10 +25,10 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import com.joblinker.models.Call;
-import com.joblinker.models.Conversation;
+import com.example.joblinker.models.Call;
+import com.example.joblinker.models.Conversation;
 import com.example.joblinker.models.Job;
-import com.joblinker.models.Message;
+import com.example.joblinker.models.Message;
 import com.example.joblinker.models.User;
 
 import java.util.ArrayList;
@@ -1222,6 +1222,14 @@ public class JobLinkerFirebaseManager {
                     callback.onFailure(e.getMessage());
                     Log.e(TAG, "Error unsaving job", e);
                 });
+    }
+
+    /**
+     * Get all saved job IDs for a user — used by JobsFragment to initialise bookmark icons.
+     * Delegates to getSavedJobs which already queries the savedJobs collection.
+     */
+    public void getSavedJobIds(String userId, final ListCallback<String> callback) {
+        getSavedJobs(userId, callback);
     }
 
     /**

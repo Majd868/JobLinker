@@ -361,4 +361,14 @@
     <string name="rating">Rating</string>
     <string name="connections">Connections</string>
 
+    <!-- Job Details - Missing Strings -->
+    <string name="total_applications">Total Applications:</string>
+    <string name="views">Views:</string>
+    <string name="already_applied">Already Applied</string>
+    <string name="job_expired">Job Expired</string>
+    <string name="applying">Applying…</string>
+    <string name="jobs_found">%d jobs found</string>
+    <string name="one_job_found">1 job found</string>
+    <string name="try_adjust_filters">Try adjusting your filters or search terms</string>
+
 </resources>

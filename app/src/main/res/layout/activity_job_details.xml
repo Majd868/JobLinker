@@ -266,7 +266,7 @@
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:layout_height="wrap_content"
-                            android:text="Application Deadline:"
+                            android:text="@string/application_deadline"
                             style="@style/TextAppearance.JobLinker.BodyMedium"/>
 
                         <TextView
@@ -290,7 +290,7 @@
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:layout_height="wrap_content"
-                            android:text="Total Applications:"
+                            android:text="@string/total_applications"
                             style="@style/TextAppearance.JobLinker.BodyMedium"/>
 
                         <TextView
@@ -313,7 +313,7 @@
                             android:layout_width="0dp"
                             android:layout_weight="1"
                             android:layout_height="wrap_content"
-                            android:text="Views:"
+                            android:text="@string/views"
                             style="@style/TextAppearance.JobLinker.BodyMedium"/>
 
                         <TextView

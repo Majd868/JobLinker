@@ -199,7 +199,6 @@ public class JobDetailsActivity extends AppCompatActivity {
         if (job.getJobSkills() != null && !job.getJobSkills().isEmpty()) {
             chipGroupSkills.setVisibility(View.VISIBLE);
             chipGroupSkills.removeAllViews();
-
             for (String skill : job.getJobSkills()) {
                 Chip chip = new Chip(this);
                 chip.setText(skill);
@@ -226,9 +225,24 @@ public class JobDetailsActivity extends AppCompatActivity {
         // Load employer info
         loadEmployerInfo(job.getJobEmployerId());
 
-        // Hide apply button if user is employer
+        // Apply button logic:
+        // - Hide for employers
+        // - Show "Already Applied" if user already applied
+        // - Show "Job Expired" if deadline passed
         if (prefsManager.isEmployer()) {
             btnApply.setVisibility(View.GONE);
+        } else if (job.isDeadlinePassed()) {
+            btnApply.setText(R.string.job_expired);
+            btnApply.setEnabled(false);
+        } else {
+            String currentUserId = firebaseManager.getCurrentUserId();
+            if (currentUserId != null && job.hasUserApplied(currentUserId)) {
+                btnApply.setText(R.string.already_applied);
+                btnApply.setEnabled(false);
+            } else {
+                btnApply.setText(R.string.apply_now);
+                btnApply.setEnabled(true);
+            }
         }
     }
 
@@ -343,12 +357,14 @@ public class JobDetailsActivity extends AppCompatActivity {
         }
 
         btnApply.setEnabled(false);
-        btnApply.setText("Applying...");
+        btnApply.setText(R.string.applying);
 
         firebaseManager.addJobApplicant(jobId, userId, new JobLinkerFirebaseManager.VoidCallback() {
             @Override
             public void onSuccess() {
-                btnApply.setText("Applied");
+                // Keep button disabled and update label permanently
+                btnApply.setText(R.string.already_applied);
+                btnApply.setEnabled(false);
                 Toast.makeText(JobDetailsActivity.this,
                         "Application submitted successfully!", Toast.LENGTH_SHORT).show();
             }

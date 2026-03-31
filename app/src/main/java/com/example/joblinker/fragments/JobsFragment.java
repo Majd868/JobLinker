@@ -2,6 +2,8 @@ package com.example.joblinker.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -12,6 +14,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -36,9 +39,14 @@ import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class JobsFragment extends Fragment {
+
+    // Search debounce: wait 300ms after last keystroke before filtering
+    private static final long SEARCH_DEBOUNCE_MS = 300;
 
     private EditText etSearch;
     private ImageButton btnFilter;
@@ -47,6 +55,7 @@ public class JobsFragment extends Fragment {
     private LinearLayout layoutEmpty;
     private ProgressBar progressBar;
     private FloatingActionButton fabPostJob;
+    private TextView tvResultCount;          // NEW: shows "X jobs found"
 
     private JobAdapter jobAdapter;
     private final List<Job> allJobs = new ArrayList<>();
@@ -55,10 +64,14 @@ public class JobsFragment extends Fragment {
     private SharedPreferencesManager prefsManager;
     private ListenerRegistration jobsListener;
 
-    // Chip filter (quick filter)
+    // Debounce handler
+    private final Handler searchHandler = new Handler(Looper.getMainLooper());
+    private Runnable searchRunnable;
+
+    // Quick chip filter
     private String currentFilter = "All";
 
-    // Advanced filter page state
+    // Advanced filter state
     private String filterJobType = "All";
     private String filterCategory = "All";
     private String filterLocation = "";
@@ -92,42 +105,32 @@ public class JobsFragment extends Fragment {
         filterLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-                    if (result.getResultCode() != android.app.Activity.RESULT_OK || result.getData() == null) {
-                        return;
-                    }
+                    if (result.getResultCode() != android.app.Activity.RESULT_OK
+                            || result.getData() == null) return;
 
                     Intent data = result.getData();
-
-                    filterJobType = data.getStringExtra(FilterActivity.EXTRA_FILTER_JOB_TYPE);
-                    if (filterJobType == null) filterJobType = "All";
-
-                    filterCategory = data.getStringExtra(FilterActivity.EXTRA_FILTER_CATEGORY);
-                    if (filterCategory == null) filterCategory = "All";
-
-                    filterLocation = data.getStringExtra(FilterActivity.EXTRA_FILTER_LOCATION);
-                    if (filterLocation == null) filterLocation = "";
-
+                    filterJobType = nvl(data.getStringExtra(FilterActivity.EXTRA_FILTER_JOB_TYPE), "All");
+                    filterCategory = nvl(data.getStringExtra(FilterActivity.EXTRA_FILTER_CATEGORY), "All");
+                    filterLocation = nvl(data.getStringExtra(FilterActivity.EXTRA_FILTER_LOCATION), "");
                     filterSalaryMin = data.getLongExtra(FilterActivity.EXTRA_FILTER_SALARY_MIN, -1);
                     filterSalaryMax = data.getLongExtra(FilterActivity.EXTRA_FILTER_SALARY_MAX, -1);
-
-                    filterSort = data.getStringExtra(FilterActivity.EXTRA_FILTER_SORT);
-                    if (filterSort == null) filterSort = FilterActivity.SORT_NEWEST;
+                    filterSort = nvl(data.getStringExtra(FilterActivity.EXTRA_FILTER_SORT),
+                            FilterActivity.SORT_NEWEST);
 
                     applyAllFilters();
-                }
-        );
+                });
     }
 
     private void initializeViews(View view) {
-        etSearch = view.findViewById(R.id.et_search);
-        btnFilter = view.findViewById(R.id.btn_filter);
-        chipGroup = view.findViewById(R.id.chip_group);
-        recyclerJobs = view.findViewById(R.id.recycler_jobs);
-        layoutEmpty = view.findViewById(R.id.layout_empty);
-        progressBar = view.findViewById(R.id.progress_bar);
-        fabPostJob = view.findViewById(R.id.fab_post_job);
+        etSearch      = view.findViewById(R.id.et_search);
+        btnFilter     = view.findViewById(R.id.btn_filter);
+        chipGroup     = view.findViewById(R.id.chip_group);
+        recyclerJobs  = view.findViewById(R.id.recycler_jobs);
+        layoutEmpty   = view.findViewById(R.id.layout_empty);
+        progressBar   = view.findViewById(R.id.progress_bar);
+        fabPostJob    = view.findViewById(R.id.fab_post_job);
+        tvResultCount = view.findViewById(R.id.tv_result_count);
 
-        // Show FAB only for employers
         fabPostJob.setVisibility(prefsManager.isEmployer() ? View.VISIBLE : View.GONE);
     }
 
@@ -136,7 +139,6 @@ public class JobsFragment extends Fragment {
         recyclerJobs.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerJobs.setAdapter(jobAdapter);
 
-        // If your adapter doesn't have this listener, remove this block.
         jobAdapter.setOnJobClickListener(new JobAdapter.OnJobClickListener() {
             @Override
             public void onJobClick(Job job) {
@@ -146,50 +148,84 @@ public class JobsFragment extends Fragment {
             }
 
             @Override
-            public void onSaveClick(Job job) {
-                Toast.makeText(requireContext(),
-                        "Saved: " + job.getJobTitle(),
-                        Toast.LENGTH_SHORT).show();
+            public void onSaveClick(Job job, boolean isSaved) {
+                // Persist save/unsave to Firebase
+                String userId = firebaseManager.getCurrentUserId();
+                if (userId == null) {
+                    Toast.makeText(requireContext(),
+                            "Please login to save jobs", Toast.LENGTH_SHORT).show();
+                    jobAdapter.markJobSaved(job.getJobId(), !isSaved); // revert optimistic
+                    return;
+                }
+
+                JobLinkerFirebaseManager.VoidCallback cb = new JobLinkerFirebaseManager.VoidCallback() {
+                    @Override public void onSuccess() { /* UI already updated optimistically */ }
+                    @Override public void onFailure(String error) {
+                        // Revert optimistic update on failure
+                        jobAdapter.markJobSaved(job.getJobId(), !isSaved);
+                        Toast.makeText(requireContext(), "Error: " + error, Toast.LENGTH_SHORT).show();
+                    }
+                };
+
+                if (isSaved) {
+                    firebaseManager.saveJob(userId, job.getJobId(), cb);
+                } else {
+                    firebaseManager.unsaveJob(userId, job.getJobId(), cb);
+                }
             }
+        });
+
+        // Load saved job IDs once so bookmark icons show correctly from the start
+        loadSavedJobIds();
+    }
+
+    private void loadSavedJobIds() {
+        String userId = firebaseManager.getCurrentUserId();
+        if (userId == null) return;
+
+        firebaseManager.getSavedJobIds(userId, new JobLinkerFirebaseManager.ListCallback<String>() {
+            @Override
+            public void onSuccess(List<String> ids) {
+                if (ids == null || !isAdded()) return;
+                Set<String> idSet = new HashSet<>(ids);
+                jobAdapter.setSavedJobIds(idSet);
+            }
+
+            @Override
+            public void onFailure(String error) { /* non-critical, ignore */ }
         });
     }
 
+    /**
+     * Debounced search: waits 300 ms after the last keystroke before filtering.
+     * This avoids running the filter loop on every character typed.
+     */
     private void setupSearchListener() {
         etSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
+            @Override public void afterTextChanged(Editable s) {}
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                applyAllFilters();
+                if (searchRunnable != null) searchHandler.removeCallbacks(searchRunnable);
+                searchRunnable = () -> applyAllFilters();
+                searchHandler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_MS);
             }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
         });
     }
 
     private void setupChipListener() {
         chipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
             if (checkedIds == null || checkedIds.isEmpty()) return;
+            int id = checkedIds.get(0);
 
-            int checkedId = checkedIds.get(0);
-
-            if (checkedId == R.id.chip_all) {
-                currentFilter = "All";
-            } else if (checkedId == R.id.chip_full_time) {
-                currentFilter = "Full-time";
-            } else if (checkedId == R.id.chip_part_time) {
-                currentFilter = "Part-time";
-            } else if (checkedId == R.id.chip_remote) {
-                currentFilter = "Remote";
-            } else if (checkedId == R.id.chip_contract) {
-                currentFilter = "Contract";
-            } else if (checkedId == R.id.chip_internship) {
-                currentFilter = "Internship";
-            } else {
-                currentFilter = "All";
-            }
+            if      (id == R.id.chip_all)        currentFilter = "All";
+            else if (id == R.id.chip_full_time)  currentFilter = "Full-time";
+            else if (id == R.id.chip_part_time)  currentFilter = "Part-time";
+            else if (id == R.id.chip_remote)     currentFilter = "Remote";
+            else if (id == R.id.chip_contract)   currentFilter = "Contract";
+            else if (id == R.id.chip_internship) currentFilter = "Internship";
+            else                                 currentFilter = "All";
 
             applyAllFilters();
         });
@@ -198,38 +234,32 @@ public class JobsFragment extends Fragment {
     private void setupClickListeners() {
         btnFilter.setOnClickListener(v -> {
             Intent intent = new Intent(requireContext(), FilterActivity.class);
-
-            // Send current filter state to filter page
             intent.putExtra(FilterActivity.EXTRA_FILTER_JOB_TYPE, filterJobType);
             intent.putExtra(FilterActivity.EXTRA_FILTER_CATEGORY, filterCategory);
             intent.putExtra(FilterActivity.EXTRA_FILTER_LOCATION, filterLocation);
             intent.putExtra(FilterActivity.EXTRA_FILTER_SALARY_MIN, filterSalaryMin);
             intent.putExtra(FilterActivity.EXTRA_FILTER_SALARY_MAX, filterSalaryMax);
             intent.putExtra(FilterActivity.EXTRA_FILTER_SORT, filterSort);
-
             filterLauncher.launch(intent);
         });
 
-        fabPostJob.setOnClickListener(v -> {
-            Intent intent = new Intent(requireContext(), PostJobActivity.class);
-            startActivity(intent);
-        });
+        fabPostJob.setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), PostJobActivity.class)));
     }
 
     private void loadJobs() {
         progressBar.setVisibility(View.VISIBLE);
         layoutEmpty.setVisibility(View.GONE);
         recyclerJobs.setVisibility(View.GONE);
+        updateResultCount(0, true);
 
         jobsListener = firebaseManager.listenToActiveJobs(
                 new JobLinkerFirebaseManager.ListCallback<Job>() {
                     @Override
                     public void onSuccess(List<Job> jobs) {
                         progressBar.setVisibility(View.GONE);
-
                         allJobs.clear();
                         if (jobs != null) allJobs.addAll(jobs);
-
                         applyAllFilters();
                     }
 
@@ -238,68 +268,69 @@ public class JobsFragment extends Fragment {
                         progressBar.setVisibility(View.GONE);
                         layoutEmpty.setVisibility(View.VISIBLE);
                         recyclerJobs.setVisibility(View.GONE);
-
+                        updateResultCount(0, false);
                         Toast.makeText(requireContext(),
                                 "Error loading jobs: " + error, Toast.LENGTH_SHORT).show();
                     }
-                }
-        );
+                });
     }
 
     private void applyAllFilters() {
-        String searchQuery = etSearch.getText() == null ? "" : etSearch.getText().toString().trim();
+        String query = etSearch.getText() == null ? "" : etSearch.getText().toString().trim();
 
-        filteredJobs.clear();
+        List<Job> result = new ArrayList<>();
 
         for (Job job : allJobs) {
             if (job == null) continue;
 
-            // 1) Search
-            boolean matchesSearch = TextUtils.isEmpty(searchQuery)
-                    || containsIgnoreCase(job.getJobTitle(), searchQuery)
-                    || containsIgnoreCase(job.getJobCompany(), searchQuery)
-                    || containsIgnoreCase(job.getJobDescription(), searchQuery);
+            // 1) Text search (title, company, description)
+            if (!TextUtils.isEmpty(query)) {
+                boolean matchesSearch = containsCI(job.getJobTitle(), query)
+                        || containsCI(job.getJobCompany(), query)
+                        || containsCI(job.getJobDescription(), query);
+                if (!matchesSearch) continue;
+            }
 
-            if (!matchesSearch) continue;
+            // 2) Quick chip (job type)
+            if (!"All".equals(currentFilter)
+                    && !currentFilter.equals(job.getJobType())) continue;
 
-            // 2) Quick chip filter (job type)
-            boolean matchesChip = "All".equals(currentFilter)
-                    || TextUtils.equals(job.getJobType(), currentFilter);
-            if (!matchesChip) continue;
+            // 3) Advanced: job type
+            if (!"All".equals(filterJobType)
+                    && !filterJobType.equals(job.getJobType())) continue;
 
-            // 3) Advanced: Job type
-            boolean matchesJobType = "All".equals(filterJobType)
-                    || TextUtils.equals(job.getJobType(), filterJobType);
-            if (!matchesJobType) continue;
+            // 4) Advanced: category
+            if (!"All".equals(filterCategory)
+                    && !filterCategory.equals(job.getJobCategory())) continue;
 
-            // 4) Advanced: Category
-            boolean matchesCategory = "All".equals(filterCategory)
-                    || TextUtils.equals(job.getJobCategory(), filterCategory);
-            if (!matchesCategory) continue;
+            // 5) Advanced: location substring
+            if (!TextUtils.isEmpty(filterLocation)
+                    && !containsCI(job.getLocation(), filterLocation)) continue;
 
-            // 5) Advanced: Location contains
-            boolean matchesLocation = TextUtils.isEmpty(filterLocation)
-                    || containsIgnoreCase(job.getLocation(), filterLocation);
-            if (!matchesLocation) continue;
+            // 6) Advanced: salary range (numeric fields are available on Job model)
+            if (filterSalaryMin > 0 && job.getJobSalaryMax() > 0
+                    && job.getJobSalaryMax() < filterSalaryMin) continue;
+            if (filterSalaryMax > 0 && job.getJobSalaryMin() > filterSalaryMax) continue;
 
-            // 6) Advanced: Salary min/max
-            // NOTE: Your job salary seems to be a String range (salaryRange).
-            // If you want real salary filtering, you need numeric salary fields in Job OR parse the string.
-            // (left as TODO)
-
-            filteredJobs.add(job);
+            result.add(job);
         }
 
-        // 7) Sort by createdAt
+        // 7) Sort
         if (FilterActivity.SORT_OLDEST.equals(filterSort)) {
-            Collections.sort(filteredJobs, (a, b) -> Long.compare(safeCreatedAt(a), safeCreatedAt(b)));
+            Collections.sort(result, (a, b) -> Long.compare(safeCreatedAt(a), safeCreatedAt(b)));
         } else {
-            Collections.sort(filteredJobs, (a, b) -> Long.compare(safeCreatedAt(b), safeCreatedAt(a)));
+            Collections.sort(result, (a, b) -> Long.compare(safeCreatedAt(b), safeCreatedAt(a)));
         }
 
-        jobAdapter.notifyDataSetChanged();
+        // Use DiffUtil-based submitList instead of notifyDataSetChanged
+        jobAdapter.submitList(result);
 
-        if (filteredJobs.isEmpty()) {
+        filteredJobs.clear();
+        filteredJobs.addAll(result);
+
+        updateResultCount(result.size(), false);
+
+        if (result.isEmpty()) {
             layoutEmpty.setVisibility(View.VISIBLE);
             recyclerJobs.setVisibility(View.GONE);
         } else {
@@ -308,25 +339,38 @@ public class JobsFragment extends Fragment {
         }
     }
 
-    private boolean containsIgnoreCase(String source, String q) {
-        if (source == null || q == null) return false;
-        return source.toLowerCase().contains(q.toLowerCase());
+    /** Show or hide the result counter label */
+    private void updateResultCount(int count, boolean loading) {
+        if (tvResultCount == null) return;
+        if (loading) {
+            tvResultCount.setVisibility(View.GONE);
+            return;
+        }
+        tvResultCount.setVisibility(View.VISIBLE);
+        if (count == 0) {
+            tvResultCount.setText("");
+            tvResultCount.setVisibility(View.GONE);
+        } else {
+            tvResultCount.setText(count + (count == 1 ? " job found" : " jobs found"));
+        }
+    }
+
+    private boolean containsCI(String src, String q) {
+        if (src == null || q == null) return false;
+        return src.toLowerCase().contains(q.toLowerCase());
     }
 
     private long safeCreatedAt(Job job) {
-        try {
-            return job.getCreatedAt();
-        } catch (Exception e) {
-            return 0;
-        }
+        try { return job.getCreatedAt(); } catch (Exception e) { return 0; }
     }
+
+    private static String nvl(String s, String def) { return s != null ? s : def; }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (jobsListener != null) {
-            jobsListener.remove();
-            jobsListener = null;
-        }
+        // Cancel any pending debounce callback
+        if (searchRunnable != null) searchHandler.removeCallbacks(searchRunnable);
+        if (jobsListener != null) { jobsListener.remove(); jobsListener = null; }
     }
 }

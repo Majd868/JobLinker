@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Base Application Theme -->
-    <style name="Theme.JobLinker" parent="Theme.Material3.Light.NoActionBar">
+    <!-- Base Application Theme — supports both light and dark mode -->
+    <style name="Theme.JobLinker" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Primary brand color -->
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryVariant">@color/primary_dark</item>
