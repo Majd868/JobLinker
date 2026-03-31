@@ -7,12 +7,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:943441972422:android:da8155746881c4c7c3dbc7",
+        "mobilesdk_app_id": "1:943441972422:android:4304e5f29628fdcfc3dbc7",
         "android_client_info": {
           "package_name": "com.example.joblinker"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "943441972422-p7rs8rbnq9k28tl7rpre25t327mroape.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDDXC0-HtrprRkqHKjWqXdy39WEYpvcegg"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "943441972422-p7rs8rbnq9k28tl7rpre25t327mroape.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

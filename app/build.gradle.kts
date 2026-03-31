@@ -52,6 +52,9 @@ dependencies {
 
     // Glide (Image Loading)
     implementation(libs.glide)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
     annotationProcessor(libs.glide.compiler)
 
     // Retrofit (API calls)
