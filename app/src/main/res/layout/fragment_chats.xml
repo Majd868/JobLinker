@@ -15,7 +15,7 @@
         android:layout_margin="@dimen/spacing_medium"
         app:cardCornerRadius="8dp"
         app:cardElevation="2dp"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
@@ -34,7 +34,7 @@
                 app:tint="@color/text_hint"/>
 
             <EditText
-                android:id="@+id/et_search"
+                android:id="@+id/et_search_chats"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:layout_marginStart="@dimen/spacing_small"

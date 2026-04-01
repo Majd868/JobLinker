@@ -2,9 +2,12 @@ package com.example.joblinker.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -26,151 +29,163 @@ import com.example.joblinker.models.User;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class ChatsFragment extends Fragment implements ConversationAdapter.OnConversationClickListener {
+public class ChatsFragment extends Fragment
+        implements ConversationAdapter.OnConversationClickListener {
 
     private RecyclerView recyclerConversations;
     private LinearLayout layoutEmpty;
-    private ProgressBar progressBar;
+    private ProgressBar  progressBar;
+    private EditText     etSearch;
 
     private ConversationAdapter conversationAdapter;
-    private List<Conversation> conversations;
-    private JobLinkerFirebaseManager firebaseManager;
-    private ListenerRegistration conversationsListener;
+    private final List<Conversation> allConversations = new ArrayList<>();
+    private final List<Conversation> filtered         = new ArrayList<>();
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+    private JobLinkerFirebaseManager firebaseManager;
+    private ListenerRegistration     conversationsListener;
+
+    @Nullable @Override
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chats, container, false);
 
         firebaseManager = JobLinkerFirebaseManager.getInstance();
-        conversations = new ArrayList<>();
 
-        initializeViews(view);
+        recyclerConversations = view.findViewById(R.id.recycler_conversations);
+        layoutEmpty           = view.findViewById(R.id.layout_empty);
+        progressBar           = view.findViewById(R.id.progress_bar);
+        etSearch              = view.findViewById(R.id.et_search_chats);
+
         setupRecyclerView();
+        setupSearch();
         loadConversations();
 
         return view;
     }
 
-    private void initializeViews(View view) {
-        recyclerConversations = view.findViewById(R.id.recycler_conversations);
-        layoutEmpty = view.findViewById(R.id.layout_empty);
-        progressBar = view.findViewById(R.id.progress_bar);
-    }
-
     private void setupRecyclerView() {
-        conversationAdapter = new ConversationAdapter(requireContext(), conversations, this);
+        conversationAdapter = new ConversationAdapter(requireContext(), filtered, this);
         recyclerConversations.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerConversations.setAdapter(conversationAdapter);
     }
 
-    private void loadConversations() {
-        progressBar.setVisibility(View.VISIBLE);
-        layoutEmpty.setVisibility(View.GONE);
-
-        String userId = firebaseManager.getCurrentUserId();
-
-        conversationsListener = firebaseManager.listenToConversations(userId,
-                new JobLinkerFirebaseManager.ListCallback<Conversation>() {
-                    @Override
-                    public void onSuccess(List<Conversation> conversationList) {
-                        progressBar.setVisibility(View.GONE);
-                        conversations.clear();
-
-                        // Load other user details for each conversation
-                        for (Conversation conversation : conversationList) {
-                            loadOtherUserDetails(conversation);
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(String error) {
-                        progressBar.setVisibility(View.GONE);
-                        layoutEmpty.setVisibility(View.VISIBLE);
-                        Toast.makeText(requireContext(),
-                                "Error loading conversations: " + error, Toast.LENGTH_SHORT).show();
-                    }
-                });
+    private void setupSearch() {
+        if (etSearch == null) return;
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int i, int i1, int i2) {}
+            @Override public void afterTextChanged(Editable s) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int b, int count) {
+                filterConversations(s.toString().trim());
+            }
+        });
     }
 
-    private void loadOtherUserDetails(Conversation conversation) {
-        String currentUserId = firebaseManager.getCurrentUserId();
-        String otherUserId = null;
-
-        // Find the other user ID
-        for (String participantId : conversation.getParticipants()) {
-            if (!participantId.equals(currentUserId)) {
-                otherUserId = participantId;
-                break;
+    private void filterConversations(String query) {
+        filtered.clear();
+        if (query.isEmpty()) {
+            filtered.addAll(allConversations);
+        } else {
+            String lower = query.toLowerCase();
+            for (Conversation c : allConversations) {
+                String name = c.getOtherUserName();
+                String last = c.getLastMessage();
+                if ((name != null && name.toLowerCase().contains(lower))
+                 || (last != null && last.toLowerCase().contains(lower))) {
+                    filtered.add(c);
+                }
             }
         }
+        conversationAdapter.notifyDataSetChanged();
+        updateEmptyState();
+    }
 
-        if (otherUserId != null) {
-            String finalOtherUserId = otherUserId;
-            firebaseManager.getUser(otherUserId, new JobLinkerFirebaseManager.DataCallback<User>() {
+    private void loadConversations() {
+        String userId = firebaseManager.getCurrentUserId();
+        if (userId == null) return;
+
+        progressBar.setVisibility(View.VISIBLE);
+
+        firebaseManager.getUserConversations(userId,
+            new JobLinkerFirebaseManager.ListCallback<Conversation>() {
                 @Override
-                public void onSuccess(User user) {
-                    conversation.setOtherUserName(user.getUserName());
-                    conversation.setOtherUserAvatarUrl(user.getAvatarUrl());
-                    conversation.setOtherUserOnline(user.isOnline());
-
-                    // Add to list and update UI
-                    if (!conversations.contains(conversation)) {
-                        conversations.add(conversation);
-                        conversationAdapter.notifyDataSetChanged();
-                    }
-
-                    updateEmptyState();
+                public void onSuccess(List<Conversation> list) {
+                    if (!isAdded()) return;
+                    progressBar.setVisibility(View.GONE);
+                    allConversations.clear();
+                    for (Conversation c : list) loadOtherUserDetails(c);
                 }
 
                 @Override
                 public void onFailure(String error) {
-                    // Handle error
+                    if (!isAdded()) return;
+                    progressBar.setVisibility(View.GONE);
+                    layoutEmpty.setVisibility(View.VISIBLE);
+                    Toast.makeText(requireContext(),
+                        "Error loading conversations: " + error, Toast.LENGTH_SHORT).show();
                 }
             });
+    }
+
+    private void loadOtherUserDetails(Conversation conversation) {
+        String currentUserId = firebaseManager.getCurrentUserId();
+        String otherUserId   = null;
+        for (String id : conversation.getParticipants()) {
+            if (!id.equals(currentUserId)) { otherUserId = id; break; }
         }
+        if (otherUserId == null) return;
+
+        firebaseManager.getUser(otherUserId, new JobLinkerFirebaseManager.DataCallback<User>() {
+            @Override
+            public void onSuccess(User user) {
+                if (!isAdded()) return;
+                conversation.setOtherUserName(user.getUserName());
+                conversation.setOtherUserAvatarUrl(user.getAvatarUrl());
+                conversation.setOtherUserOnline(user.isOnline());
+
+                if (!allConversations.contains(conversation)) {
+                    allConversations.add(conversation);
+                }
+                // Refresh filtered list
+                String query = etSearch != null
+                    ? etSearch.getText().toString().trim() : "";
+                filterConversations(query);
+            }
+
+            @Override public void onFailure(String error) {}
+        });
     }
 
     private void updateEmptyState() {
-        if (conversations.isEmpty()) {
-            layoutEmpty.setVisibility(View.VISIBLE);
-            recyclerConversations.setVisibility(View.GONE);
-        } else {
-            layoutEmpty.setVisibility(View.GONE);
-            recyclerConversations.setVisibility(View.VISIBLE);
-        }
+        if (!isAdded()) return;
+        boolean empty = filtered.isEmpty();
+        layoutEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
+        recyclerConversations.setVisibility(empty ? View.GONE : View.VISIBLE);
     }
 
     @Override
     public void onConversationClick(Conversation conversation) {
-        // Get other user ID
         String currentUserId = firebaseManager.getCurrentUserId();
-        String otherUserId = null;
-
-        for (String participantId : conversation.getParticipants()) {
-            if (!participantId.equals(currentUserId)) {
-                otherUserId = participantId;
-                break;
-            }
+        String otherUserId   = null;
+        for (String id : conversation.getParticipants()) {
+            if (!id.equals(currentUserId)) { otherUserId = id; break; }
         }
+        if (otherUserId == null) return;
 
-        if (otherUserId != null) {
-            Intent intent = new Intent(requireContext(), ChatActivity.class);
-            intent.putExtra(ChatActivity.EXTRA_USER_ID, otherUserId);
-            intent.putExtra(ChatActivity.EXTRA_USER_NAME, conversation.getOtherUserName());
-            intent.putExtra(ChatActivity.EXTRA_USER_AVATAR, conversation.getOtherUserAvatarUrl());
-            intent.putExtra(ChatActivity.EXTRA_CONVERSATION_ID, conversation.getConversationId());
-            startActivity(intent);
-        }
+        Intent intent = new Intent(requireContext(), ChatActivity.class);
+        intent.putExtra(ChatActivity.EXTRA_USER_ID,         otherUserId);
+        intent.putExtra(ChatActivity.EXTRA_USER_NAME,       conversation.getOtherUserName());
+        intent.putExtra(ChatActivity.EXTRA_USER_AVATAR,     conversation.getOtherUserAvatarUrl());
+        intent.putExtra(ChatActivity.EXTRA_CONVERSATION_ID, conversation.getConversationId());
+        startActivity(intent);
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (conversationsListener != null) {
-            conversationsListener.remove();
-        }
+        if (conversationsListener != null) conversationsListener.remove();
     }
 }

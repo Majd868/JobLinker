@@ -6,15 +6,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:layout_marginTop="@dimen/spacing_xs"
-    android:layout_marginBottom="@dimen/spacing_xs">
+    android:paddingHorizontal="8dp"
+    android:paddingVertical="3dp"
+    android:gravity="bottom">
 
-    <!-- Sender Avatar -->
+    <!-- Avatar -->
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/iv_avatar"
         android:layout_width="32dp"
         android:layout_height="32dp"
-        android:layout_marginEnd="@dimen/spacing_small"
+        android:layout_marginEnd="6dp"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_person_placeholder"
         app:shapeAppearanceOverlay="@style/CircularShape"
@@ -25,7 +26,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Message Bubble -->
+        <!-- Bubble -->
         <LinearLayout
             android:id="@+id/message_bubble"
             android:layout_width="wrap_content"
@@ -33,30 +34,62 @@
             android:maxWidth="280dp"
             android:orientation="vertical"
             android:background="@drawable/bg_message_received"
-            android:padding="@dimen/spacing_medium">
+            android:padding="10dp">
 
             <TextView
                 android:id="@+id/tv_message"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/text_primary"
-                android:textSize="@dimen/text_body_large"
+                android:textSize="15sp"
                 android:lineSpacingExtra="2dp"
-                tools:text="Hi! I'm doing great, thanks!"/>
+                tools:text="Hi! Great thanks!"/>
+
+            <ImageView
+                android:id="@+id/iv_image"
+                android:layout_width="220dp"
+                android:layout_height="160dp"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                android:background="@drawable/bg_rounded_white"/>
+
+            <LinearLayout
+                android:id="@+id/layout_media"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="4dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_audio_wave"
+                    app:tint="@color/primary"/>
+
+                <TextView
+                    android:id="@+id/tv_media_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp"
+                    tools:text="🎤 Voice message (0:12)"/>
+            </LinearLayout>
 
         </LinearLayout>
 
-        <!-- Timestamp -->
+        <!-- Time -->
         <TextView
             android:id="@+id/tv_timestamp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_xs"
-            android:layout_marginStart="@dimen/spacing_xs"
-            android:textSize="@dimen/text_label_small"
+            android:layout_marginTop="2dp"
+            android:layout_marginStart="4dp"
+            android:textSize="11sp"
             android:textColor="@color/text_hint"
             tools:text="2:31 PM"/>
-
     </LinearLayout>
 
 </LinearLayout>

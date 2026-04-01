@@ -35,6 +35,7 @@ public class PostJobActivity extends AppCompatActivity {
     private MaterialButton btnAddSkill, btnCancel, btnPost;
     private ChipGroup chipGroupSkills;
     private View progressOverlay;
+    private com.google.android.material.switchmaterial.SwitchMaterial switchUrgent;
 
     private JobLinkerFirebaseManager firebaseManager;
     private List<String> skills;
@@ -72,6 +73,7 @@ public class PostJobActivity extends AppCompatActivity {
         btnCancel = findViewById(R.id.btn_cancel);
         btnPost = findViewById(R.id.btn_post);
         progressOverlay = findViewById(R.id.progress_overlay);
+        switchUrgent = findViewById(R.id.switch_urgent);
     }
 
     private void setupToolbar() {
@@ -218,6 +220,7 @@ public class PostJobActivity extends AppCompatActivity {
         job.setJobDescription(description);
         job.setJobSkills(skills);
         job.setDeadline(deadlineTimestamp);
+        if (switchUrgent != null) job.setUrgent(switchUrgent.isChecked());
 
         // Parse salary
         if (!ValidationHelper.isEmpty(salaryMinStr)) {

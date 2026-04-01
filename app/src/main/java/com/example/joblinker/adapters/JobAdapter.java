@@ -27,10 +27,7 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
 
     private final Context context;
     private final List<Job> jobs;
-
-    // Track saved job IDs locally for instant UI feedback
     private final Set<String> savedJobIds = new HashSet<>();
-
     private OnJobClickListener listener;
 
     public interface OnJobClickListener {
@@ -40,56 +37,40 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
 
     public JobAdapter(Context context, List<Job> jobs) {
         this.context = context;
-        this.jobs = jobs;
+        this.jobs    = jobs;
     }
 
     public void setOnJobClickListener(OnJobClickListener listener) {
         this.listener = listener;
     }
 
-    /**
-     * Update the adapter list using DiffUtil for efficient, animated updates.
-     * Replaces notifyDataSetChanged() — no more full-list flicker on every search keystroke.
-     */
     public void submitList(List<Job> newJobs) {
-        final List<Job> oldJobs = new ArrayList<>(jobs);
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffUtil.Callback() {
-            @Override public int getOldListSize() { return oldJobs.size(); }
+        final List<Job> old = new ArrayList<>(jobs);
+        DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override public int getOldListSize() { return old.size(); }
             @Override public int getNewListSize() { return newJobs.size(); }
-
-            @Override
-            public boolean areItemsTheSame(int oldPos, int newPos) {
-                Job o = oldJobs.get(oldPos);
-                Job n = newJobs.get(newPos);
-                if (o.getJobId() == null || n.getJobId() == null) return false;
-                return o.getJobId().equals(n.getJobId());
+            @Override public boolean areItemsTheSame(int o, int n) {
+                String oid = old.get(o).getJobId(), nid = newJobs.get(n).getJobId();
+                return oid != null && oid.equals(nid);
             }
-
-            @Override
-            public boolean areContentsTheSame(int oldPos, int newPos) {
-                Job o = oldJobs.get(oldPos);
-                Job n = newJobs.get(newPos);
-                boolean titleSame = safeEquals(o.getJobTitle(), n.getJobTitle());
-                boolean companySame = safeEquals(o.getJobCompany(), n.getJobCompany());
-                boolean salarySame = o.getJobSalaryMin() == n.getJobSalaryMin()
-                        && o.getJobSalaryMax() == n.getJobSalaryMax();
-                return titleSame && companySame && salarySame;
+            @Override public boolean areContentsTheSame(int o, int n) {
+                Job a = old.get(o), b = newJobs.get(n);
+                return safeEq(a.getJobTitle(), b.getJobTitle())
+                    && safeEq(a.getJobCompany(), b.getJobCompany())
+                    && a.getJobSalaryMin() == b.getJobSalaryMin();
             }
         });
-
         jobs.clear();
         jobs.addAll(newJobs);
-        diffResult.dispatchUpdatesTo(this);
+        diff.dispatchUpdatesTo(this);
     }
 
-    /** Bulk-set which jobs are saved (called once on fragment start). */
     public void setSavedJobIds(Set<String> ids) {
         savedJobIds.clear();
         if (ids != null) savedJobIds.addAll(ids);
         notifyDataSetChanged();
     }
 
-    /** Flip one job's saved state and refresh only that row — no full redraw. */
     public void markJobSaved(String jobId, boolean saved) {
         if (jobId == null) return;
         if (saved) savedJobIds.add(jobId); else savedJobIds.remove(jobId);
@@ -101,86 +82,92 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
         }
     }
 
-    @NonNull
-    @Override
+    @NonNull @Override
     public JobViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_job, parent, false);
-        return new JobViewHolder(view);
+        return new JobViewHolder(LayoutInflater.from(context)
+            .inflate(R.layout.item_job, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull JobViewHolder holder, int position) {
-        bindJob(holder, jobs.get(position));
+    public void onBindViewHolder(@NonNull JobViewHolder h, int pos) {
+        bind(h, jobs.get(pos));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull JobViewHolder holder, int position,
-                                 @NonNull List<Object> payloads) {
+    public void onBindViewHolder(@NonNull JobViewHolder h, int pos, @NonNull List<Object> payloads) {
         if (!payloads.isEmpty() && "save_changed".equals(payloads.get(0))) {
-            // Partial bind: only refresh the bookmark icon — avoids image flicker
-            updateSaveIcon(holder, jobs.get(position));
-            return;
+            updateSaveIcon(h, jobs.get(pos)); return;
         }
-        super.onBindViewHolder(holder, position, payloads);
+        super.onBindViewHolder(h, pos, payloads);
     }
 
-    private void bindJob(@NonNull JobViewHolder holder, Job job) {
-        // Load real company logo URL (was always null before this fix)
-        ImageUtils.loadCompanyLogo(context, job.getCompanyLogoUrl(), holder.ivCompanyLogo);
+    private void bind(@NonNull JobViewHolder h, Job job) {
+        ImageUtils.loadCompanyLogo(context, job.getCompanyLogoUrl(), h.ivCompanyLogo);
 
-        holder.tvJobTitle.setText(safe(job.getJobTitle()));
-        holder.tvCompanyName.setText(safe(job.getJobCompany()));
-        holder.tvLocation.setText(job.getLocation());
-        holder.tvSalary.setText(job.getSalaryRange());
-        holder.chipCategory.setText(safe(job.getJobCategory()));
-        holder.chipJobType.setText(safe(job.getJobType()));
-        holder.tvPostedTime.setText(DateTimeHelper.getRelativeTime(job.getCreatedAt()));
+        h.tvJobTitle.setText(safe(job.getJobTitle()));
+        h.tvCompanyName.setText(safe(job.getJobCompany()));
+        h.tvLocation.setText(safe(job.getLocation()));
+        h.tvSalary.setText(safe(job.getSalaryRange()));
+        h.chipCategory.setText(safe(job.getJobCategory()));
+        h.chipJobType.setText(safe(job.getJobType()));
 
-        updateSaveIcon(holder, job);
+        // Posted time + applicant count
+        String time = DateTimeHelper.getRelativeTime(job.getCreatedAt());
+        int apps = job.getApplicantCount();
+        h.tvPostedTime.setText(apps > 0 ? time + " · " + apps + " applied" : time);
 
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) listener.onJobClick(job);
-        });
+        // Remote chip
+        if (h.chipRemote != null) {
+            boolean remote = "Remote".equalsIgnoreCase(job.getJobType())
+                || (job.getLocation() != null && job.getLocation().toLowerCase().contains("remote"));
+            h.chipRemote.setVisibility(remote ? View.VISIBLE : View.GONE);
+        }
 
-        holder.btnSave.setOnClickListener(v -> {
+        // Urgent badge
+        if (h.tvUrgent != null) {
+            h.tvUrgent.setVisibility(job.isUrgent() ? View.VISIBLE : View.GONE);
+        }
+
+        updateSaveIcon(h, job);
+
+        h.itemView.setOnClickListener(v -> { if (listener != null) listener.onJobClick(job); });
+        h.btnSave.setOnClickListener(v -> {
             if (listener == null || job.getJobId() == null) return;
-            boolean currentlySaved = savedJobIds.contains(job.getJobId());
-            markJobSaved(job.getJobId(), !currentlySaved);      // optimistic update
-            listener.onSaveClick(job, !currentlySaved);
+            boolean cur = savedJobIds.contains(job.getJobId());
+            markJobSaved(job.getJobId(), !cur);
+            listener.onSaveClick(job, !cur);
         });
     }
 
-    private void updateSaveIcon(@NonNull JobViewHolder holder, Job job) {
+    private void updateSaveIcon(@NonNull JobViewHolder h, Job job) {
         boolean saved = job.getJobId() != null && savedJobIds.contains(job.getJobId());
-        holder.btnSave.setImageResource(
-                saved ? R.drawable.ic_bookmark : R.drawable.ic_bookmark_border);
+        h.btnSave.setImageResource(saved ? R.drawable.ic_bookmark : R.drawable.ic_bookmark_border);
     }
 
     private static String safe(String s) { return s != null ? s : ""; }
-    private static boolean safeEquals(String a, String b) {
-        return a == null ? b == null : a.equals(b);
-    }
+    private static boolean safeEq(String a, String b) { return a == null ? b == null : a.equals(b); }
 
-    @Override
-    public int getItemCount() { return jobs.size(); }
+    @Override public int getItemCount() { return jobs.size(); }
 
     static class JobViewHolder extends RecyclerView.ViewHolder {
         ImageView ivCompanyLogo;
-        TextView tvJobTitle, tvCompanyName, tvLocation, tvSalary, tvPostedTime;
-        Chip chipCategory, chipJobType;
+        TextView tvJobTitle, tvCompanyName, tvLocation, tvSalary, tvPostedTime, tvUrgent;
+        Chip chipCategory, chipJobType, chipRemote;
         ImageButton btnSave;
 
-        JobViewHolder(@NonNull View itemView) {
-            super(itemView);
-            ivCompanyLogo = itemView.findViewById(R.id.iv_company_logo);
-            tvJobTitle    = itemView.findViewById(R.id.tv_job_title);
-            tvCompanyName = itemView.findViewById(R.id.tv_company_name);
-            tvLocation    = itemView.findViewById(R.id.tv_location);
-            tvSalary      = itemView.findViewById(R.id.tv_salary);
-            chipCategory  = itemView.findViewById(R.id.chip_category);
-            chipJobType   = itemView.findViewById(R.id.chip_job_type);
-            tvPostedTime  = itemView.findViewById(R.id.tv_posted_time);
-            btnSave       = itemView.findViewById(R.id.btn_save);
+        JobViewHolder(@NonNull View v) {
+            super(v);
+            ivCompanyLogo = v.findViewById(R.id.iv_company_logo);
+            tvJobTitle    = v.findViewById(R.id.tv_job_title);
+            tvCompanyName = v.findViewById(R.id.tv_company_name);
+            tvLocation    = v.findViewById(R.id.tv_location);
+            tvSalary      = v.findViewById(R.id.tv_salary);
+            chipCategory  = v.findViewById(R.id.chip_category);
+            chipJobType   = v.findViewById(R.id.chip_job_type);
+            chipRemote    = v.findViewById(R.id.chip_remote);
+            tvPostedTime  = v.findViewById(R.id.tv_posted_time);
+            tvUrgent      = v.findViewById(R.id.tv_urgent);
+            btnSave       = v.findViewById(R.id.btn_save);
         }
     }
 }
