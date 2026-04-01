@@ -547,7 +547,6 @@ public class JobLinkerFirebaseManager {
     public void getActiveJobs(final ListCallback<Job> callback) {
         db.collection(JOBS_COLLECTION)
                 .whereEqualTo("jobActive", true)
-                .orderBy("createdAt", Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Job> jobs = new ArrayList<>();
@@ -555,6 +554,7 @@ public class JobLinkerFirebaseManager {
                         Job job = document.toObject(Job.class);
                         jobs.add(job);
                     }
+                    jobs.sort((a, b) -> Long.compare(b.getCreatedAt(), a.getCreatedAt()));
                     callback.onSuccess(jobs);
                     Log.d(TAG, "Retrieved " + jobs.size() + " active jobs");
                 })
@@ -571,7 +571,6 @@ public class JobLinkerFirebaseManager {
         db.collection(JOBS_COLLECTION)
                 .whereEqualTo("jobActive", true)
                 .whereEqualTo("jobType", jobType)
-                .orderBy("createdAt", Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Job> jobs = new ArrayList<>();
@@ -579,6 +578,7 @@ public class JobLinkerFirebaseManager {
                         Job job = document.toObject(Job.class);
                         jobs.add(job);
                     }
+                    jobs.sort((a, b) -> Long.compare(b.getCreatedAt(), a.getCreatedAt()));
                     callback.onSuccess(jobs);
                     Log.d(TAG, "Retrieved " + jobs.size() + " jobs of type: " + jobType);
                 })
@@ -620,7 +620,6 @@ public class JobLinkerFirebaseManager {
         // This is a basic implementation - consider using Algolia or Elasticsearch for production
         db.collection(JOBS_COLLECTION)
                 .whereEqualTo("jobActive", true)
-                .orderBy("createdAt", Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Job> jobs = new ArrayList<>();
@@ -685,7 +684,7 @@ public class JobLinkerFirebaseManager {
     public ListenerRegistration listenToActiveJobs(final ListCallback<Job> callback) {
         ListenerRegistration registration = db.collection(JOBS_COLLECTION)
                 .whereEqualTo("jobActive", true)
-                .orderBy("createdAt", Query.Direction.DESCENDING)
+                // No orderBy — sort in memory to avoid composite index
                 .addSnapshotListener((queryDocumentSnapshots, e) -> {
                     if (e != null) {
                         callback.onFailure(e.getMessage());
@@ -699,6 +698,7 @@ public class JobLinkerFirebaseManager {
                             Job job = document.toObject(Job.class);
                             jobs.add(job);
                         }
+                        jobs.sort((a, b) -> Long.compare(b.getCreatedAt(), a.getCreatedAt()));
                         callback.onSuccess(jobs);
                         Log.d(TAG, "Jobs updated via listener: " + jobs.size());
                     }
@@ -767,16 +767,17 @@ public class JobLinkerFirebaseManager {
     public void getMessages(String conversationId, final ListCallback<Message> callback) {
         db.collection(MESSAGES_COLLECTION)
                 .whereEqualTo("conversationId", conversationId)
-                .orderBy("messageTimestamp", Query.Direction.ASCENDING)
+                // No orderBy — sort in memory to avoid composite index requirement
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Message> messages = new ArrayList<>();
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        Message message = document.toObject(Message.class);
-                        messages.add(message);
+                        messages.add(document.toObject(Message.class));
                     }
+                    messages.sort((a, b) ->
+                        Long.compare(a.getMessageTimestamp(), b.getMessageTimestamp()));
                     callback.onSuccess(messages);
-                    Log.d(TAG, "Retrieved " + messages.size() + " messages for conversation: " + conversationId);
+                    Log.d(TAG, "Retrieved " + messages.size() + " messages");
                 })
                 .addOnFailureListener(e -> {
                     callback.onFailure(e.getMessage());
@@ -790,22 +791,22 @@ public class JobLinkerFirebaseManager {
     public ListenerRegistration listenToMessages(String conversationId, final ListCallback<Message> callback) {
         ListenerRegistration registration = db.collection(MESSAGES_COLLECTION)
                 .whereEqualTo("conversationId", conversationId)
-                .orderBy("messageTimestamp", Query.Direction.ASCENDING)
+                // No orderBy — sort in memory to avoid composite index requirement
                 .addSnapshotListener((queryDocumentSnapshots, e) -> {
                     if (e != null) {
                         callback.onFailure(e.getMessage());
                         Log.e(TAG, "Listen to messages failed", e);
                         return;
                     }
-
                     if (queryDocumentSnapshots != null) {
                         List<Message> messages = new ArrayList<>();
                         for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                            Message message = document.toObject(Message.class);
-                            messages.add(message);
+                            messages.add(document.toObject(Message.class));
                         }
+                        messages.sort((a, b) ->
+                            Long.compare(a.getMessageTimestamp(), b.getMessageTimestamp()));
                         callback.onSuccess(messages);
-                        Log.d(TAG, "Messages updated via listener: " + messages.size());
+                        Log.d(TAG, "Messages updated: " + messages.size());
                     }
                 });
 
@@ -900,7 +901,8 @@ public class JobLinkerFirebaseManager {
     public void getUserConversations(String userId, final ListCallback<Conversation> callback) {
         db.collection(CONVERSATIONS_COLLECTION)
                 .whereArrayContains("participants", userId)
-                .orderBy("lastMessageTime", Query.Direction.DESCENDING)
+                // No orderBy here — Firestore requires a composite index for
+                // whereArrayContains + orderBy. We sort in memory instead.
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Conversation> conversations = new ArrayList<>();
@@ -909,6 +911,9 @@ public class JobLinkerFirebaseManager {
                         conversation.setConversationId(document.getId());
                         conversations.add(conversation);
                     }
+                    // Sort by lastMessageTime descending (newest first)
+                    conversations.sort((a, b) ->
+                        Long.compare(b.getLastMessageTime(), a.getLastMessageTime()));
                     callback.onSuccess(conversations);
                     Log.d(TAG, "Retrieved " + conversations.size() + " conversations for user: " + userId);
                 })
@@ -924,7 +929,7 @@ public class JobLinkerFirebaseManager {
     public ListenerRegistration listenToConversations(String userId, final ListCallback<Conversation> callback) {
         ListenerRegistration registration = db.collection(CONVERSATIONS_COLLECTION)
                 .whereArrayContains("participants", userId)
-                .orderBy("lastMessageTime", Query.Direction.DESCENDING)
+                // No orderBy — avoids composite index requirement, sort in memory
                 .addSnapshotListener((queryDocumentSnapshots, e) -> {
                     if (e != null) {
                         callback.onFailure(e.getMessage());
@@ -939,6 +944,9 @@ public class JobLinkerFirebaseManager {
                             conversation.setConversationId(document.getId());
                             conversations.add(conversation);
                         }
+                        // Sort newest first in memory
+                        conversations.sort((a, b) ->
+                            Long.compare(b.getLastMessageTime(), a.getLastMessageTime()));
                         callback.onSuccess(conversations);
                         Log.d(TAG, "Conversations updated via listener: " + conversations.size());
                     }
