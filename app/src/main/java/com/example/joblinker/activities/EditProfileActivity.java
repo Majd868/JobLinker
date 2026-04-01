@@ -84,6 +84,13 @@ public class EditProfileActivity extends AppCompatActivity {
     private final ActivityResultLauncher<Intent> cameraLauncher =
         registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK && cameraImageUri != null) {
+                // Grant read permission so ContentResolver can open the URI during upload
+                try {
+                    getContentResolver().takePersistableUriPermission(
+                        cameraImageUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                } catch (Exception ignored) {
+                    // Not all URIs support persistable permissions — that's OK
+                }
                 showAvatarPreview(cameraImageUri);
                 uploadAvatar(cameraImageUri);
             }

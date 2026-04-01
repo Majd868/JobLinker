@@ -1072,25 +1072,57 @@ public class JobLinkerFirebaseManager {
             return;
         }
 
-        // Use path directly as the storage ref (caller controls uniqueness)
         StorageReference fileRef = storage.getReference().child(path);
 
-        UploadTask uploadTask = fileRef.putFile(imageUri);
-        uploadTask.addOnProgressListener(taskSnapshot -> {
-            double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-            callback.onProgress((int) progress);
-        }).addOnSuccessListener(taskSnapshot -> {
-            fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                callback.onSuccess(uri.toString());
-                Log.d(TAG, "Image uploaded successfully: " + uri.toString());
+        // Use putStream instead of putFile so it works with ALL URI types:
+        // - content:// (FileProvider / camera capture, gallery picker)
+        // - file://    (direct file URIs)
+        // putFile() can fail with "Object does not exist at location" on
+        // scoped content:// URIs because Firebase tries to resolve the path
+        // on its own instead of going through the ContentResolver.
+        try {
+            java.io.InputStream inputStream =
+                storage.getApp().getApplicationContext()
+                    .getContentResolver()
+                    .openInputStream(imageUri);
+
+            if (inputStream == null) {
+                callback.onFailure("Cannot open image");
+                return;
+            }
+
+            com.google.firebase.storage.StorageMetadata metadata =
+                new com.google.firebase.storage.StorageMetadata.Builder()
+                    .setContentType("image/jpeg")
+                    .build();
+
+            UploadTask uploadTask = fileRef.putStream(inputStream, metadata);
+
+            uploadTask.addOnProgressListener(taskSnapshot -> {
+                double progress = (100.0 * taskSnapshot.getBytesTransferred())
+                    / taskSnapshot.getTotalByteCount();
+                callback.onProgress((int) progress);
+            }).addOnSuccessListener(taskSnapshot -> {
+                // Close the stream after upload
+                try { inputStream.close(); } catch (Exception ignored) {}
+
+                fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                    callback.onSuccess(uri.toString());
+                    Log.d(TAG, "Image uploaded successfully: " + uri);
+                }).addOnFailureListener(e -> {
+                    callback.onFailure(e.getMessage());
+                    Log.e(TAG, "Error getting download URL", e);
+                });
             }).addOnFailureListener(e -> {
+                try { inputStream.close(); } catch (Exception ignored) {}
                 callback.onFailure(e.getMessage());
-                Log.e(TAG, "Error getting download URL", e);
+                Log.e(TAG, "Error uploading image", e);
             });
-        }).addOnFailureListener(e -> {
-            callback.onFailure(e.getMessage());
-            Log.e(TAG, "Error uploading image", e);
-        });
+
+        } catch (java.io.IOException e) {
+            callback.onFailure("Cannot read image: " + e.getMessage());
+            Log.e(TAG, "Error opening input stream for image URI", e);
+        }
     }
 
     /**
