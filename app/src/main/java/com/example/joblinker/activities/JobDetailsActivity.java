@@ -502,6 +502,8 @@ public class JobDetailsActivity extends AppCompatActivity {
         intent.putExtra(ChatActivity.EXTRA_USER_ID,   employerId);
         intent.putExtra(ChatActivity.EXTRA_USER_NAME,
             (employerName != null && !employerName.isEmpty()) ? employerName : "Employer");
+        // Don't clear back stack — user should be able to go back to job details
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
     }
 

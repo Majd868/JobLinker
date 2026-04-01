@@ -253,20 +253,36 @@ public class EditProfileActivity extends AppCompatActivity {
         btnSaveChanges.setEnabled(false);
         btnSaveChanges.setText("Uploading photo…");
 
-        // Use a unique path per upload so Firebase Storage doesn't cache old URL
-        String path = "avatars/" + userId + "_" + System.currentTimeMillis() + ".jpg";
+        // Step 1: Copy image bytes to app's private cache directory FIRST
+        // This avoids "Object does not exist at location" caused by FileProvider
+        // URI permissions being revoked by the time the async upload starts.
+        // The cache file is always readable by our app regardless of URI type.
+        java.io.File cachedFile = copyUriToCache(imageUri);
+        if (cachedFile == null) {
+            isUploadingPhoto = false;
+            progressBar.setVisibility(View.GONE);
+            btnSaveChanges.setEnabled(true);
+            btnSaveChanges.setText("Save Changes");
+            Toast.makeText(this, "Could not read photo. Please try again.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        firebaseManager.uploadImage(imageUri, path,
+        android.net.Uri cachedUri = android.net.Uri.fromFile(cachedFile);
+        String path = "avatars/" + userId + ".jpg"; // fixed path — overwrites previous
+
+        firebaseManager.uploadImage(cachedUri, path,
             new JobLinkerFirebaseManager.UploadCallback() {
                 @Override public void onSuccess(String downloadUrl) {
+                    // Delete temp cache file
+                    cachedFile.delete();
+
                     currentAvatarUrl = downloadUrl;
                     isUploadingPhoto = false;
                     progressBar.setVisibility(View.GONE);
                     btnSaveChanges.setEnabled(true);
                     btnSaveChanges.setText("Save Changes");
 
-                    // Preview already shown — also persist URL immediately so
-                    // even if user closes without saving it's not lost
+                    // Save URL to Firestore immediately
                     if (userId != null) {
                         firestore.collection("users").document(userId)
                             .update("avatarUrl", downloadUrl);
@@ -279,6 +295,7 @@ public class EditProfileActivity extends AppCompatActivity {
                     btnSaveChanges.setText("Uploading " + progress + "%…");
                 }
                 @Override public void onFailure(String error) {
+                    cachedFile.delete();
                     isUploadingPhoto = false;
                     progressBar.setVisibility(View.GONE);
                     btnSaveChanges.setEnabled(true);
@@ -287,6 +304,29 @@ public class EditProfileActivity extends AppCompatActivity {
                         "Photo upload failed: " + error, Toast.LENGTH_LONG).show();
                 }
             });
+    }
+
+    /**
+     * Copies any URI (content://, file://, FileProvider) to app's private cache.
+     * Returns the File, or null if copy failed.
+     */
+    private java.io.File copyUriToCache(Uri uri) {
+        try {
+            java.io.InputStream in = getContentResolver().openInputStream(uri);
+            if (in == null) return null;
+            java.io.File out = new java.io.File(getCacheDir(),
+                "avatar_upload_" + System.currentTimeMillis() + ".jpg");
+            java.io.FileOutputStream fos = new java.io.FileOutputStream(out);
+            byte[] buf = new byte[8192];
+            int len;
+            while ((len = in.read(buf)) != -1) fos.write(buf, 0, len);
+            fos.close();
+            in.close();
+            return out;
+        } catch (Exception e) {
+            Log.e(TAG, "copyUriToCache failed", e);
+            return null;
+        }
     }
 
     private File createImageFile() throws IOException {

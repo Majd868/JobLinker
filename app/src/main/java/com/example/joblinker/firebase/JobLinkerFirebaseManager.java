@@ -1135,12 +1135,34 @@ public class JobLinkerFirebaseManager {
 
         StorageReference fileRef = storage.getReference().child(path);
 
-        // Use putStream instead of putFile so it works with ALL URI types:
-        // - content:// (FileProvider / camera capture, gallery picker)
-        // - file://    (direct file URIs)
-        // putFile() can fail with "Object does not exist at location" on
-        // scoped content:// URIs because Firebase tries to resolve the path
-        // on its own instead of going through the ContentResolver.
+        // If it's a file:// URI (from our cache copy), use putFile directly — faster and reliable
+        if ("file".equals(imageUri.getScheme())) {
+            java.io.File file = new java.io.File(imageUri.getPath());
+            if (!file.exists()) {
+                callback.onFailure("Image file not found: " + imageUri.getPath());
+                return;
+            }
+            UploadTask uploadTask = fileRef.putFile(imageUri);
+            uploadTask.addOnProgressListener(taskSnapshot -> {
+                double progress = (100.0 * taskSnapshot.getBytesTransferred())
+                    / taskSnapshot.getTotalByteCount();
+                callback.onProgress((int) progress);
+            }).addOnSuccessListener(taskSnapshot ->
+                fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                    callback.onSuccess(uri.toString());
+                    Log.d(TAG, "Image uploaded: " + uri);
+                }).addOnFailureListener(e -> {
+                    callback.onFailure(e.getMessage());
+                    Log.e(TAG, "Error getting download URL", e);
+                })
+            ).addOnFailureListener(e -> {
+                callback.onFailure(e.getMessage());
+                Log.e(TAG, "Error uploading image", e);
+            });
+            return;
+        }
+
+        // For content:// URIs — use putStream via ContentResolver
         try {
             java.io.InputStream inputStream =
                 storage.getApp().getApplicationContext()
@@ -1164,9 +1186,7 @@ public class JobLinkerFirebaseManager {
                     / taskSnapshot.getTotalByteCount();
                 callback.onProgress((int) progress);
             }).addOnSuccessListener(taskSnapshot -> {
-                // Close the stream after upload
                 try { inputStream.close(); } catch (Exception ignored) {}
-
                 fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
                     callback.onSuccess(uri.toString());
                     Log.d(TAG, "Image uploaded successfully: " + uri);
