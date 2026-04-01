@@ -32,7 +32,6 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.radiobutton.MaterialRadioButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
@@ -55,7 +54,7 @@ public class EditProfileActivity extends AppCompatActivity {
     // Views
     private MaterialToolbar toolbar;
     private FloatingActionButton fabChangePhoto;
-    private ShapeableImageView ivAvatar;
+    private ImageView ivAvatar;
     private TextInputEditText etFullName, etEmail, etPhone, etBio, etCity;
     private AutoCompleteTextView actvCountry, actvLanguage, actvCurrency;
     private RadioGroup rgUserRole;
@@ -122,7 +121,7 @@ public class EditProfileActivity extends AppCompatActivity {
     private void initViews() {
         toolbar        = findViewById(R.id.toolbar);
         fabChangePhoto = findViewById(R.id.fabChangePhoto);
-        ivAvatar       = findViewById(R.id.ivAvatar);
+        ivAvatar       = findViewById(R.id.ivProfilePicture);
         etFullName     = findViewById(R.id.etFullName);
         etEmail        = findViewById(R.id.etEmail);
         etPhone        = findViewById(R.id.etPhone);
