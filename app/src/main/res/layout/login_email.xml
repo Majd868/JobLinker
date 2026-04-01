@@ -67,6 +67,48 @@
         android:layout_height="@dimen/button_height"
         android:text="@string/login"/>
 
+
+    <!-- OR Divider -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="@dimen/spacing_medium"
+        android:layout_marginBottom="@dimen/spacing_medium">
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            android:background="@color/divider"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="  or  "
+            android:textColor="@color/text_hint"
+            android:textSize="13sp"/>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            android:background="@color/divider"/>
+
+    </LinearLayout>
+
+    <!-- Google Sign In -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_google_login"
+        style="@style/Widget.JobLinker.Button.Secondary"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/button_height"
+        android:text="Continue with Google"
+        app:icon="@drawable/ic_google"
+        app:iconGravity="textStart"
+        app:iconSize="20dp"/>
+
     <!-- Progress Bar -->
     <ProgressBar
         android:id="@+id/progress_bar"

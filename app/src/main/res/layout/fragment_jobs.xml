@@ -13,8 +13,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/spacing_medium"
-        app:cardCornerRadius="8dp"
-        app:cardElevation="2dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="3dp"
         app:cardBackgroundColor="@color/background"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -27,7 +27,6 @@
             android:padding="@dimen/spacing_small"
             android:gravity="center_vertical">
 
-            <!-- Search Icon -->
             <ImageView
                 android:id="@+id/ic_search"
                 android:layout_width="@dimen/icon_size"
@@ -38,7 +37,6 @@
                 android:contentDescription="@string/cd_search_button"
                 app:tint="@color/text_hint"/>
 
-            <!-- Search EditText -->
             <EditText
                 android:id="@+id/et_search"
                 android:layout_width="0dp"
@@ -55,7 +53,6 @@
                 android:paddingStart="0dp"
                 android:paddingEnd="@dimen/spacing_small"/>
 
-            <!-- Filter Button -->
             <ImageButton
                 android:id="@+id/btn_filter"
                 android:layout_width="@dimen/min_touch_target"
@@ -69,7 +66,7 @@
 
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Filter Chips Horizontal ScrollView -->
+    <!-- Filter Chips -->
     <HorizontalScrollView
         android:id="@+id/scroll_chips"
         android:layout_width="match_parent"
@@ -91,7 +88,6 @@
             app:checkedChip="@id/chip_all"
             app:chipSpacingHorizontal="@dimen/spacing_small">
 
-            <!-- All Chip -->
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_all"
                 style="@style/Widget.Material3.Chip.Filter"
@@ -103,7 +99,6 @@
                 app:chipStrokeColor="@color/primary"
                 app:chipStrokeWidth="1dp"/>
 
-            <!-- Full-time Chip -->
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_full_time"
                 style="@style/Widget.Material3.Chip.Filter"
@@ -114,7 +109,6 @@
                 app:chipStrokeColor="@color/primary"
                 app:chipStrokeWidth="1dp"/>
 
-            <!-- Part-time Chip -->
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_part_time"
                 style="@style/Widget.Material3.Chip.Filter"
@@ -125,7 +119,6 @@
                 app:chipStrokeColor="@color/primary"
                 app:chipStrokeWidth="1dp"/>
 
-            <!-- Remote Chip -->
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_remote"
                 style="@style/Widget.Material3.Chip.Filter"
@@ -136,7 +129,6 @@
                 app:chipStrokeColor="@color/primary"
                 app:chipStrokeWidth="1dp"/>
 
-            <!-- Contract Chip -->
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_contract"
                 style="@style/Widget.Material3.Chip.Filter"
@@ -147,7 +139,6 @@
                 app:chipStrokeColor="@color/primary"
                 app:chipStrokeWidth="1dp"/>
 
-            <!-- Internship Chip -->
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_internship"
                 style="@style/Widget.Material3.Chip.Filter"
@@ -162,7 +153,7 @@
 
     </HorizontalScrollView>
 
-    <!-- Result count label: "12 jobs found" -->
+    <!-- Result count label -->
     <TextView
         android:id="@+id/tv_result_count"
         android:layout_width="wrap_content"
@@ -180,10 +171,10 @@
         android:id="@+id/recycler_jobs"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="@dimen/spacing_small"
+        android:layout_marginTop="@dimen/spacing_xs"
         android:clipToPadding="false"
         android:paddingTop="@dimen/spacing_small"
-        android:paddingBottom="@dimen/spacing_medium"
+        android:paddingBottom="80dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintTop_toBottomOf="@id/tv_result_count"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -203,10 +194,8 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:visibility="visible">
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Empty Icon -->
         <ImageView
             android:layout_width="80dp"
             android:layout_height="80dp"
@@ -215,7 +204,6 @@
             android:contentDescription="@string/jobs"
             app:tint="@color/text_hint"/>
 
-        <!-- Empty Title -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -224,7 +212,6 @@
             android:textColor="@color/text_primary"
             android:layout_marginTop="@dimen/spacing_medium"/>
 
-        <!-- Empty Message -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -246,10 +233,9 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:visibility="visible"/>
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Floating Action Button (For Employers Only) -->
+    <!-- FAB (Employers Only) -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_post_job"
         android:layout_width="wrap_content"
@@ -263,7 +249,6 @@
         app:elevation="6dp"
         app:fabSize="normal"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:visibility="visible"/>
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

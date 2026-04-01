@@ -391,6 +391,15 @@ public class Job implements Serializable {
                 jobType != null && !jobType.isEmpty();
     }
 
+    // ── Urgent flag ───────────────────────────────
+    private boolean urgent = false;
+
+    @com.google.firebase.firestore.PropertyName("urgent")
+    public boolean isUrgent() { return urgent; }
+
+    @com.google.firebase.firestore.PropertyName("urgent")
+    public void setUrgent(boolean urgent) { this.urgent = urgent; }
+
     @Override
     public String toString() {
         return "Job{" +

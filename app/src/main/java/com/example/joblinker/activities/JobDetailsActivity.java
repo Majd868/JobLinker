@@ -356,27 +356,80 @@ public class JobDetailsActivity extends AppCompatActivity {
             return;
         }
 
+        // ── Cover letter dialog ───────────────────
+        android.widget.EditText etCoverLetter = new android.widget.EditText(this);
+        etCoverLetter.setHint("Write a short cover letter (optional)…");
+        etCoverLetter.setInputType(android.text.InputType.TYPE_CLASS_TEXT
+            | android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        etCoverLetter.setMinLines(4);
+        etCoverLetter.setMaxLines(8);
+        etCoverLetter.setGravity(android.view.Gravity.TOP | android.view.Gravity.START);
+        etCoverLetter.setBackground(getResources().getDrawable(R.drawable.bg_rounded_white, null));
+        int pad = (int)(16 * getResources().getDisplayMetrics().density);
+        etCoverLetter.setPadding(pad, pad, pad, pad);
+
+        android.widget.LinearLayout layout = new android.widget.LinearLayout(this);
+        layout.setOrientation(android.widget.LinearLayout.VERTICAL);
+        layout.setPadding(pad, pad / 2, pad, 0);
+
+        android.widget.TextView tvHint = new android.widget.TextView(this);
+        tvHint.setText("Applying for: " + currentJob.getJobTitle()
+            + " at " + currentJob.getJobCompany());
+        tvHint.setTextSize(14f);
+        tvHint.setTextColor(getResources().getColor(R.color.text_secondary, null));
+        tvHint.setPadding(0, 0, 0, pad / 2);
+        layout.addView(tvHint);
+        layout.addView(etCoverLetter);
+
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Apply for this job")
+            .setView(layout)
+            .setPositiveButton("Submit Application", (dialog, which) -> {
+                String coverLetter = etCoverLetter.getText().toString().trim();
+                submitApplication(coverLetter);
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
+    }
+
+    private void submitApplication(String coverLetter) {
+        String userId = firebaseManager.getCurrentUserId();
+        if (userId == null || currentJob == null) return;
+
         btnApply.setEnabled(false);
         btnApply.setText(R.string.applying);
 
-        firebaseManager.addJobApplicant(jobId, userId, new JobLinkerFirebaseManager.VoidCallback() {
-            @Override
-            public void onSuccess() {
-                // Keep button disabled and update label permanently
-                btnApply.setText(R.string.already_applied);
-                btnApply.setEnabled(false);
-                Toast.makeText(JobDetailsActivity.this,
-                        "Application submitted successfully!", Toast.LENGTH_SHORT).show();
-            }
+        // Save full application object
+        com.example.joblinker.models.Application application =
+            new com.example.joblinker.models.Application(
+                null, jobId, userId,
+                currentJob.getJobEmployerId(), coverLetter);
+        application.setJobTitle(currentJob.getJobTitle());
 
-            @Override
-            public void onFailure(String error) {
-                btnApply.setEnabled(true);
-                btnApply.setText(R.string.apply_now);
-                Toast.makeText(JobDetailsActivity.this,
+        firebaseManager.submitApplication(application,
+            new JobLinkerFirebaseManager.VoidCallback() {
+                @Override
+                public void onSuccess() {
+                    // Also mark job as applied
+                    firebaseManager.addJobApplicant(jobId, userId,
+                        new JobLinkerFirebaseManager.VoidCallback() {
+                            @Override public void onSuccess() {}
+                            @Override public void onFailure(String e) {}
+                        });
+                    btnApply.setText(R.string.already_applied);
+                    btnApply.setEnabled(false);
+                    Toast.makeText(JobDetailsActivity.this,
+                        "✅ Application submitted!", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onFailure(String error) {
+                    btnApply.setEnabled(true);
+                    btnApply.setText(R.string.apply_now);
+                    Toast.makeText(JobDetailsActivity.this,
                         "Error: " + error, Toast.LENGTH_SHORT).show();
-            }
-        });
+                }
+            });
     }
 
     private void shareJob() {

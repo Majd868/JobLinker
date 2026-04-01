@@ -7,10 +7,10 @@
     android:layout_height="wrap_content"
     android:layout_marginStart="@dimen/spacing_medium"
     android:layout_marginEnd="@dimen/spacing_medium"
-    android:layout_marginTop="@dimen/spacing_small"
-    android:layout_marginBottom="@dimen/spacing_small"
-    app:cardCornerRadius="@dimen/card_corner_radius"
-    app:cardElevation="@dimen/card_elevation"
+    android:layout_marginTop="6dp"
+    android:layout_marginBottom="6dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="3dp"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground">
@@ -23,8 +23,8 @@
         <!-- Company Logo -->
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/iv_company_logo"
-            android:layout_width="@dimen/avatar_size_small"
-            android:layout_height="@dimen/avatar_size_small"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_company_placeholder"
             app:shapeAppearanceOverlay="@style/RoundedSquare"
@@ -32,14 +32,32 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:src="@tools:sample/avatars"/>
 
+        <!-- Urgent badge -->
+        <TextView
+            android:id="@+id/tv_urgent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🔥 Urgent"
+            android:textSize="10sp"
+            android:textColor="@color/text_white"
+            android:background="@drawable/bg_rounded_primary"
+            android:backgroundTint="#FF5722"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="2dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="@id/iv_company_logo"
+            app:layout_constraintTop_toBottomOf="@id/iv_company_logo"
+            android:layout_marginTop="4dp"/>
+
         <!-- Job Title -->
         <TextView
             android:id="@+id/tv_job_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/spacing_medium"
-            android:layout_marginEnd="@dimen/spacing_medium"
+            android:layout_marginEnd="@dimen/spacing_small"
             style="@style/TextAppearance.JobLinker.HeadlineSmall"
+            android:textSize="15sp"
             android:maxLines="2"
             android:ellipsize="end"
             app:layout_constraintStart_toEndOf="@id/iv_company_logo"
@@ -52,7 +70,7 @@
             android:id="@+id/tv_company_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_xs"
+            android:layout_marginTop="2dp"
             style="@style/TextAppearance.JobLinker.BodyMedium"
             android:maxLines="1"
             android:ellipsize="end"
@@ -61,12 +79,12 @@
             app:layout_constraintTop_toBottomOf="@id/tv_job_title"
             tools:text="Google Inc."/>
 
-        <!-- Location -->
+        <!-- Location row -->
         <ImageView
             android:id="@+id/ic_location"
-            android:layout_width="@dimen/icon_size_small"
-            android:layout_height="@dimen/icon_size_small"
-            android:layout_marginTop="@dimen/spacing_small"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_marginTop="6dp"
             android:src="@drawable/ic_location"
             android:contentDescription="@string/country"
             app:tint="@color/text_hint"
@@ -77,12 +95,12 @@
             android:id="@+id/tv_location"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_xs"
+            android:layout_marginStart="4dp"
             style="@style/TextAppearance.JobLinker.LabelSmall"
             android:maxLines="1"
             android:ellipsize="end"
             app:layout_constraintStart_toEndOf="@id/ic_location"
-            app:layout_constraintEnd_toStartOf="@id/chip_job_type"
+            app:layout_constraintEnd_toEndOf="@id/tv_job_title"
             app:layout_constraintTop_toTopOf="@id/ic_location"
             app:layout_constraintBottom_toBottomOf="@id/ic_location"
             tools:text="San Francisco, CA"/>
@@ -99,18 +117,30 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
 
+        <!-- Divider -->
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/divider"
+            android:layout_marginTop="10dp"
+            app:layout_constraintTop_toBottomOf="@id/ic_location"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
         <!-- Salary -->
         <TextView
             android:id="@+id/tv_salary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_medium"
+            android:layout_marginTop="10dp"
             style="@style/TextAppearance.JobLinker.BodyLarge"
             android:textColor="@color/accent"
             android:textStyle="bold"
+            android:textSize="14sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/ic_location"
-            tools:text="$120,000 - $180,000"/>
+            app:layout_constraintTop_toBottomOf="@id/divider"
+            tools:text="$120k - $180k"/>
 
         <!-- Category Chip -->
         <com.google.android.material.chip.Chip
@@ -118,12 +148,13 @@
             style="@style/Widget.Material3.Chip.Assist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_small"
-            android:textSize="@dimen/text_label_small"
+            android:layout_marginTop="8dp"
+            android:textSize="11sp"
             app:chipBackgroundColor="@color/surface_dark"
+            app:chipMinHeight="28dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_salary"
-            tools:text="Tech"/>
+            tools:text="Technology"/>
 
         <!-- Job Type Chip -->
         <com.google.android.material.chip.Chip
@@ -131,24 +162,42 @@
             style="@style/Widget.Material3.Chip.Assist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_small"
-            android:textSize="@dimen/text_label_small"
+            android:layout_marginStart="6dp"
+            android:textSize="11sp"
             app:chipBackgroundColor="@color/surface_dark"
+            app:chipMinHeight="28dp"
             app:layout_constraintStart_toEndOf="@id/chip_category"
             app:layout_constraintTop_toTopOf="@id/chip_category"
             app:layout_constraintBottom_toBottomOf="@id/chip_category"
             tools:text="Full-time"/>
 
-        <!-- Posted Time -->
+        <!-- Remote chip -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_remote"
+            style="@style/Widget.Material3.Chip.Assist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:textSize="11sp"
+            android:text="🌐 Remote"
+            android:visibility="gone"
+            app:chipBackgroundColor="#E8F5E9"
+            app:chipMinHeight="28dp"
+            app:layout_constraintStart_toEndOf="@id/chip_job_type"
+            app:layout_constraintTop_toTopOf="@id/chip_category"
+            app:layout_constraintBottom_toBottomOf="@id/chip_category"/>
+
+        <!-- Posted time + applicant count -->
         <TextView
             android:id="@+id/tv_posted_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/TextAppearance.JobLinker.LabelSmall"
+            android:textColor="@color/text_hint"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/chip_category"
             app:layout_constraintBottom_toBottomOf="@id/chip_category"
-            tools:text="2 days ago"/>
+            tools:text="2d ago · 12 applied"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
