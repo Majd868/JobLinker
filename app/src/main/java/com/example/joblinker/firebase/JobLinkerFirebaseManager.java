@@ -1072,9 +1072,8 @@ public class JobLinkerFirebaseManager {
             return;
         }
 
-        // Generate unique filename
-        String fileName = UUID.randomUUID().toString() + ".jpg";
-        StorageReference fileRef = storage.getReference().child(path + "/" + fileName);
+        // Use path directly as the storage ref (caller controls uniqueness)
+        StorageReference fileRef = storage.getReference().child(path);
 
         UploadTask uploadTask = fileRef.putFile(imageUri);
         uploadTask.addOnProgressListener(taskSnapshot -> {

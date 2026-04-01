@@ -75,6 +75,7 @@ public class EditProfileActivity extends AppCompatActivity {
     // Photo state
     private Uri cameraImageUri;
     private String currentAvatarUrl;
+    private boolean isUploadingPhoto = false; // guard: block Save while uploading
 
     // Data
     private String[] countries, languages, currencies;
@@ -240,27 +241,43 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private void uploadAvatar(Uri imageUri) {
         if (userId == null) return;
+        isUploadingPhoto = true;
         progressBar.setVisibility(View.VISIBLE);
         btnSaveChanges.setEnabled(false);
+        btnSaveChanges.setText("Uploading photo…");
 
-        firebaseManager.uploadImage(imageUri, "avatars/" + userId,
+        // Use a unique path per upload so Firebase Storage doesn't cache old URL
+        String path = "avatars/" + userId + "_" + System.currentTimeMillis() + ".jpg";
+
+        firebaseManager.uploadImage(imageUri, path,
             new JobLinkerFirebaseManager.UploadCallback() {
                 @Override public void onSuccess(String downloadUrl) {
                     currentAvatarUrl = downloadUrl;
-                    // Save URL to Firestore immediately
-                    firestore.collection("users").document(userId)
-                        .update("avatarUrl", downloadUrl);
+                    isUploadingPhoto = false;
                     progressBar.setVisibility(View.GONE);
                     btnSaveChanges.setEnabled(true);
+                    btnSaveChanges.setText("Save Changes");
+
+                    // Preview already shown — also persist URL immediately so
+                    // even if user closes without saving it's not lost
+                    if (userId != null) {
+                        firestore.collection("users").document(userId)
+                            .update("avatarUrl", downloadUrl);
+                    }
                     Toast.makeText(EditProfileActivity.this,
-                        "Photo uploaded!", Toast.LENGTH_SHORT).show();
+                        "Photo ready — tap Save to confirm all changes",
+                        Toast.LENGTH_SHORT).show();
                 }
-                @Override public void onProgress(int progress) { }
+                @Override public void onProgress(int progress) {
+                    btnSaveChanges.setText("Uploading " + progress + "%…");
+                }
                 @Override public void onFailure(String error) {
+                    isUploadingPhoto = false;
                     progressBar.setVisibility(View.GONE);
                     btnSaveChanges.setEnabled(true);
+                    btnSaveChanges.setText("Save Changes");
                     Toast.makeText(EditProfileActivity.this,
-                        "Upload failed: " + error, Toast.LENGTH_SHORT).show();
+                        "Photo upload failed: " + error, Toast.LENGTH_LONG).show();
                 }
             });
     }
@@ -317,6 +334,13 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     private void saveChanges() {
+        // Block save if photo is still uploading
+        if (isUploadingPhoto) {
+            Toast.makeText(this, "Please wait — photo is still uploading…",
+                Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String name     = etFullName.getText().toString().trim();
         String phone    = etPhone.getText().toString().trim();
         String bio      = etBio.getText().toString().trim();
@@ -371,7 +395,8 @@ public class EditProfileActivity extends AppCompatActivity {
         data.put("userCurrency", currency);
         data.put("userRole",    role);
         data.put("updatedAt",   System.currentTimeMillis());
-        if (currentAvatarUrl != null) data.put("avatarUrl", currentAvatarUrl);
+        // Always write avatarUrl — null clears it (remove photo), non-null updates it
+        data.put("avatarUrl", currentAvatarUrl);
 
         if (userId != null) {
             firestore.collection("users").document(userId).update(data)
