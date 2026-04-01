@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.joblinker.R;
-import com.joblinker.models.Conversation;
+import com.example.joblinker.models.Conversation;
 import com.example.joblinker.utils.DateTimeHelper;
 import com.example.joblinker.utils.ImageUtils;
 

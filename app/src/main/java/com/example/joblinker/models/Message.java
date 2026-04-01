@@ -1,4 +1,4 @@
-package com.joblinker.models;
+package com.example.joblinker.models;
 
 import com.google.firebase.firestore.PropertyName;
 

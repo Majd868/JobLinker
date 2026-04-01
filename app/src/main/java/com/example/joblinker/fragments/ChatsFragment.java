@@ -21,7 +21,7 @@ import com.example.joblinker.R;
 import com.example.joblinker.activities.ChatActivity;
 import com.example.joblinker.adapters.ConversationAdapter;
 import com.example.joblinker.firebase.JobLinkerFirebaseManager;
-import com.joblinker.models.Conversation;
+import com.example.joblinker.models.Conversation;
 import com.example.joblinker.models.User;
 
 import java.util.ArrayList;

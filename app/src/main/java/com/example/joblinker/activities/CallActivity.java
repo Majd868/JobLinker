@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.example.joblinker.R;
 import com.example.joblinker.firebase.JobLinkerFirebaseManager;
-import com.joblinker.models.Call;
+import com.example.joblinker.models.Call;
 import com.example.joblinker.utils.ImageUtils;
 
 public class CallActivity extends AppCompatActivity {

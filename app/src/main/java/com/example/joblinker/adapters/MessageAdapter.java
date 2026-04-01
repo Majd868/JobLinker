@@ -1,4 +1,4 @@
-package com.joblinker.adapters;
+package com.example.joblinker.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.joblinker.R;
-import com.joblinker.models.Message;
+import com.example.joblinker.models.Message;
 import com.example.joblinker.utils.DateTimeHelper;
 import com.example.joblinker.utils.ImageUtils;
 

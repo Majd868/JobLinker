@@ -1,4 +1,4 @@
-package com.joblinker.fragments;
+package com.example.joblinker.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
