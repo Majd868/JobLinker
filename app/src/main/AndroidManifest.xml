@@ -107,6 +107,13 @@
             android:windowSoftInputMode="adjustResize"
             android:parentActivityName=".activities.MainActivity" />
         <activity android:name=".activities.FilterActivity" />
+        <!-- Saved Jobs Activity -->
+        <activity
+            android:name=".activities.SavedJobsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".activities.MainActivity" />
+
         <!-- Settings Activity -->
         <activity
             android:name=".activities.SettingActivity"
