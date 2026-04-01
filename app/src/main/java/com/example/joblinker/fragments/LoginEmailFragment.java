@@ -34,7 +34,7 @@ import java.util.concurrent.Executors;
 public class LoginEmailFragment extends Fragment {
 
     // ⚠️ Replace with your Web Client ID from Firebase Console → Authentication → Google → Web SDK Config
-    private static final String WEB_CLIENT_ID = "YOUR_WEB_CLIENT_ID";
+    private static final String WEB_CLIENT_ID = "943441972422-p7rs8rbnq9k28tl7rpre25t327mroape.apps.googleusercontent.com";
 
     private TextInputEditText etEmail, etPassword;
     private TextView          tvForgotPassword;
