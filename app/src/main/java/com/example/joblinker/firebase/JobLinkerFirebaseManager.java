@@ -1256,4 +1256,110 @@ public class JobLinkerFirebaseManager {
                     Log.e(TAG, "Error getting saved jobs", e);
                 });
     }
+
+    // ==================== APPLICATION OPERATIONS ====================
+
+    /**
+     * Get applications submitted by a job seeker
+     */
+    public void getApplicationsByJobSeeker(String jobSeekerUserId,
+                                           final ListCallback<com.example.joblinker.models.Application> callback) {
+        db.collection(APPLICATIONS_COLLECTION)
+                .whereEqualTo("jobSeekerUserId", jobSeekerUserId)
+                .orderBy("appliedAt", Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<com.example.joblinker.models.Application> applications = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        com.example.joblinker.models.Application app =
+                                document.toObject(com.example.joblinker.models.Application.class);
+                        applications.add(app);
+                    }
+                    callback.onSuccess(applications);
+                    Log.d(TAG, "Retrieved " + applications.size() + " applications for user: " + jobSeekerUserId);
+                })
+                .addOnFailureListener(e -> {
+                    callback.onFailure(e.getMessage());
+                    Log.e(TAG, "Error getting applications", e);
+                });
+    }
+
+    /**
+     * Get applications for a specific job (for employers)
+     */
+    public void getApplicationsByJob(String jobId,
+                                     final ListCallback<com.example.joblinker.models.Application> callback) {
+        db.collection(APPLICATIONS_COLLECTION)
+                .whereEqualTo("jobId", jobId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<com.example.joblinker.models.Application> applications = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        com.example.joblinker.models.Application app =
+                                document.toObject(com.example.joblinker.models.Application.class);
+                        applications.add(app);
+                    }
+                    callback.onSuccess(applications);
+                    Log.d(TAG, "Retrieved " + applications.size() + " applications for job: " + jobId);
+                })
+                .addOnFailureListener(e -> {
+                    callback.onFailure(e.getMessage());
+                    Log.e(TAG, "Error getting job applications", e);
+                });
+    }
+
+    /**
+     * Submit a new application
+     */
+    public void submitApplication(com.example.joblinker.models.Application application,
+                                  final VoidCallback callback) {
+        DocumentReference docRef = db.collection(APPLICATIONS_COLLECTION).document();
+        application.setApplicationId(docRef.getId());
+        application.setAppliedAt(System.currentTimeMillis());
+
+        docRef.set(application)
+                .addOnSuccessListener(aVoid -> {
+                    callback.onSuccess();
+                    Log.d(TAG, "Application submitted: " + application.getApplicationId());
+                })
+                .addOnFailureListener(e -> {
+                    callback.onFailure(e.getMessage());
+                    Log.e(TAG, "Error submitting application", e);
+                });
+    }
+
+    /**
+     * Update application status (for employers)
+     */
+    public void updateApplicationStatus(String applicationId, String status,
+                                        final VoidCallback callback) {
+        db.collection(APPLICATIONS_COLLECTION)
+                .document(applicationId)
+                .update("status", status)
+                .addOnSuccessListener(aVoid -> {
+                    callback.onSuccess();
+                    Log.d(TAG, "Application status updated: " + applicationId + " -> " + status);
+                })
+                .addOnFailureListener(e -> {
+                    callback.onFailure(e.getMessage());
+                    Log.e(TAG, "Error updating application status", e);
+                });
+    }
+
+    /**
+     * Delete / withdraw an application
+     */
+    public void deleteApplication(String applicationId, final VoidCallback callback) {
+        db.collection(APPLICATIONS_COLLECTION)
+                .document(applicationId)
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    callback.onSuccess();
+                    Log.d(TAG, "Application deleted: " + applicationId);
+                })
+                .addOnFailureListener(e -> {
+                    callback.onFailure(e.getMessage());
+                    Log.e(TAG, "Error deleting application", e);
+                });
+    }
 }

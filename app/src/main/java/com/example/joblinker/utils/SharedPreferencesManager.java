@@ -136,6 +136,35 @@ public class SharedPreferencesManager {
         return sharedPreferences.getBoolean(KEY_ONLINE_STATUS_VISIBLE, true);
     }
 
+    // ── Generic accessors (used by SettingActivity) ──────────────────
+
+    public void saveBoolean(String key, boolean value) {
+        editor.putBoolean(key, value);
+        editor.apply();
+    }
+
+    public boolean getBoolean(String key, boolean defaultValue) {
+        return sharedPreferences.getBoolean(key, defaultValue);
+    }
+
+    public void saveInt(String key, int value) {
+        editor.putInt(key, value);
+        editor.apply();
+    }
+
+    public int getInt(String key, int defaultValue) {
+        return sharedPreferences.getInt(key, defaultValue);
+    }
+
+    public void saveString(String key, String value) {
+        editor.putString(key, value);
+        editor.apply();
+    }
+
+    public String getString(String key, String defaultValue) {
+        return sharedPreferences.getString(key, defaultValue);
+    }
+
     // Clear all data
     public void clearAll() {
         editor.clear();

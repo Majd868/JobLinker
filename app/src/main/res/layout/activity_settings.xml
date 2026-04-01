@@ -1,345 +1,512 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
-    android:fillViewport="true">
+    android:background="@color/background">
 
-    <LinearLayout
+    <!-- Toolbar -->
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
 
-        <!-- Toolbar -->
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/primary"
-            android:elevation="4dp"
-            app:title="@string/settings"
+            app:title="Settings"
             app:titleTextColor="@color/text_white"
             app:navigationIcon="@drawable/ic_back"
             app:navigationIconTint="@color/text_white"/>
 
-        <!-- Profile Section -->
-        <com.google.android.material.card.MaterialCardView
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:fillViewport="true">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="2dp">
+            android:orientation="vertical"
+            android:paddingBottom="32dp">
 
-            <LinearLayout
+            <!-- ══════════════════════════════════════ -->
+            <!-- PROFILE HEADER CARD                    -->
+            <!-- ══════════════════════════════════════ -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="16dp"
-                android:gravity="center_vertical">
+                android:layout_margin="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
 
-                <ImageView
-                    android:id="@+id/ivProfilePicture"
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:src="@drawable/ic_user_placeholder"
-                    android:scaleType="centerCrop"
-                    android:background="@drawable/circle_background"
-                    android:contentDescription="@string/cd_profile_picture"/>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="16dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/tvUserName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="User Name"
-                        android:textSize="18sp"
-                        android:textColor="@color/text_primary"
-                        android:textStyle="bold"/>
-
-                    <TextView
-                        android:id="@+id/tvUserEmail"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="user@example.com"
-                        android:textSize="14sp"
-                        android:textColor="@color/text_secondary"
-                        android:layout_marginTop="4dp"/>
-
-                </LinearLayout>
-
-                <ImageView
-                    android:id="@+id/ivBack"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_chevron_right"
-                    android:contentDescription="@string/edit_profile"
-                    app:tint="@color/text_hint"/>
-
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- App Preferences Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/app_preferences"
-            android:textSize="14sp"
-            android:textColor="@color/text_secondary"
-            android:textStyle="bold"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"/>
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="2dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="8dp">
-
-                <!-- Notifications Toggle -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:padding="12dp"
+                    android:padding="16dp"
                     android:gravity="center_vertical">
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_notifications"
-                        app:tint="@color/primary"/>
+                        android:id="@+id/ivProfilePicture"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:src="@drawable/ic_user_placeholder"
+                        android:scaleType="centerCrop"
+                        android:background="@drawable/circle_background"
+                        android:contentDescription="Profile picture"/>
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginStart="16dp"
-                        android:text="@string/notifications"
-                        android:textSize="16sp"
-                        android:textColor="@color/text_primary"/>
+                        android:orientation="vertical">
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/switchNotifications"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        <TextView
+                            android:id="@+id/tvUserName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="User Name"
+                            android:textSize="18sp"
+                            android:textColor="@color/text_primary"
+                            android:textStyle="bold"/>
 
-                </LinearLayout>
+                        <TextView
+                            android:id="@+id/tvUserEmail"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="user@example.com"
+                            android:textSize="14sp"
+                            android:textColor="@color/text_secondary"
+                            android:layout_marginTop="2dp"/>
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/divider"
-                    android:layout_marginHorizontal="12dp"/>
+                        <TextView
+                            android:id="@+id/tvVerificationStatus"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Not verified"
+                            android:textSize="12sp"
+                            android:textColor="@color/warning"
+                            android:layout_marginTop="2dp"/>
 
-                <!-- Dark Mode Toggle -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="12dp"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_dark_mode"
-                        app:tint="@color/primary"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="16dp"
-                        android:text="dark_mode"
-                        android:textSize="16sp"
-                        android:textColor="@color/text_primary"/>
-
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/switchDarkMode"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/divider"
-                    android:layout_marginHorizontal="12dp"/>
-
-                <!-- Online Status Toggle -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="12dp"
-                    android:gravity="center_vertical">
+                    </LinearLayout>
 
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:src="@drawable/ic_online_indicator"
-                        app:tint="@color/online"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="16dp"
-                        android:text="@string/show_online_status"
-                        android:textSize="16sp"
-                        android:textColor="@color/text_primary"/>
-
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/switchOnlineStatus"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Account Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/account"
-            android:textSize="14sp"
-            android:textColor="@color/text_secondary"
-            android:textStyle="bold"
-            android:layout_marginStart="16dp"
-            android:layout_marginBottom="8dp"/>
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="2dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="8dp">
-
-                <!-- Edit Profile -->
-                <LinearLayout
-                    android:id="@+id/btnEditProfile"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="12dp"
-                    android:gravity="center_vertical"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_edit"
-                        app:tint="@color/primary"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="16dp"
-                        android:text="@string/edit_profile"
-                        android:textSize="16sp"
-                        android:textColor="@color/text_primary"/>
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
                         android:src="@drawable/ic_chevron_right"
                         app:tint="@color/text_hint"/>
 
                 </LinearLayout>
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/divider"
-                    android:layout_marginHorizontal="12dp"/>
+            </com.google.android.material.card.MaterialCardView>
 
-                <!-- Change Password -->
+            <!-- ══════════════════════════════════════ -->
+            <!-- ACCOUNT SECTION                        -->
+            <!-- ══════════════════════════════════════ -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Account"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary"
+                android:textStyle="bold"
+                android:textAllCaps="true"
+                android:layout_marginStart="16dp"
+                android:layout_marginBottom="6dp"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
+
                 <LinearLayout
-                    android:id="@+id/btnChangePassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="12dp"
-                    android:gravity="center_vertical"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
+                    android:orientation="vertical"
+                    android:padding="8dp">
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_lock"
-                        app:tint="@color/primary"/>
+                    <!-- Edit Profile -->
+                    <LinearLayout
+                        android:id="@+id/btnEditProfile"
+                        style="@style/SettingsRow">
+                        <ImageView style="@style/SettingsRowIcon" android:src="@drawable/ic_edit" app:tint="@color/primary"/>
+                        <TextView style="@style/SettingsRowText" android:text="Edit Profile"/>
+                        <ImageView style="@style/SettingsRowChevron"/>
+                    </LinearLayout>
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="16dp"
-                        android:text="@string/change_password"
-                        android:textSize="16sp"
-                        android:textColor="@color/text_primary"/>
+                    <View style="@style/SettingsDivider"/>
 
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_chevron_right"
-                        app:tint="@color/text_hint"/>
+                    <!-- Change Password -->
+                    <LinearLayout
+                        android:id="@+id/btnChangePassword"
+                        style="@style/SettingsRow">
+                        <ImageView style="@style/SettingsRowIcon" android:src="@drawable/ic_lock" app:tint="@color/primary"/>
+                        <TextView style="@style/SettingsRowText" android:text="Change Password"/>
+                        <ImageView style="@style/SettingsRowChevron"/>
+                    </LinearLayout>
+
+                    <View style="@style/SettingsDivider"/>
+
+                    <!-- Verify Email -->
+                    <LinearLayout
+                        android:id="@+id/btnVerifyEmail"
+                        style="@style/SettingsRow">
+                        <ImageView style="@style/SettingsRowIcon" android:src="@drawable/ic_email" app:tint="@color/primary"/>
+                        <TextView style="@style/SettingsRowText" android:text="Verify Email"/>
+                        <ImageView style="@style/SettingsRowChevron"/>
+                    </LinearLayout>
+
+                    <View style="@style/SettingsDivider"/>
+
+                    <!-- Saved Jobs -->
+                    <LinearLayout
+                        android:id="@+id/btnSavedJobs"
+                        style="@style/SettingsRow">
+                        <ImageView style="@style/SettingsRowIcon" android:src="@drawable/ic_bookmark" app:tint="@color/primary"/>
+                        <TextView style="@style/SettingsRowText" android:text="Saved Jobs"/>
+                        <ImageView style="@style/SettingsRowChevron"/>
+                    </LinearLayout>
+
+                    <View style="@style/SettingsDivider"/>
+
+                    <!-- My Applications -->
+                    <LinearLayout
+                        android:id="@+id/btnMyApplications"
+                        style="@style/SettingsRow">
+                        <ImageView style="@style/SettingsRowIcon" android:src="@drawable/ic_application" app:tint="@color/primary"/>
+                        <TextView style="@style/SettingsRowText" android:text="My Applications"/>
+                        <ImageView style="@style/SettingsRowChevron"/>
+                    </LinearLayout>
 
                 </LinearLayout>
 
-            </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-        </com.google.android.material.card.MaterialCardView>
+            <!-- ══════════════════════════════════════ -->
+            <!-- NOTIFICATIONS SECTION                  -->
+            <!-- ══════════════════════════════════════ -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Notifications"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary"
+                android:textStyle="bold"
+                android:textAllCaps="true"
+                android:layout_marginStart="16dp"
+                android:layout_marginBottom="6dp"/>
 
-        <!-- Logout Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnLogout"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_margin="16dp"
-            android:text="@string/logout"
-            android:textColor="@color/error"
-            android:textSize="16sp"
-            app:strokeColor="@color/error"
-            app:strokeWidth="2dp"
-            app:cornerRadius="8dp"
-            app:icon="@drawable/ic_logout"
-            app:iconTint="@color/error"
-            style="@style/Widget.Material3.Button.OutlinedButton"/>
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
 
-    </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
 
-</ScrollView>
+                    <!-- All Notifications -->
+                    <LinearLayout style="@style/SettingsRow">
+                        <ImageView style="@style/SettingsRowIcon" android:src="@drawable/ic_notification" app:tint="@color/primary"/>
+                        <TextView style="@style/SettingsRowText" android:text="Push Notifications"/>
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchNotifications"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+                    </LinearLayout>
+
+                    <View style="@style/SettingsDivider"/>
+
+                    <!-- Job Alerts -->
+                    <LinearLayout style="@style/SettingsRow">
+                        <ImageView style="@style/SettingsRowIcon" android:src="@drawable/ic_work" app:tint="@color/primary"/>
+                        <TextView style="@style/SettingsRowText" android:text="Job Alerts"/>
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchJobAlerts"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+                    </LinearLayout>
+
+                    <View style="@style/SettingsDivider"/>
+
+                    <!-- Message Notifications -->
+                    <LinearLayout style="@style/SettingsRow">
+                        <ImageView style="@style/SettingsRowIcon" android:src="@drawable/ic_message" app:tint="@color/primary"/>
+                        <TextView style="@style/SettingsRowText" android:text="Message Notifications"/>
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchMessageNotifications"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ══════════════════════════════════════ -->
+            <!-- APPEARANCE SECTION                     -->
+            <!-- ══════════════════════════════════════ -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Appearance"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary"
+                android:textStyle="bold"
+                android:textAllCaps="true"
+                android:layout_marginStart="16dp"
+                android:layout_marginBottom="6dp"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+                    <!-- Dark Mode -->
+                    <LinearLayout style="@style/SettingsRow">
+                        <ImageView style="@style/SettingsRowIcon" android:src="@drawable/ic_dark_mode" app:tint="@color/primary"/>
+                        <TextView style="@style/SettingsRowText" android:text="Dark Mode"/>
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchDarkMode"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ══════════════════════════════════════ -->
+            <!-- PRIVACY SECTION                        -->
+            <!-- ══════════════════════════════════════ -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Privacy"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary"
+                android:textStyle="bold"
+                android:textAllCaps="true"
+                android:layout_marginStart="16dp"
+                android:layout_marginBottom="6dp"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+                    <!-- Online Status toggle -->
+                    <LinearLayout style="@style/SettingsRow">
+                        <ImageView style="@style/SettingsRowIcon" android:src="@drawable/ic_online" app:tint="@color/primary"/>
+                        <TextView style="@style/SettingsRowText" android:text="Show Online Status"/>
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchOnlineStatus"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+                    </LinearLayout>
+
+                    <View style="@style/SettingsDivider"/>
+
+                    <!-- Profile Visibility -->
+                    <LinearLayout
+                        android:id="@+id/btnPrivacyProfile"
+                        style="@style/SettingsRow">
+                        <ImageView style="@style/SettingsRowIcon" android:src="@drawable/ic_visibility" app:tint="@color/primary"/>
+                        <TextView style="@style/SettingsRowText" android:text="Who Can See My Profile"/>
+                        <ImageView style="@style/SettingsRowChevron"/>
+                    </LinearLayout>
+
+                    <View style="@style/SettingsDivider"/>
+
+                    <!-- Blocked Users -->
+                    <LinearLayout
+                        android:id="@+id/btnBlockedUsers"
+                        style="@style/SettingsRow">
+                        <ImageView style="@style/SettingsRowIcon" android:src="@drawable/ic_block" app:tint="@color/primary"/>
+                        <TextView style="@style/SettingsRowText" android:text="Blocked Users"/>
+                        <ImageView style="@style/SettingsRowChevron"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ══════════════════════════════════════ -->
+            <!-- SUPPORT SECTION                        -->
+            <!-- ══════════════════════════════════════ -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Support"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary"
+                android:textStyle="bold"
+                android:textAllCaps="true"
+                android:layout_marginStart="16dp"
+                android:layout_marginBottom="6dp"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+                    <!-- Help & Support -->
+                    <LinearLayout
+                        android:id="@+id/btnHelpSupport"
+                        style="@style/SettingsRow">
+                        <ImageView style="@style/SettingsRowIcon" android:src="@drawable/ic_help" app:tint="@color/primary"/>
+                        <TextView style="@style/SettingsRowText" android:text="Help &amp; Support"/>
+                        <ImageView style="@style/SettingsRowChevron"/>
+                    </LinearLayout>
+
+                    <View style="@style/SettingsDivider"/>
+
+                    <!-- Terms -->
+                    <LinearLayout
+                        android:id="@+id/btnTerms"
+                        style="@style/SettingsRow">
+                        <ImageView style="@style/SettingsRowIcon" android:src="@drawable/ic_document" app:tint="@color/primary"/>
+                        <TextView style="@style/SettingsRowText" android:text="Terms &amp; Conditions"/>
+                        <ImageView style="@style/SettingsRowChevron"/>
+                    </LinearLayout>
+
+                    <View style="@style/SettingsDivider"/>
+
+                    <!-- Privacy Policy -->
+                    <LinearLayout
+                        android:id="@+id/btnPrivacyPolicy"
+                        style="@style/SettingsRow">
+                        <ImageView style="@style/SettingsRowIcon" android:src="@drawable/ic_shield" app:tint="@color/primary"/>
+                        <TextView style="@style/SettingsRowText" android:text="Privacy Policy"/>
+                        <ImageView style="@style/SettingsRowChevron"/>
+                    </LinearLayout>
+
+                    <View style="@style/SettingsDivider"/>
+
+                    <!-- About -->
+                    <LinearLayout
+                        android:id="@+id/btnAbout"
+                        style="@style/SettingsRow">
+                        <ImageView style="@style/SettingsRowIcon" android:src="@drawable/ic_info" app:tint="@color/primary"/>
+                        <TextView style="@style/SettingsRowText" android:text="About JobLinker"/>
+                        <ImageView style="@style/SettingsRowChevron"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ══════════════════════════════════════ -->
+            <!-- LOGOUT BUTTON                          -->
+            <!-- ══════════════════════════════════════ -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnLogout"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:text="Log Out"
+                android:textColor="@color/error"
+                android:textSize="16sp"
+                app:strokeColor="@color/error"
+                app:strokeWidth="2dp"
+                app:cornerRadius="8dp"
+                app:icon="@drawable/ic_logout"
+                app:iconTint="@color/error"/>
+
+            <!-- ══════════════════════════════════════ -->
+            <!-- DANGER ZONE                            -->
+            <!-- ══════════════════════════════════════ -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚠️  Danger Zone"
+                android:textSize="12sp"
+                android:textColor="@color/error"
+                android:textStyle="bold"
+                android:textAllCaps="true"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="6dp"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="32dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeColor="@color/error"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+                    <LinearLayout
+                        android:id="@+id/btnDeleteAccount"
+                        style="@style/SettingsRow">
+                        <ImageView style="@style/SettingsRowIcon" android:src="@drawable/ic_delete" app:tint="@color/error"/>
+                        <TextView
+                            style="@style/SettingsRowText"
+                            android:text="Delete Account"
+                            android:textColor="@color/error"/>
+                        <ImageView style="@style/SettingsRowChevron" app:tint="@color/error"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
