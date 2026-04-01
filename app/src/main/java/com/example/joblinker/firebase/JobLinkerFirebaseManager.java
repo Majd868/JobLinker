@@ -593,8 +593,7 @@ public class JobLinkerFirebaseManager {
      */
     public void getJobsByEmployer(String employerId, final ListCallback<Job> callback) {
         db.collection(JOBS_COLLECTION)
-                .whereEqualTo("jobEmployerId", employerId)
-                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .whereEqualTo("employerId", employerId)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Job> jobs = new ArrayList<>();
@@ -602,6 +601,8 @@ public class JobLinkerFirebaseManager {
                         Job job = document.toObject(Job.class);
                         jobs.add(job);
                     }
+                    // Sort by createdAt descending in memory — no composite index needed
+                    jobs.sort((a, b) -> Long.compare(b.getCreatedAt(), a.getCreatedAt()));
                     callback.onSuccess(jobs);
                     Log.d(TAG, "Retrieved " + jobs.size() + " jobs for employer: " + employerId);
                 })
@@ -1238,15 +1239,12 @@ public class JobLinkerFirebaseManager {
     public void getSavedJobs(String userId, final ListCallback<String> callback) {
         db.collection(SAVED_JOBS_COLLECTION)
                 .whereEqualTo("userId", userId)
-                .orderBy("savedAt", Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<String> jobIds = new ArrayList<>();
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         String jobId = document.getString("jobId");
-                        if (jobId != null) {
-                            jobIds.add(jobId);
-                        }
+                        if (jobId != null) jobIds.add(jobId);
                     }
                     callback.onSuccess(jobIds);
                     Log.d(TAG, "Retrieved " + jobIds.size() + " saved jobs for user: " + userId);

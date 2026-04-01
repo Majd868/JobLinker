@@ -411,6 +411,49 @@ public class JobDetailsActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    private void showReportDialog() {
+        String[] reasons = {
+            "Fake or scam job",
+            "Inappropriate content",
+            "Duplicate listing",
+            "Wrong category",
+            "Misleading information",
+            "Other"
+        };
+
+        final int[] selectedReason = {0};
+
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Report this job")
+            .setSingleChoiceItems(reasons, 0, (dialog, which) -> selectedReason[0] = which)
+            .setPositiveButton("Submit Report", (dialog, which) -> {
+                String reason = reasons[selectedReason[0]];
+                submitReport(reason);
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
+    }
+
+    private void submitReport(String reason) {
+        if (currentJob == null) return;
+
+        // Save report to Firestore
+        java.util.Map<String, Object> report = new java.util.HashMap<>();
+        report.put("jobId",       currentJob.getJobId());
+        report.put("jobTitle",    currentJob.getJobTitle());
+        report.put("reason",      reason);
+        report.put("reportedBy",  com.google.firebase.auth.FirebaseAuth.getInstance().getUid());
+        report.put("reportedAt",  System.currentTimeMillis());
+
+        com.google.firebase.firestore.FirebaseFirestore.getInstance()
+            .collection("reports")
+            .add(report)
+            .addOnSuccessListener(ref ->
+                Toast.makeText(this, "Report submitted. Thank you!", Toast.LENGTH_SHORT).show())
+            .addOnFailureListener(e ->
+                Toast.makeText(this, "Failed to submit report", Toast.LENGTH_SHORT).show());
+    }
+
     private void showLoading(boolean show) {
         progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
         scrollView.setVisibility(show ? View.GONE : View.VISIBLE);
@@ -430,7 +473,7 @@ public class JobDetailsActivity extends AppCompatActivity {
             shareJob();
             return true;
         } else if (id == R.id.action_report) {
-            Toast.makeText(this, "Report job feature coming soon", Toast.LENGTH_SHORT).show();
+            showReportDialog();
             return true;
         }
 

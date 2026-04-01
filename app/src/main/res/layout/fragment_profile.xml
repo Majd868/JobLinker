@@ -328,7 +328,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="my_job_listings"
+                android:text="@string/my_jobs"
                 style="@style/TextAppearance.JobLinker.HeadlineSmall"
                 android:layout_marginBottom="@dimen/spacing_medium"/>
 
