@@ -24,6 +24,7 @@ import com.google.android.material.chip.ChipGroup;
 import com.example.joblinker.R;
 import com.example.joblinker.activities.EditProfileActivity;
 import com.example.joblinker.activities.LoginActivity;
+import com.example.joblinker.activities.SavedJobsActivity;
 import com.example.joblinker.activities.SettingActivity;
 import com.example.joblinker.adapters.JobAdapter;
 import com.example.joblinker.firebase.JobLinkerFirebaseManager;
@@ -126,11 +127,10 @@ public class ProfileFragment extends Fragment {
         if (layoutSavedJobs != null) {
             layoutSavedJobs.setOnClickListener(v -> {
                 try {
-                    startActivity(new Intent(requireContext(),
-                        Class.forName("com.example.joblinker.activities.SavedJobsActivity")));
-                } catch (ClassNotFoundException e) {
+                    startActivity(new Intent(requireContext(), SavedJobsActivity.class));
+                } catch (Exception e) {
                     Toast.makeText(requireContext(),
-                        "Saved jobs screen coming soon", Toast.LENGTH_SHORT).show();
+                        "Error opening saved jobs", Toast.LENGTH_SHORT).show();
                 }
             });
         }

@@ -8,7 +8,7 @@
     android:background="@color/background"
     tools:context=".activities.ChatActivity">
 
-    <!-- Toolbar -->
+    <!-- TOOLBAR -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -24,7 +24,6 @@
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
-            <!-- User Avatar -->
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/iv_user_avatar"
                 android:layout_width="@dimen/avatar_size_small"
@@ -34,7 +33,6 @@
                 app:shapeAppearanceOverlay="@style/CircularShape"
                 tools:src="@tools:sample/avatars"/>
 
-            <!-- User Info -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_weight="1"
@@ -64,7 +62,6 @@
 
             </LinearLayout>
 
-            <!-- Call Buttons -->
             <ImageButton
                 android:id="@+id/btn_voice_call"
                 android:layout_width="@dimen/min_touch_target"
@@ -94,23 +91,24 @@
                 app:tint="@color/text_white"/>
 
         </LinearLayout>
-
     </com.google.android.material.appbar.MaterialToolbar>
 
-    <!-- Messages RecyclerView -->
+    <!-- MESSAGES LIST -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_messages"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:clipToPadding="false"
-        android:padding="@dimen/spacing_medium"
+        android:paddingHorizontal="@dimen/spacing_medium"
+        android:paddingTop="@dimen/spacing_small"
+        android:paddingBottom="@dimen/spacing_small"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:stackFromEnd="true"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
-        app:layout_constraintBottom_toTopOf="@id/layout_input"
+        app:layout_constraintBottom_toTopOf="@id/layout_recording_bar"
         tools:listitem="@layout/item_message_sent"/>
 
-    <!-- Typing Indicator -->
+    <!-- TYPING INDICATOR -->
     <TextView
         android:id="@+id/tv_typing"
         android:layout_width="wrap_content"
@@ -122,58 +120,304 @@
         android:textStyle="italic"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/layout_input"/>
+        app:layout_constraintBottom_toTopOf="@id/layout_recording_bar"/>
 
-    <!-- Input Area -->
+    <!-- VOICE RECORDING BAR -->
+    <LinearLayout
+        android:id="@+id/layout_recording_bar"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:background="@color/surface"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/layout_input">
+
+        <View
+            android:id="@+id/view_recording_dot"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:background="@drawable/ic_online_indicator"
+            android:backgroundTint="@color/error"/>
+
+        <TextView
+            android:id="@+id/tv_recording_time"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="0:00"
+            android:textColor="@color/error"
+            android:textSize="16sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Slide to cancel"
+            android:textColor="@color/text_hint"
+            android:textSize="13sp"/>
+
+        <ImageButton
+            android:id="@+id/btn_cancel_recording"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_delete"
+            android:layout_marginStart="8dp"
+            app:tint="@color/error"/>
+
+    </LinearLayout>
+
+    <!-- MAIN INPUT BAR -->
     <LinearLayout
         android:id="@+id/layout_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="@dimen/spacing_small"
+        android:orientation="vertical"
         android:background="@color/surface"
         android:elevation="4dp"
-        android:gravity="center_vertical"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- Attachment Button -->
-        <ImageButton
-            android:id="@+id/btn_attachment"
-            android:layout_width="@dimen/min_touch_target"
-            android:layout_height="@dimen/min_touch_target"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_attachment"
-            android:contentDescription="@string/cd_attachment_button"
-            app:tint="@color/secondary"/>
-
-        <!-- Message Input -->
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/et_message"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+        <!-- Attachment tray -->
+        <LinearLayout
+            android:id="@+id/layout_attachment_tray"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_small"
-            android:layout_marginEnd="@dimen/spacing_small"
-            android:background="@drawable/bg_rounded_white"
-            android:hint="@string/type_a_message"
-            android:maxLines="4"
-            android:padding="@dimen/spacing_medium"
-            android:textSize="@dimen/text_body_large"
-            android:textColor="@color/text_primary"
-            android:textColorHint="@color/text_hint"
-            android:inputType="textCapSentences|textMultiLine"/>
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:paddingVertical="12dp"
+            android:paddingHorizontal="8dp"
+            android:background="@color/surface"
+            android:visibility="gone">
 
-        <!-- Send Button -->
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btn_send"
-            android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/tray_camera"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="8dp">
+                <FrameLayout
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:background="@drawable/circle_background"
+                    android:backgroundTint="#9C27B0">
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_camera"
+                        app:tint="@color/text_white"/>
+                </FrameLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Camera"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_secondary"
+                    android:layout_marginTop="4dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tray_gallery"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="8dp">
+                <FrameLayout
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:background="@drawable/circle_background"
+                    android:backgroundTint="#2196F3">
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_photo"
+                        app:tint="@color/text_white"/>
+                </FrameLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Gallery"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_secondary"
+                    android:layout_marginTop="4dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tray_document"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="8dp">
+                <FrameLayout
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:background="@drawable/circle_background"
+                    android:backgroundTint="#FF9800">
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_document"
+                        app:tint="@color/text_white"/>
+                </FrameLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Document"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_secondary"
+                    android:layout_marginTop="4dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tray_location"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="8dp">
+                <FrameLayout
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:background="@drawable/circle_background"
+                    android:backgroundTint="#4CAF50">
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_location_pin"
+                        app:tint="@color/text_white"/>
+                </FrameLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Location"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_secondary"
+                    android:layout_marginTop="4dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tray_contact"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="8dp">
+                <FrameLayout
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:background="@drawable/circle_background"
+                    android:backgroundTint="#F44336">
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_contact"
+                        app:tint="@color/text_white"/>
+                </FrameLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Contact"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_secondary"
+                    android:layout_marginTop="4dp"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Input row -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:contentDescription="@string/cd_send_button"
-            android:src="@drawable/ic_send"
-            app:fabCustomSize="40dp"
-            app:tint="@color/text_white"
-            app:backgroundTint="@color/primary"
-            app:elevation="0dp"/>
+            android:orientation="horizontal"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="6dp"
+            android:gravity="center_vertical">
+
+            <!-- Emoji -->
+            <ImageButton
+                android:id="@+id/btn_emoji"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_emoji"
+                android:contentDescription="Emoji"
+                app:tint="@color/text_hint"/>
+
+            <!-- Pill: text field + attachment + camera -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_rounded_white"
+                android:layout_marginHorizontal="4dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_message"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:hint="@string/type_a_message"
+                    android:maxLines="5"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="10dp"
+                    android:textSize="16sp"
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_hint"
+                    android:inputType="textCapSentences|textMultiLine"/>
+
+                <ImageButton
+                    android:id="@+id/btn_attachment"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_attachment"
+                    android:contentDescription="@string/cd_attachment_button"
+                    android:layout_marginEnd="2dp"
+                    app:tint="@color/text_hint"/>
+
+                <ImageButton
+                    android:id="@+id/btn_camera"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_camera"
+                    android:contentDescription="Camera"
+                    android:layout_marginEnd="4dp"
+                    app:tint="@color/text_hint"/>
+
+            </LinearLayout>
+
+            <!-- Send / Mic FAB — icon swaps dynamically in Java -->
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btn_send"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_mic"
+                android:contentDescription="@string/cd_send_button"
+                app:fabCustomSize="44dp"
+                app:tint="@color/text_white"
+                app:backgroundTint="@color/primary"
+                app:elevation="2dp"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 
