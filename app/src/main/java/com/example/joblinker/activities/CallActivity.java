@@ -27,7 +27,6 @@ public class CallActivity extends AppCompatActivity {
     private TextView tvUserName, tvCallStatus, tvCallTimer;
     private View viewPulse, remoteVideoContainer, localVideoContainer;
     private FloatingActionButton btnMute, btnSpeaker, btnHangUp, btnVideoToggle;
-
     private JobLinkerFirebaseManager firebaseManager;
     private String receiverId;
     private String receiverName;
