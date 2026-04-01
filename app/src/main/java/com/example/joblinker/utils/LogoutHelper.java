@@ -2,7 +2,6 @@ package com.example.joblinker.utils;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -35,10 +34,7 @@ public class LogoutHelper {
      * Perform logout with progress dialog
      */
     public static void performLogout(Activity activity) {
-        // Show progress dialog
-        ProgressDialog progressDialog = new ProgressDialog(activity);
-        progressDialog.setMessage("Logging out...");
-        progressDialog.setCancelable(false);
+        ProgressDialogHelper progressDialog = new ProgressDialogHelper(activity, "Logging out...");
         progressDialog.show();
 
         // Perform logout after short delay (for better UX)
@@ -53,9 +49,7 @@ public class LogoutHelper {
             clearCache(activity);
 
             // Dismiss progress dialog
-            if (progressDialog.isShowing()) {
-                progressDialog.dismiss();
-            }
+            progressDialog.dismiss();
 
             // Show success message
             Toast.makeText(activity, "Logged out successfully", Toast.LENGTH_SHORT).show();

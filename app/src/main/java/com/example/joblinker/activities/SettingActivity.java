@@ -1,6 +1,6 @@
 package com.example.joblinker.activities;
 
-import android.app.ProgressDialog;
+import com.example.joblinker.utils.ProgressDialogHelper;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -431,9 +431,7 @@ public class SettingActivity extends BaseActivity {
         FirebaseUser user = firebaseAuth.getCurrentUser();
         if (user == null || user.getEmail() == null) return;
 
-        ProgressDialog pd = new ProgressDialog(this);
-        pd.setMessage("Changing password…");
-        pd.setCancelable(false);
+        ProgressDialogHelper pd = new ProgressDialogHelper(this, "Changing password…");
         pd.show();
 
         // Re-authenticate first
@@ -473,8 +471,7 @@ public class SettingActivity extends BaseActivity {
             return;
         }
 
-        ProgressDialog pd = new ProgressDialog(this);
-        pd.setMessage("Sending verification email…");
+        ProgressDialogHelper pd = new ProgressDialogHelper(this, "Sending verification email…");
         pd.show();
 
         user.sendEmailVerification().addOnCompleteListener(task -> {
@@ -611,9 +608,7 @@ public class SettingActivity extends BaseActivity {
         FirebaseUser user = firebaseAuth.getCurrentUser();
         if (user == null || user.getEmail() == null) return;
 
-        ProgressDialog pd = new ProgressDialog(this);
-        pd.setMessage("Deleting account…");
-        pd.setCancelable(false);
+        ProgressDialogHelper pd = new ProgressDialogHelper(this, "Deleting account…");
         pd.show();
 
         AuthCredential credential = EmailAuthProvider.getCredential(user.getEmail(), password);
