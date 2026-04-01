@@ -341,6 +341,52 @@
 
         </LinearLayout>
 
+        <!-- Saved Jobs Row (For Job Seekers) -->
+        <LinearLayout
+            android:id="@+id/layout_saved_jobs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@color/background"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:padding="@dimen/spacing_medium"
+            android:gravity="center_vertical"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_bookmark"
+                app:tint="@color/primary"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="@dimen/spacing_medium"
+                android:text="Saved Jobs"
+                style="@style/TextAppearance.JobLinker.BodyLarge"/>
+
+            <TextView
+                android:id="@+id/tv_saved_jobs_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textColor="@color/primary"
+                android:textStyle="bold"
+                android:layout_marginEnd="@dimen/spacing_small"/>
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_chevron_right"
+                app:tint="@color/text_hint"/>
+
+        </LinearLayout>
+
         <!-- Logout Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_logout"
