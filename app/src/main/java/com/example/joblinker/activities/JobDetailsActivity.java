@@ -457,10 +457,25 @@ public class JobDetailsActivity extends AppCompatActivity {
     private void contactEmployer() {
         if (currentJob == null) return;
 
-        // Navigate to chat with employer
+        String employerId = currentJob.getJobEmployerId();
+
+        // Safety check — employer ID must exist
+        if (employerId == null || employerId.isEmpty()) {
+            Toast.makeText(this,
+                "Could not find employer info. Please try again.",
+                Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Get employer name — use what we already loaded, or fall back to job company name
+        String employerName = (tvEmployerName != null
+                && tvEmployerName.getText().length() > 0)
+            ? tvEmployerName.getText().toString()
+            : currentJob.getJobCompany();
+
         Intent intent = new Intent(this, ChatActivity.class);
-        intent.putExtra(ChatActivity.EXTRA_USER_ID, currentJob.getJobEmployerId());
-        intent.putExtra(ChatActivity.EXTRA_USER_NAME, tvEmployerName.getText().toString());
+        intent.putExtra(ChatActivity.EXTRA_USER_ID,   employerId);
+        intent.putExtra(ChatActivity.EXTRA_USER_NAME, employerName);
         startActivity(intent);
     }
 

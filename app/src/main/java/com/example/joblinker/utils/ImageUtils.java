@@ -35,20 +35,39 @@ public class ImageUtils {
     }
 
     /**
-     * Load circular image
+     * Load circular image — always fetches fresh copy, no disk cache
+     * so profile photo updates are visible immediately after save.
      */
     public static void loadCircularImage(Context context, String imageUrl, ImageView imageView) {
+        if (context == null || imageView == null) return;
+
+        Glide.with(context)
+                .load(imageUrl)
+                .apply(new RequestOptions()
+                        .circleCrop()
+                        .placeholder(R.drawable.ic_person_placeholder)
+                        .error(R.drawable.ic_person_placeholder)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)   // never cache to disk
+                        .skipMemoryCache(true))                        // never cache in memory
+                .into(imageView);
+    }
+
+    /**
+     * Load circular image with disk cache (use for conversation/job lists
+     * where the image rarely changes and speed matters more).
+     */
+    public static void loadCircularImageCached(Context context, String imageUrl, ImageView imageView) {
         if (context == null || imageView == null) return;
 
         RequestOptions options = new RequestOptions()
                 .circleCrop()
                 .placeholder(R.drawable.ic_person_placeholder)
-                .error(R.drawable.ic_person_placeholder);
+                .error(R.drawable.ic_person_placeholder)
+                .diskCacheStrategy(DiskCacheStrategy.ALL);
 
         Glide.with(context)
                 .load(imageUrl)
                 .apply(options)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(imageView);
     }
 

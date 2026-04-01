@@ -593,7 +593,8 @@ public class JobLinkerFirebaseManager {
      */
     public void getJobsByEmployer(String employerId, final ListCallback<Job> callback) {
         db.collection(JOBS_COLLECTION)
-                .whereEqualTo("employerId", employerId)
+                // Field name matches Job model: private String jobEmployerId
+                .whereEqualTo("jobEmployerId", employerId)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Job> jobs = new ArrayList<>();

@@ -321,8 +321,13 @@ public class EditProfileActivity extends AppCompatActivity {
                     currentAvatarUrl = doc.getString("avatarUrl");
 
                     if (currentAvatarUrl != null && ivAvatar != null) {
-                        Glide.with(this).load(currentAvatarUrl).circleCrop()
-                            .placeholder(R.drawable.ic_person_placeholder).into(ivAvatar);
+                        Glide.with(this)
+                            .load(currentAvatarUrl)
+                            .circleCrop()
+                            .skipMemoryCache(true)
+                            .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.NONE)
+                            .placeholder(R.drawable.ic_person_placeholder)
+                            .into(ivAvatar);
                     }
 
                     boolean isEmployer = "employer".equalsIgnoreCase(currentRole);

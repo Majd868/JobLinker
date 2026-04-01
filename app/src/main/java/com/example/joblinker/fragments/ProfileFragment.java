@@ -22,6 +22,7 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 
 import com.example.joblinker.R;
+import com.bumptech.glide.Glide;
 import com.example.joblinker.activities.EditProfileActivity;
 import com.example.joblinker.activities.LoginActivity;
 import com.example.joblinker.activities.SavedJobsActivity;
@@ -390,6 +391,9 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        loadUserProfile(); // Refresh when returning from EditProfile / Settings
+        // Clear Glide memory cache so the updated avatar is always re-fetched
+        // from Firestore instead of showing the stale cached version
+        Glide.get(requireContext()).clearMemory();
+        loadUserProfile();
     }
 }

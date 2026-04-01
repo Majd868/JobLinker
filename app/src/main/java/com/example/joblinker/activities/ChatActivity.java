@@ -136,11 +136,21 @@ public class ChatActivity extends AppCompatActivity {
 
     // ── Intent data ───────────────────────────────
     private void getIntentData() {
-        Intent i    = getIntent();
+        Intent i       = getIntent();
         otherUserId    = i.getStringExtra(EXTRA_USER_ID);
         otherUserName  = i.getStringExtra(EXTRA_USER_NAME);
         otherUserAvatar = i.getStringExtra(EXTRA_USER_AVATAR);
         conversationId = i.getStringExtra(EXTRA_CONVERSATION_ID);
+
+        // Guard: if otherUserId is null the chat cannot work — finish safely
+        if (otherUserId == null || otherUserId.isEmpty()) {
+            android.widget.Toast.makeText(this,
+                "Could not open chat — employer info missing",
+                android.widget.Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
         if (conversationId == null)
             conversationId = JobLinkerFirebaseManager.generateConversationId(currentUserId, otherUserId);
     }

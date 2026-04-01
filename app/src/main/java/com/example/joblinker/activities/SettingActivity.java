@@ -162,6 +162,8 @@ public class SettingActivity extends BaseActivity {
                     Glide.with(SettingActivity.this)
                          .load(user.getAvatarUrl())
                          .circleCrop()
+                         .skipMemoryCache(true)
+                         .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.NONE)
                          .placeholder(R.drawable.ic_user_placeholder)
                          .into(ivProfilePicture);
                 }
