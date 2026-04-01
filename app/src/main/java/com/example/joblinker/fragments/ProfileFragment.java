@@ -391,9 +391,12 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // Clear Glide memory cache so the updated avatar is always re-fetched
-        // from Firestore instead of showing the stale cached version
-        Glide.get(requireContext()).clearMemory();
+        // Clear Glide disk cache on background thread, memory cache on main thread
+        // This ensures updated profile photos always show fresh
+        new Thread(() -> {
+            Glide.get(requireContext()).clearDiskCache();
+        }).start();
+        Glide.get(requireContext()).clearMemory(); // must be on main thread
         loadUserProfile();
     }
 }

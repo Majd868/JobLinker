@@ -507,7 +507,34 @@ public class JobLinkerFirebaseManager {
         job.setJobId(docRef.getId());
         job.setCreatedAt(System.currentTimeMillis());
 
-        docRef.set(job)
+        // Convert to map so we can save BOTH employerId fields for compatibility
+        // (old code queried "employerId", new code queries "jobEmployerId")
+        java.util.Map<String, Object> jobMap = new java.util.HashMap<>();
+        jobMap.put("jobId",          job.getJobId());
+        jobMap.put("jobTitle",       job.getJobTitle());
+        jobMap.put("jobCompany",     job.getJobCompany());
+        jobMap.put("jobEmployerId",  job.getJobEmployerId());
+        jobMap.put("employerId",     job.getJobEmployerId()); // backward compat
+        jobMap.put("jobCategory",    job.getJobCategory());
+        jobMap.put("jobType",        job.getJobType());
+        jobMap.put("employmentType", job.getEmploymentType());
+        jobMap.put("jobCountry",     job.getJobCountry());
+        jobMap.put("jobCity",        job.getJobCity());
+        jobMap.put("jobDescription", job.getJobDescription());
+        jobMap.put("jobSkills",      job.getJobSkills());
+        jobMap.put("jobSalaryMin",   job.getJobSalaryMin());
+        jobMap.put("jobSalaryMax",   job.getJobSalaryMax());
+        jobMap.put("salaryCurrency", job.getSalaryCurrency());
+        jobMap.put("deadline",       job.getDeadline());
+        jobMap.put("createdAt",      job.getCreatedAt());
+        jobMap.put("updatedAt",      job.getUpdatedAt());
+        jobMap.put("jobActive",      true);
+        jobMap.put("viewCount",      job.getViewCount());
+        jobMap.put("applicantCount", job.getApplicantCount());
+        jobMap.put("urgent",         job.isUrgent());
+        if (job.getCompanyLogoUrl() != null) jobMap.put("companyLogoUrl", job.getCompanyLogoUrl());
+
+        docRef.set(jobMap)
                 .addOnSuccessListener(aVoid -> {
                     callback.onSuccess(job.getJobId());
                     Log.d(TAG, "Job created successfully: " + job.getJobId());
@@ -528,6 +555,17 @@ public class JobLinkerFirebaseManager {
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         Job job = documentSnapshot.toObject(Job.class);
+                        if (job != null) {
+                            // Fallback: some old documents stored employerId as "employerId"
+                            // instead of "jobEmployerId" — fix it at read time
+                            if (job.getJobEmployerId() == null || job.getJobEmployerId().isEmpty()) {
+                                String fallback = documentSnapshot.getString("employerId");
+                                if (fallback != null && !fallback.isEmpty()) {
+                                    job.setJobEmployerId(fallback);
+                                    Log.d(TAG, "Used fallback employerId for job: " + jobId);
+                                }
+                            }
+                        }
                         callback.onSuccess(job);
                         Log.d(TAG, "Job retrieved: " + jobId);
                     } else {
@@ -552,7 +590,14 @@ public class JobLinkerFirebaseManager {
                     List<Job> jobs = new ArrayList<>();
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         Job job = document.toObject(Job.class);
-                        jobs.add(job);
+                        if (job != null) {
+                            // Fallback for old docs that stored "employerId" instead of "jobEmployerId"
+                            if (job.getJobEmployerId() == null || job.getJobEmployerId().isEmpty()) {
+                                String fb = document.getString("employerId");
+                                if (fb != null) job.setJobEmployerId(fb);
+                            }
+                            jobs.add(job);
+                        }
                     }
                     jobs.sort((a, b) -> Long.compare(b.getCreatedAt(), a.getCreatedAt()));
                     callback.onSuccess(jobs);
@@ -697,7 +742,14 @@ public class JobLinkerFirebaseManager {
                         List<Job> jobs = new ArrayList<>();
                         for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                             Job job = document.toObject(Job.class);
-                            jobs.add(job);
+                            if (job != null) {
+                                // Fallback for old docs using "employerId"
+                                if (job.getJobEmployerId() == null || job.getJobEmployerId().isEmpty()) {
+                                    String fb = document.getString("employerId");
+                                    if (fb != null) job.setJobEmployerId(fb);
+                                }
+                                jobs.add(job);
+                            }
                         }
                         jobs.sort((a, b) -> Long.compare(b.getCreatedAt(), a.getCreatedAt()));
                         callback.onSuccess(jobs);

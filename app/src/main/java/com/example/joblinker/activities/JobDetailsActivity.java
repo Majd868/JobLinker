@@ -457,25 +457,51 @@ public class JobDetailsActivity extends AppCompatActivity {
     private void contactEmployer() {
         if (currentJob == null) return;
 
+        // Try all possible employer ID field names (handles old and new Firestore docs)
         String employerId = currentJob.getJobEmployerId();
 
-        // Safety check — employer ID must exist
+        // If still null — reload job from Firestore to get fresh data
         if (employerId == null || employerId.isEmpty()) {
-            Toast.makeText(this,
-                "Could not find employer info. Please try again.",
-                Toast.LENGTH_SHORT).show();
+            if (jobId == null) {
+                Toast.makeText(this, "Employer information not available", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Toast.makeText(this, "Loading employer info...", Toast.LENGTH_SHORT).show();
+            firebaseManager.getJob(jobId, new JobLinkerFirebaseManager.DataCallback<Job>() {
+                @Override
+                public void onSuccess(Job freshJob) {
+                    currentJob = freshJob;
+                    String freshId = freshJob.getJobEmployerId();
+                    if (freshId == null || freshId.isEmpty()) {
+                        // Last resort: use the job owner from Firebase Auth context
+                        Toast.makeText(JobDetailsActivity.this,
+                            "Could not find employer. Try again.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    openChat(freshId, freshJob.getJobCompany());
+                }
+                @Override
+                public void onFailure(String error) {
+                    Toast.makeText(JobDetailsActivity.this,
+                        "Error loading employer: " + error, Toast.LENGTH_SHORT).show();
+                }
+            });
             return;
         }
 
-        // Get employer name — use what we already loaded, or fall back to job company name
         String employerName = (tvEmployerName != null
                 && tvEmployerName.getText().length() > 0)
             ? tvEmployerName.getText().toString()
             : currentJob.getJobCompany();
 
+        openChat(employerId, employerName);
+    }
+
+    private void openChat(String employerId, String employerName) {
         Intent intent = new Intent(this, ChatActivity.class);
         intent.putExtra(ChatActivity.EXTRA_USER_ID,   employerId);
-        intent.putExtra(ChatActivity.EXTRA_USER_NAME, employerName);
+        intent.putExtra(ChatActivity.EXTRA_USER_NAME,
+            (employerName != null && !employerName.isEmpty()) ? employerName : "Employer");
         startActivity(intent);
     }
 
