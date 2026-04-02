@@ -246,16 +246,16 @@ public class ChatActivity extends AppCompatActivity {
         // ── Send / Mic FAB ────────────────────────
         // Short tap → send text (if text present) or start/stop recording
         btnSend.setOnClickListener(v -> {
+            if (isRecording) {
+                // Always stop & send when recording, regardless of text
+                stopRecordingAndSend();
+                return;
+            }
             String text = etMessage.getText() != null ? etMessage.getText().toString().trim() : "";
             if (!text.isEmpty()) {
                 sendTextMessage(text);
             } else {
-                // Toggle voice recording
-                if (isRecording) {
-                    stopRecordingAndSend();
-                } else {
-                    startVoiceRecording();
-                }
+                startVoiceRecording();
             }
         });
 
@@ -438,7 +438,7 @@ public class ChatActivity extends AppCompatActivity {
             isRecording = true;
             recordingSeconds = 0;
             layoutRecordingBar.setVisibility(View.VISIBLE);
-            btnSend.setImageResource(R.drawable.ic_send); // becomes "send" when recording
+            btnSend.setImageResource(R.drawable.ic_stop); // tap to stop recording
 
             // Animate the red dot
             startRecordingDotAnimation();
@@ -478,7 +478,8 @@ public class ChatActivity extends AppCompatActivity {
             fis.close();
 
             String uploadPath = "chat_audio/" + conversationId + "/" + System.currentTimeMillis() + ".3gp";
-            firebaseManager.uploadBytes(audioBytes, uploadPath,
+            // Use uploadRawBytes — audio must NOT be processed through BitmapFactory
+            firebaseManager.uploadRawBytes(audioBytes, uploadPath, "audio/3gpp",
                 new JobLinkerFirebaseManager.UploadCallback() {
                     @Override public void onSuccess(String downloadUrl) {
                         audioFile.delete();
@@ -514,7 +515,7 @@ public class ChatActivity extends AppCompatActivity {
         isRecording = false;
         recordingHandler.removeCallbacks(recordingTimerRunnable);
         layoutRecordingBar.setVisibility(View.GONE);
-        viewRecordingDot.setAlpha(1f);
+        if (viewRecordingDot != null) viewRecordingDot.setAlpha(1f);
         btnSend.setImageResource(R.drawable.ic_mic);
         try {
             if (mediaRecorder != null) {

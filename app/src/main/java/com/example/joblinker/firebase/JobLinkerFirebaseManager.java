@@ -1190,50 +1190,60 @@ public class JobLinkerFirebaseManager {
     }
 
     /**
-     * Compresses image bytes to JPEG and uploads on background thread.
+     * Uploads image bytes — compresses to JPEG first if decodable as bitmap.
+     * For audio/document files use uploadRawBytes() instead.
      */
     public void uploadBytes(byte[] rawBytes, String path, UploadCallback callback) {
+        if (rawBytes == null || rawBytes.length == 0) {
+            callback.onFailure("No data to upload");
+            return;
+        }
         StorageReference fileRef = storage.getReference().child(path);
 
         new Thread(() -> {
             byte[] uploadBytes = rawBytes;
-            // Try to compress as image (skip for audio/document files)
             try {
-                android.graphics.BitmapFactory.Options opts =
-                    new android.graphics.BitmapFactory.Options();
-                opts.inSampleSize = 1;
-                android.graphics.Bitmap bmp =
-                    android.graphics.BitmapFactory.decodeByteArray(rawBytes, 0, rawBytes.length, opts);
+                // Only compress if it's actually an image
+                android.graphics.Bitmap bmp = android.graphics.BitmapFactory
+                    .decodeByteArray(rawBytes, 0, rawBytes.length);
                 if (bmp != null) {
-                    // Scale to max 1024px
                     int maxDim = 1024;
                     if (bmp.getWidth() > maxDim || bmp.getHeight() > maxDim) {
                         float scale = Math.min(
                             (float) maxDim / bmp.getWidth(),
                             (float) maxDim / bmp.getHeight());
-                        bmp = android.graphics.Bitmap.createScaledBitmap(
-                            bmp,
-                            (int) (bmp.getWidth() * scale),
-                            (int) (bmp.getHeight() * scale), true);
+                        bmp = android.graphics.Bitmap.createScaledBitmap(bmp,
+                            (int)(bmp.getWidth() * scale),
+                            (int)(bmp.getHeight() * scale), true);
                     }
                     java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
                     bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 85, baos);
                     bmp.recycle();
                     if (baos.size() > 0) uploadBytes = baos.toByteArray();
                 }
-            } catch (Exception ignored) {
-                // Not an image (audio/document) — upload raw bytes as-is
-            }
+                // If bmp == null → not an image → upload raw as-is (should not happen here)
+            } catch (Exception ignored) {}
 
-            final byte[] finalBytes = uploadBytes;
-            doUpload(fileRef, finalBytes, callback);
+            doUpload(fileRef, uploadBytes, "image/jpeg", callback);
         }).start();
     }
 
-    private void doUpload(StorageReference fileRef, byte[] bytes, UploadCallback callback) {
+    /**
+     * Uploads raw bytes without any compression — use for audio and documents.
+     */
+    public void uploadRawBytes(byte[] rawBytes, String path, String mimeType, UploadCallback callback) {
+        if (rawBytes == null || rawBytes.length == 0) {
+            callback.onFailure("No data to upload");
+            return;
+        }
+        StorageReference fileRef = storage.getReference().child(path);
+        new Thread(() -> doUpload(fileRef, rawBytes, mimeType, callback)).start();
+    }
+
+    private void doUpload(StorageReference fileRef, byte[] bytes, String mimeType, UploadCallback callback) {
         com.google.firebase.storage.StorageMetadata metadata =
             new com.google.firebase.storage.StorageMetadata.Builder()
-                .setContentType("image/jpeg")
+                .setContentType(mimeType != null ? mimeType : "application/octet-stream")
                 .build();
 
         fileRef.putBytes(bytes, metadata)
