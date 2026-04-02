@@ -246,6 +246,21 @@ public class EditProfileActivity extends AppCompatActivity {
         }
     }
 
+    private byte[] readImageBytes(Uri uri) {
+        try {
+            java.io.InputStream is = getContentResolver().openInputStream(uri);
+            if (is == null) return null;
+            java.io.ByteArrayOutputStream buffer = new java.io.ByteArrayOutputStream();
+            byte[] chunk = new byte[8192]; int read;
+            while ((read = is.read(chunk)) != -1) buffer.write(chunk, 0, read);
+            is.close();
+            return buffer.toByteArray();
+        } catch (Exception e) {
+            Log.e(TAG, "readImageBytes failed", e);
+            return null;
+        }
+    }
+
     private void uploadAvatar(Uri imageUri) {
         if (userId == null) return;
         isUploadingPhoto = true;
@@ -253,10 +268,21 @@ public class EditProfileActivity extends AppCompatActivity {
         btnSaveChanges.setEnabled(false);
         btnSaveChanges.setText("Uploading photo…");
 
+        // Read bytes NOW on main thread while URI permissions are valid
+        byte[] imageBytes = readImageBytes(imageUri);
+        if (imageBytes == null || imageBytes.length == 0) {
+            isUploadingPhoto = false;
+            progressBar.setVisibility(View.GONE);
+            btnSaveChanges.setEnabled(true);
+            btnSaveChanges.setText("Save Changes");
+            Toast.makeText(this, "Could not read photo", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         // Fixed path per user — overwrites previous avatar automatically
         String path = "avatars/" + userId + ".jpg";
 
-        firebaseManager.uploadImage(imageUri, path,
+        firebaseManager.uploadBytes(imageBytes, path,
             new JobLinkerFirebaseManager.UploadCallback() {
                 @Override public void onSuccess(String downloadUrl) {
                     currentAvatarUrl = downloadUrl;

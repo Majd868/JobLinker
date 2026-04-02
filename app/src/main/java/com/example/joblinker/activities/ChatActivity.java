@@ -463,25 +463,41 @@ public class ChatActivity extends AppCompatActivity {
         if (!isRecording) return;
         stopRecording();
 
-        // Upload the audio file and send as message
-        Uri audioUri = Uri.fromFile(new File(audioFilePath));
-        String uploadPath = "chat_audio/" + conversationId + "/" + System.currentTimeMillis() + ".3gp";
-        firebaseManager.uploadImage(audioUri, uploadPath,
-            new JobLinkerFirebaseManager.UploadCallback() {
-                @Override public void onSuccess(String downloadUrl) {
-                    String duration = tvRecordingTime.getText().toString();
-                    Message msg = new Message(conversationId, currentUserId, otherUserId,
-                        "🎤 Voice message (" + duration + ")");
-                    msg.setMessageType("audio");
-                    msg.setImageUrl(downloadUrl); // reuse imageUrl field for audio URL
-                    sendMessageObject(msg);
-                }
-                @Override public void onProgress(int progress) {}
-                @Override public void onFailure(String error) {
-                    Toast.makeText(ChatActivity.this,
-                        "Failed to send voice message", Toast.LENGTH_SHORT).show();
-                }
-            });
+        // Read audio bytes from file directly (file:// path, always readable)
+        String duration = tvRecordingTime != null ? tvRecordingTime.getText().toString() : "0:00";
+        try {
+            java.io.File audioFile = new java.io.File(audioFilePath);
+            if (!audioFile.exists() || audioFile.length() == 0) {
+                Toast.makeText(this, "Recording failed", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            byte[] audioBytes = new byte[(int) audioFile.length()];
+            java.io.FileInputStream fis = new java.io.FileInputStream(audioFile);
+            fis.read(audioBytes);
+            fis.close();
+
+            String uploadPath = "chat_audio/" + conversationId + "/" + System.currentTimeMillis() + ".3gp";
+            firebaseManager.uploadBytes(audioBytes, uploadPath,
+                new JobLinkerFirebaseManager.UploadCallback() {
+                    @Override public void onSuccess(String downloadUrl) {
+                        audioFile.delete();
+                        Message msg = new Message(conversationId, currentUserId, otherUserId,
+                            "🎤 Voice message (" + duration + ")");
+                        msg.setMessageType("audio");
+                        msg.setImageUrl(downloadUrl);
+                        sendMessageObject(msg);
+                    }
+                    @Override public void onProgress(int progress) {}
+                    @Override public void onFailure(String error) {
+                        audioFile.delete();
+                        Toast.makeText(ChatActivity.this,
+                            "Failed to send voice message", Toast.LENGTH_SHORT).show();
+                    }
+                });
+        } catch (Exception e) {
+            Toast.makeText(this, "Could not send voice message: " + e.getMessage(),
+                Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void cancelRecording() {

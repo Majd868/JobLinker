@@ -1147,61 +1147,74 @@ public class JobLinkerFirebaseManager {
      * Upload image to Firebase Storage
      */
     public void uploadImage(Uri imageUri, String path, final UploadCallback callback) {
-        if (imageUri == null) {
-            callback.onFailure("Image URI is null");
+        if (imageUri == null) { callback.onFailure("Image URI is null"); return; }
+        // Read bytes immediately on calling thread (URI is still valid here)
+        byte[] bytes = readBytesFromUri(imageUri, storage.getApp().getApplicationContext());
+        if (bytes == null || bytes.length == 0) {
+            callback.onFailure("Cannot read file");
             return;
         }
+        uploadBytes(bytes, path, callback);
+    }
 
+    /**
+     * Reads all bytes from any URI type synchronously on calling thread.
+     * Must be called while URI permissions are still valid.
+     */
+    private byte[] readBytesFromUri(Uri uri, android.content.Context ctx) {
+        try {
+            java.io.InputStream is = ctx.getContentResolver().openInputStream(uri);
+            if (is == null) return null;
+            java.io.ByteArrayOutputStream buffer = new java.io.ByteArrayOutputStream();
+            byte[] chunk = new byte[8192];
+            int read;
+            while ((read = is.read(chunk)) != -1) buffer.write(chunk, 0, read);
+            is.close();
+            return buffer.toByteArray();
+        } catch (Exception e) {
+            Log.e(TAG, "readBytesFromUri failed: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Compresses image bytes to JPEG and uploads on background thread.
+     */
+    public void uploadBytes(byte[] rawBytes, String path, UploadCallback callback) {
         StorageReference fileRef = storage.getReference().child(path);
-        android.content.Context ctx = storage.getApp().getApplicationContext();
 
-        // Run compression off the main thread to avoid ANR
         new Thread(() -> {
+            byte[] uploadBytes = rawBytes;
+            // Try to compress as image (skip for audio/document files)
             try {
-                // Step 1: Decode URI to Bitmap (handles ALL URI types via ContentResolver)
-                android.graphics.BitmapFactory.Options opts = new android.graphics.BitmapFactory.Options();
-                opts.inSampleSize = 2; // downsample to reduce memory
-                java.io.InputStream is1 = ctx.getContentResolver().openInputStream(imageUri);
-                if (is1 == null) { callback.onFailure("Cannot open image"); return; }
-                android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeStream(is1, null, opts);
-                is1.close();
-
-                if (bmp == null) {
-                    // Fallback: read raw bytes without decoding
-                    java.io.InputStream is2 = ctx.getContentResolver().openInputStream(imageUri);
-                    if (is2 == null) { callback.onFailure("Cannot open image"); return; }
-                    java.io.ByteArrayOutputStream raw = new java.io.ByteArrayOutputStream();
-                    byte[] buf2 = new byte[8192]; int n2;
-                    while ((n2 = is2.read(buf2)) != -1) raw.write(buf2, 0, n2);
-                    is2.close();
-                    byte[] rawBytes = raw.toByteArray();
-                    if (rawBytes.length == 0) { callback.onFailure("Image is empty"); return; }
-                    doUpload(fileRef, rawBytes, callback);
-                    return;
+                android.graphics.BitmapFactory.Options opts =
+                    new android.graphics.BitmapFactory.Options();
+                opts.inSampleSize = 1;
+                android.graphics.Bitmap bmp =
+                    android.graphics.BitmapFactory.decodeByteArray(rawBytes, 0, rawBytes.length, opts);
+                if (bmp != null) {
+                    // Scale to max 1024px
+                    int maxDim = 1024;
+                    if (bmp.getWidth() > maxDim || bmp.getHeight() > maxDim) {
+                        float scale = Math.min(
+                            (float) maxDim / bmp.getWidth(),
+                            (float) maxDim / bmp.getHeight());
+                        bmp = android.graphics.Bitmap.createScaledBitmap(
+                            bmp,
+                            (int) (bmp.getWidth() * scale),
+                            (int) (bmp.getHeight() * scale), true);
+                    }
+                    java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+                    bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 85, baos);
+                    bmp.recycle();
+                    if (baos.size() > 0) uploadBytes = baos.toByteArray();
                 }
-
-                // Step 2: Scale down if too large (max 800px)
-                int maxDim = 800;
-                if (bmp.getWidth() > maxDim || bmp.getHeight() > maxDim) {
-                    float scale = Math.min((float)maxDim/bmp.getWidth(), (float)maxDim/bmp.getHeight());
-                    bmp = android.graphics.Bitmap.createScaledBitmap(
-                        bmp, (int)(bmp.getWidth()*scale), (int)(bmp.getHeight()*scale), true);
-                }
-
-                // Step 3: Compress to JPEG bytes
-                java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-                bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 85, baos);
-                bmp.recycle();
-                byte[] imageBytes = baos.toByteArray();
-
-                if (imageBytes.length == 0) { callback.onFailure("Compressed image is empty"); return; }
-
-                doUpload(fileRef, imageBytes, callback);
-
-            } catch (Exception e) {
-                Log.e(TAG, "uploadImage error", e);
-                callback.onFailure("Cannot process image: " + e.getMessage());
+            } catch (Exception ignored) {
+                // Not an image (audio/document) — upload raw bytes as-is
             }
+
+            final byte[] finalBytes = uploadBytes;
+            doUpload(fileRef, finalBytes, callback);
         }).start();
     }
 
