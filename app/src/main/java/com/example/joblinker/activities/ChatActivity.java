@@ -79,6 +79,10 @@ public class ChatActivity extends AppCompatActivity {
     private MessageAdapter messageAdapter;
     private final List<Message> messages = new ArrayList<>();
     private JobLinkerFirebaseManager firebaseManager;
+
+    // ── Audio playback ────────────────────────────
+    private MediaPlayer audioPlayer = null;
+    private String      playingUrl  = null;
     private ListenerRegistration messageListener;
     private String otherUserId, otherUserName, otherUserAvatar, conversationId, currentUserId;
 
@@ -423,41 +427,54 @@ public class ChatActivity extends AppCompatActivity {
             return;
         }
 
-        try {
-            audioFilePath = getExternalCacheDir().getAbsolutePath()
-                + "/voice_" + System.currentTimeMillis() + ".3gp";
+        // Show UI immediately
+        isRecording = true;
+        recordingSeconds = 0;
+        layoutRecordingBar.setVisibility(View.VISIBLE);
+        btnSend.setImageResource(R.drawable.ic_stop);
+        tvRecordingTime.setText("0:00");
 
-            mediaRecorder = new MediaRecorder();
-            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            mediaRecorder.setOutputFile(audioFilePath);
-            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-            mediaRecorder.prepare();
-            mediaRecorder.start();
+        // Start timer immediately
+        recordingTimerRunnable = new Runnable() {
+            @Override public void run() {
+                if (!isRecording) return;
+                recordingSeconds++;
+                int m = recordingSeconds / 60;
+                int s = recordingSeconds % 60;
+                tvRecordingTime.setText(String.format(Locale.getDefault(), "%d:%02d", m, s));
+                recordingHandler.postDelayed(this, 1000);
+            }
+        };
+        recordingHandler.postDelayed(recordingTimerRunnable, 1000);
+        startRecordingDotAnimation();
 
-            isRecording = true;
-            recordingSeconds = 0;
-            layoutRecordingBar.setVisibility(View.VISIBLE);
-            btnSend.setImageResource(R.drawable.ic_stop); // tap to stop recording
+        // Run MediaRecorder setup on background thread to avoid blocking main thread
+        audioFilePath = getExternalCacheDir().getAbsolutePath()
+            + "/voice_" + System.currentTimeMillis() + ".3gp";
+        final String filePath = audioFilePath;
 
-            // Animate the red dot
-            startRecordingDotAnimation();
-
-            // Timer
-            recordingTimerRunnable = new Runnable() {
-                @Override public void run() {
-                    recordingSeconds++;
-                    int m = recordingSeconds / 60;
-                    int s = recordingSeconds % 60;
-                    tvRecordingTime.setText(String.format(Locale.getDefault(), "%d:%02d", m, s));
-                    recordingHandler.postDelayed(this, 1000);
-                }
-            };
-            recordingHandler.postDelayed(recordingTimerRunnable, 1000);
-
-        } catch (IOException e) {
-            Toast.makeText(this, "Failed to start recording", Toast.LENGTH_SHORT).show();
-        }
+        new Thread(() -> {
+            try {
+                MediaRecorder recorder = new MediaRecorder();
+                recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+                recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+                recorder.setOutputFile(filePath);
+                recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+                recorder.prepare();
+                recorder.start();
+                // Assign to field on main thread
+                runOnUiThread(() -> mediaRecorder = recorder);
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    isRecording = false;
+                    recordingHandler.removeCallbacks(recordingTimerRunnable);
+                    layoutRecordingBar.setVisibility(View.GONE);
+                    btnSend.setImageResource(R.drawable.ic_mic);
+                    Toast.makeText(this, "Failed to start recording: " + e.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
     }
 
     private void stopRecordingAndSend() {
@@ -723,9 +740,69 @@ public class ChatActivity extends AppCompatActivity {
     // ══════════════════════════════════════════════
     // LIFECYCLE
     // ══════════════════════════════════════════════
+    // ── Public audio playback for MessageAdapter ─
+    public void playVoiceMessage(String url, Runnable onStart, Runnable onStop) {
+        // Stop current if same URL (toggle)
+        if (url.equals(playingUrl) && audioPlayer != null) {
+            stopAudioPlayer();
+            if (onStop != null) onStop.run();
+            return;
+        }
+
+        stopAudioPlayer();
+
+        audioPlayer = new MediaPlayer();
+        playingUrl  = url;
+
+        try {
+            audioPlayer.setDataSource(url);
+            audioPlayer.setAudioAttributes(
+                new android.media.AudioAttributes.Builder()
+                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH)
+                    .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
+                    .build());
+
+            final MediaPlayer player = audioPlayer;
+            audioPlayer.setOnPreparedListener(mp -> {
+                if (mp == player) {  // still valid
+                    if (onStart != null) onStart.run();
+                    mp.start();
+                }
+            });
+            audioPlayer.setOnCompletionListener(mp -> {
+                if (onStop != null) onStop.run();
+                stopAudioPlayer();
+            });
+            audioPlayer.setOnErrorListener((mp, what, extra) -> {
+                Toast.makeText(this, "Cannot play audio", Toast.LENGTH_SHORT).show();
+                if (onStop != null) onStop.run();
+                stopAudioPlayer();
+                return true;
+            });
+            audioPlayer.prepareAsync();
+
+        } catch (Exception e) {
+            Toast.makeText(this, "Cannot play audio: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            if (onStop != null) onStop.run();
+            stopAudioPlayer();
+        }
+    }
+
+    public void stopAudioPlayer() {
+        if (audioPlayer != null) {
+            try {
+                if (audioPlayer.isPlaying()) audioPlayer.stop();
+                audioPlayer.release();
+            } catch (Exception ignored) {}
+            audioPlayer = null;
+            playingUrl  = null;
+        }
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        stopAudioPlayer();
         if (messageListener != null) messageListener.remove();
         if (isRecording) stopRecording();
         recordingHandler.removeCallbacksAndMessages(null);

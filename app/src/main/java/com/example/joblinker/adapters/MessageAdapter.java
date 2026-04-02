@@ -2,20 +2,19 @@ package com.example.joblinker.adapters;
 
 import android.content.Context;
 import android.content.Intent;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.joblinker.R;
+import com.example.joblinker.activities.ChatActivity;
 import com.example.joblinker.models.Message;
 import com.example.joblinker.utils.DateTimeHelper;
 import com.example.joblinker.utils.ImageUtils;
@@ -31,9 +30,8 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private final List<Message> messages;
     private final String        currentUserId;
 
-    // Track current playing audio to stop it when another is tapped
-    private MediaPlayer currentPlayer = null;
-    private View        currentPlayingView = null;
+    // Track which URL is currently "playing" to show correct icon
+    private String currentlyPlayingUrl = null;
 
     public MessageAdapter(Context context, List<Message> messages, String currentUserId) {
         this.context       = context;
@@ -41,8 +39,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         this.currentUserId = currentUserId;
     }
 
-    @Override
-    public int getItemViewType(int position) {
+    @Override public int getItemViewType(int position) {
         return messages.get(position).getMessageSenderId().equals(currentUserId)
             ? VIEW_SENT : VIEW_RECEIVED;
     }
@@ -65,10 +62,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private void bindSent(SentHolder h, Message msg) {
         bindContent(h.tvMessage, h.ivImage, h.layoutMedia, h.tvMediaLabel, msg);
         h.tvTimestamp.setText(DateTimeHelper.formatTime(msg.getMessageTimestamp()));
-        if (h.ivStatus != null) {
+        if (h.ivStatus != null)
             h.ivStatus.setImageResource(msg.isMessageRead()
                 ? R.drawable.ic_check_double : R.drawable.ic_check);
-        }
     }
 
     private void bindReceived(ReceivedHolder h, Message msg) {
@@ -89,12 +85,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 if (layoutMedia != null) layoutMedia.setVisibility(View.GONE);
                 if (ivImage != null) {
                     ivImage.setVisibility(View.VISIBLE);
-                    Glide.with(context)
-                        .load(msg.getImageUrl())
-                        .placeholder(R.drawable.ic_photo)
-                        .centerCrop()
-                        .into(ivImage);
-                    ivImage.setOnClickListener(v -> openInBrowser(msg.getImageUrl()));
+                    Glide.with(context).load(msg.getImageUrl())
+                        .placeholder(R.drawable.ic_photo).centerCrop().into(ivImage);
+                    ivImage.setOnClickListener(v -> openUrl(msg.getImageUrl()));
                 }
                 break;
 
@@ -103,12 +96,39 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 if (ivImage != null) ivImage.setVisibility(View.GONE);
                 if (layoutMedia != null) {
                     layoutMedia.setVisibility(View.VISIBLE);
+                    String baseLabel = msg.getMessageText() != null
+                        ? msg.getMessageText() : "🎤 Voice message";
+
+                    // Show play/stop state
                     if (tvMediaLabel != null) {
-                        tvMediaLabel.setText(msg.getMessageText() != null
-                            ? msg.getMessageText() : "🎤 Voice message");
+                        boolean isPlaying = baseLabel.equals(currentlyPlayingUrl)
+                            || (msg.getImageUrl() != null
+                                && msg.getImageUrl().equals(currentlyPlayingUrl));
+                        tvMediaLabel.setText(isPlaying ? "⏹ " + baseLabel : "▶ " + baseLabel);
                     }
-                    // Tap to play/stop audio inline with MediaPlayer
-                    layoutMedia.setOnClickListener(v -> playAudio(msg.getImageUrl(), layoutMedia, tvMediaLabel));
+
+                    layoutMedia.setOnClickListener(v -> {
+                        if (!(context instanceof ChatActivity)) return;
+                        ChatActivity activity = (ChatActivity) context;
+                        final String audioUrl = msg.getImageUrl();
+                        final String label    = msg.getMessageText() != null
+                            ? msg.getMessageText() : "🎤 Voice message";
+
+                        if (tvMediaLabel != null) tvMediaLabel.setText("⏳ Loading…");
+
+                        activity.playVoiceMessage(audioUrl,
+                            () -> { // onStart
+                                currentlyPlayingUrl = audioUrl;
+                                if (tvMediaLabel != null)
+                                    tvMediaLabel.setText("⏹ " + label);
+                            },
+                            () -> { // onStop
+                                currentlyPlayingUrl = null;
+                                if (tvMediaLabel != null)
+                                    tvMediaLabel.setText("▶ " + label);
+                            }
+                        );
+                    });
                 }
                 break;
 
@@ -117,29 +137,28 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 if (ivImage != null) ivImage.setVisibility(View.GONE);
                 if (layoutMedia != null) {
                     layoutMedia.setVisibility(View.VISIBLE);
-                    if (tvMediaLabel != null) {
+                    if (tvMediaLabel != null)
                         tvMediaLabel.setText(msg.getMessageText() != null
                             ? msg.getMessageText() : "📄 Document");
-                    }
-                    layoutMedia.setOnClickListener(v -> openInBrowser(msg.getImageUrl()));
+                    layoutMedia.setOnClickListener(v -> openUrl(msg.getImageUrl()));
                 }
                 break;
 
             case "location":
                 tvMessage.setVisibility(View.VISIBLE);
-                if (ivImage  != null) ivImage.setVisibility(View.GONE);
+                if (ivImage     != null) ivImage.setVisibility(View.GONE);
                 if (layoutMedia != null) layoutMedia.setVisibility(View.GONE);
                 tvMessage.setText(msg.getMessageText());
                 tvMessage.setOnClickListener(v -> {
                     String text = msg.getMessageText();
                     if (text != null && text.contains("http"))
-                        openInBrowser(text.substring(text.indexOf("http")));
+                        openUrl(text.substring(text.indexOf("http")));
                 });
                 break;
 
-            default: // text
+            default:
                 tvMessage.setVisibility(View.VISIBLE);
-                if (ivImage  != null) ivImage.setVisibility(View.GONE);
+                if (ivImage     != null) ivImage.setVisibility(View.GONE);
                 if (layoutMedia != null) layoutMedia.setVisibility(View.GONE);
                 tvMessage.setText(msg.getMessageText());
                 tvMessage.setOnClickListener(null);
@@ -147,102 +166,16 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
-    // ── Audio playback ────────────────────────────
-    private void playAudio(String url, View layoutView, TextView label) {
-        if (url == null || url.isEmpty()) {
-            Toast.makeText(context, "Audio not available", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // If this row is already playing → stop it
-        if (currentPlayingView == layoutView && currentPlayer != null) {
-            stopCurrentPlayer();
-            if (label != null) label.setText(
-                label.getText().toString().replace("⏹ ", ""));
-            return;
-        }
-
-        // Stop any other playing audio first
-        stopCurrentPlayer();
-
-        final String originalLabel = label != null
-            ? label.getText().toString() : "🎤 Voice message";
-        if (label != null) label.setText("⏳ Loading…");
-
-        // Keep strong reference — prevents garbage collection during prepareAsync
-        currentPlayer      = new MediaPlayer();
-        currentPlayingView = layoutView;
-        final MediaPlayer player = currentPlayer;
-
-        try {
-            player.setDataSource(url);
-
-            // Use AudioAttributes instead of deprecated setAudioStreamType()
-            player.setAudioAttributes(
-                new android.media.AudioAttributes.Builder()
-                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH)
-                    .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
-                    .build()
-            );
-
-            player.setOnPreparedListener(mp -> {
-                if (label != null) label.setText("⏹ " + originalLabel);
-                mp.start();
-            });
-
-            player.setOnCompletionListener(mp -> {
-                if (label != null) label.setText(originalLabel);
-                currentPlayer      = null;
-                currentPlayingView = null;
-                mp.release();
-            });
-
-            player.setOnErrorListener((mp, what, extra) -> {
-                if (label != null) label.setText(originalLabel);
-                Toast.makeText(context,
-                    "Cannot play audio (err " + what + ")", Toast.LENGTH_SHORT).show();
-                currentPlayer      = null;
-                currentPlayingView = null;
-                mp.release();
-                return true;
-            });
-
-            player.prepareAsync(); // starts loading from URL
-
-        } catch (Exception e) {
-            if (label != null) label.setText(originalLabel);
-            Toast.makeText(context,
-                "Cannot play audio: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            currentPlayer      = null;
-            currentPlayingView = null;
-            try { player.release(); } catch (Exception ignored) {}
-        }
-    }
-
-    private void stopCurrentPlayer() {
-        if (currentPlayer != null) {
-            try {
-                if (currentPlayer.isPlaying()) currentPlayer.stop();
-                currentPlayer.release();
-            } catch (Exception ignored) {}
-            currentPlayer      = null;
-            currentPlayingView = null;
-        }
-    }
-
-    // ── Open URL in browser ───────────────────────
-    private void openInBrowser(String url) {
+    private void openUrl(String url) {
         if (url == null || url.isEmpty()) return;
         try {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
+            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         } catch (Exception ignored) {}
     }
 
     @Override public int getItemCount() { return messages.size(); }
 
-    // ── ViewHolders ───────────────────────────────
     static class SentHolder extends RecyclerView.ViewHolder {
         TextView  tvMessage, tvTimestamp, tvMediaLabel;
         ImageView ivStatus, ivImage;
