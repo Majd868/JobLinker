@@ -157,44 +157,65 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         // If this row is already playing → stop it
         if (currentPlayingView == layoutView && currentPlayer != null) {
             stopCurrentPlayer();
-            if (label != null && label.getText().toString().startsWith("⏹"))
-                label.setText(label.getText().toString().replace("⏹ ", "🎤 "));
+            if (label != null) label.setText(
+                label.getText().toString().replace("⏹ ", ""));
             return;
         }
 
         // Stop any other playing audio first
         stopCurrentPlayer();
 
-        final String originalLabel = label != null ? label.getText().toString() : "🎤 Voice message";
+        final String originalLabel = label != null
+            ? label.getText().toString() : "🎤 Voice message";
         if (label != null) label.setText("⏳ Loading…");
 
-        MediaPlayer player = new MediaPlayer();
-        currentPlayer     = player;
+        // Keep strong reference — prevents garbage collection during prepareAsync
+        currentPlayer      = new MediaPlayer();
         currentPlayingView = layoutView;
+        final MediaPlayer player = currentPlayer;
 
         try {
             player.setDataSource(url);
-            player.setAudioStreamType(android.media.AudioManager.STREAM_MUSIC);
-            player.prepareAsync();
+
+            // Use AudioAttributes instead of deprecated setAudioStreamType()
+            player.setAudioAttributes(
+                new android.media.AudioAttributes.Builder()
+                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH)
+                    .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
+                    .build()
+            );
+
             player.setOnPreparedListener(mp -> {
                 if (label != null) label.setText("⏹ " + originalLabel);
                 mp.start();
             });
+
             player.setOnCompletionListener(mp -> {
                 if (label != null) label.setText(originalLabel);
-                stopCurrentPlayer();
+                currentPlayer      = null;
+                currentPlayingView = null;
+                mp.release();
             });
+
             player.setOnErrorListener((mp, what, extra) -> {
                 if (label != null) label.setText(originalLabel);
-                Toast.makeText(context, "Cannot play audio", Toast.LENGTH_SHORT).show();
-                stopCurrentPlayer();
+                Toast.makeText(context,
+                    "Cannot play audio (err " + what + ")", Toast.LENGTH_SHORT).show();
+                currentPlayer      = null;
+                currentPlayingView = null;
+                mp.release();
                 return true;
             });
+
+            player.prepareAsync(); // starts loading from URL
+
         } catch (Exception e) {
             if (label != null) label.setText(originalLabel);
-            Toast.makeText(context, "Cannot play audio: " + e.getMessage(),
-                Toast.LENGTH_SHORT).show();
-            stopCurrentPlayer();
+            Toast.makeText(context,
+                "Cannot play audio: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            currentPlayer      = null;
+            currentPlayingView = null;
+            try { player.release(); } catch (Exception ignored) {}
         }
     }
 
