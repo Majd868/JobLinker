@@ -556,18 +556,26 @@ public class JobLinkerFirebaseManager {
                     if (documentSnapshot.exists()) {
                         Job job = documentSnapshot.toObject(Job.class);
                         if (job != null) {
-                            // Fallback: some old documents stored employerId as "employerId"
-                            // instead of "jobEmployerId" — fix it at read time
+                            // Try every possible field name for employer ID
+                            // (different versions of the app saved it differently)
                             if (job.getJobEmployerId() == null || job.getJobEmployerId().isEmpty()) {
-                                String fallback = documentSnapshot.getString("employerId");
-                                if (fallback != null && !fallback.isEmpty()) {
-                                    job.setJobEmployerId(fallback);
-                                    Log.d(TAG, "Used fallback employerId for job: " + jobId);
+                                String[] possibleFields = {"employerId", "jobEmployerId", "employer_id", "ownerId"};
+                                for (String field : possibleFields) {
+                                    String val = documentSnapshot.getString(field);
+                                    if (val != null && !val.isEmpty()) {
+                                        job.setJobEmployerId(val);
+                                        Log.d(TAG, "Found employer ID in field '" + field + "' for job: " + jobId);
+                                        break;
+                                    }
                                 }
+                            }
+                            // Also ensure jobId is set
+                            if (job.getJobId() == null || job.getJobId().isEmpty()) {
+                                job.setJobId(documentSnapshot.getId());
                             }
                         }
                         callback.onSuccess(job);
-                        Log.d(TAG, "Job retrieved: " + jobId);
+                        Log.d(TAG, "Job retrieved: " + jobId + " employerId=" + (job != null ? job.getJobEmployerId() : "null"));
                     } else {
                         callback.onFailure("Job not found");
                         Log.w(TAG, "Job not found: " + jobId);
@@ -591,10 +599,16 @@ public class JobLinkerFirebaseManager {
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         Job job = document.toObject(Job.class);
                         if (job != null) {
-                            // Fallback for old docs that stored "employerId" instead of "jobEmployerId"
+                            // Try all possible employer ID field names
                             if (job.getJobEmployerId() == null || job.getJobEmployerId().isEmpty()) {
-                                String fb = document.getString("employerId");
-                                if (fb != null) job.setJobEmployerId(fb);
+                                for (String f2 : new String[]{"employerId","jobEmployerId","employer_id","ownerId"}) {
+                                    String v = document.getString(f2);
+                                    if (v != null && !v.isEmpty()) { job.setJobEmployerId(v); break; }
+                                }
+                            }
+                            // Ensure jobId is set from document ID
+                            if (job.getJobId() == null || job.getJobId().isEmpty()) {
+                                job.setJobId(document.getId());
                             }
                             jobs.add(job);
                         }
@@ -743,10 +757,15 @@ public class JobLinkerFirebaseManager {
                         for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                             Job job = document.toObject(Job.class);
                             if (job != null) {
-                                // Fallback for old docs using "employerId"
+                                // Try all possible employer ID field names
                                 if (job.getJobEmployerId() == null || job.getJobEmployerId().isEmpty()) {
-                                    String fb = document.getString("employerId");
-                                    if (fb != null) job.setJobEmployerId(fb);
+                                    for (String f2 : new String[]{"employerId","jobEmployerId","employer_id","ownerId"}) {
+                                        String v = document.getString(f2);
+                                        if (v != null && !v.isEmpty()) { job.setJobEmployerId(v); break; }
+                                    }
+                                }
+                                if (job.getJobId() == null || job.getJobId().isEmpty()) {
+                                    job.setJobId(document.getId());
                                 }
                                 jobs.add(job);
                             }
@@ -1134,64 +1153,81 @@ public class JobLinkerFirebaseManager {
         }
 
         StorageReference fileRef = storage.getReference().child(path);
+        android.content.Context ctx = storage.getApp().getApplicationContext();
 
-        // Read all bytes first using ContentResolver (works for file://, content://, FileProvider)
-        // Then upload with putBytes() — most reliable method across all Android versions
-        try {
-            java.io.InputStream inputStream =
-                storage.getApp().getApplicationContext()
-                    .getContentResolver()
-                    .openInputStream(imageUri);
+        // Run compression off the main thread to avoid ANR
+        new Thread(() -> {
+            try {
+                // Step 1: Decode URI to Bitmap (handles ALL URI types via ContentResolver)
+                android.graphics.BitmapFactory.Options opts = new android.graphics.BitmapFactory.Options();
+                opts.inSampleSize = 2; // downsample to reduce memory
+                java.io.InputStream is1 = ctx.getContentResolver().openInputStream(imageUri);
+                if (is1 == null) { callback.onFailure("Cannot open image"); return; }
+                android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeStream(is1, null, opts);
+                is1.close();
 
-            if (inputStream == null) {
-                callback.onFailure("Cannot open image");
-                return;
+                if (bmp == null) {
+                    // Fallback: read raw bytes without decoding
+                    java.io.InputStream is2 = ctx.getContentResolver().openInputStream(imageUri);
+                    if (is2 == null) { callback.onFailure("Cannot open image"); return; }
+                    java.io.ByteArrayOutputStream raw = new java.io.ByteArrayOutputStream();
+                    byte[] buf2 = new byte[8192]; int n2;
+                    while ((n2 = is2.read(buf2)) != -1) raw.write(buf2, 0, n2);
+                    is2.close();
+                    byte[] rawBytes = raw.toByteArray();
+                    if (rawBytes.length == 0) { callback.onFailure("Image is empty"); return; }
+                    doUpload(fileRef, rawBytes, callback);
+                    return;
+                }
+
+                // Step 2: Scale down if too large (max 800px)
+                int maxDim = 800;
+                if (bmp.getWidth() > maxDim || bmp.getHeight() > maxDim) {
+                    float scale = Math.min((float)maxDim/bmp.getWidth(), (float)maxDim/bmp.getHeight());
+                    bmp = android.graphics.Bitmap.createScaledBitmap(
+                        bmp, (int)(bmp.getWidth()*scale), (int)(bmp.getHeight()*scale), true);
+                }
+
+                // Step 3: Compress to JPEG bytes
+                java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+                bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 85, baos);
+                bmp.recycle();
+                byte[] imageBytes = baos.toByteArray();
+
+                if (imageBytes.length == 0) { callback.onFailure("Compressed image is empty"); return; }
+
+                doUpload(fileRef, imageBytes, callback);
+
+            } catch (Exception e) {
+                Log.e(TAG, "uploadImage error", e);
+                callback.onFailure("Cannot process image: " + e.getMessage());
             }
+        }).start();
+    }
 
-            // Read all bytes into memory
-            java.io.ByteArrayOutputStream buffer = new java.io.ByteArrayOutputStream();
-            byte[] chunk = new byte[8192];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(chunk)) != -1) {
-                buffer.write(chunk, 0, bytesRead);
-            }
-            inputStream.close();
-            byte[] imageBytes = buffer.toByteArray();
+    private void doUpload(StorageReference fileRef, byte[] bytes, UploadCallback callback) {
+        com.google.firebase.storage.StorageMetadata metadata =
+            new com.google.firebase.storage.StorageMetadata.Builder()
+                .setContentType("image/jpeg")
+                .build();
 
-            if (imageBytes.length == 0) {
-                callback.onFailure("Image is empty");
-                return;
-            }
-
-            com.google.firebase.storage.StorageMetadata metadata =
-                new com.google.firebase.storage.StorageMetadata.Builder()
-                    .setContentType("image/jpeg")
-                    .build();
-
-            // putBytes() is the most reliable — no URI permission issues
-            UploadTask uploadTask = fileRef.putBytes(imageBytes, metadata);
-
-            uploadTask.addOnProgressListener(taskSnapshot -> {
-                double progress = (100.0 * taskSnapshot.getBytesTransferred())
-                    / taskSnapshot.getTotalByteCount();
-                callback.onProgress((int) progress);
-            }).addOnSuccessListener(taskSnapshot ->
-                fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                    callback.onSuccess(uri.toString());
-                    Log.d(TAG, "Image uploaded successfully: " + uri);
-                }).addOnFailureListener(e -> {
-                    callback.onFailure(e.getMessage());
-                    Log.e(TAG, "Error getting download URL", e);
-                })
-            ).addOnFailureListener(e -> {
+        fileRef.putBytes(bytes, metadata)
+            .addOnProgressListener(snap -> {
+                double p = (100.0 * snap.getBytesTransferred()) / snap.getTotalByteCount();
+                callback.onProgress((int) p);
+            })
+            .addOnSuccessListener(snap ->
+                fileRef.getDownloadUrl()
+                    .addOnSuccessListener(uri -> {
+                        callback.onSuccess(uri.toString());
+                        Log.d(TAG, "Upload success: " + uri);
+                    })
+                    .addOnFailureListener(e -> callback.onFailure(e.getMessage()))
+            )
+            .addOnFailureListener(e -> {
+                Log.e(TAG, "putBytes failed: " + e.getMessage(), e);
                 callback.onFailure(e.getMessage());
-                Log.e(TAG, "Error uploading image: " + e.getMessage(), e);
             });
-
-        } catch (Exception e) {
-            callback.onFailure("Cannot read image: " + e.getMessage());
-            Log.e(TAG, "Error reading image bytes", e);
-        }
     }
 
     /**
