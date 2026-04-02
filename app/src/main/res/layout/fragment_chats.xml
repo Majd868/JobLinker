@@ -58,7 +58,7 @@
         android:clipToPadding="false"
         android:paddingBottom="@dimen/spacing_small"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/card_search"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:listitem="@layout/item_conversation"/>
 
