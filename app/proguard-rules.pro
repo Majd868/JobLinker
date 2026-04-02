@@ -17,7 +17,6 @@
 }
 
 # Agora SDK
--keep class io.agora.**{*;}
 
 # Retrofit
 -keepattributes Signature, InnerClasses, EnclosingMethod

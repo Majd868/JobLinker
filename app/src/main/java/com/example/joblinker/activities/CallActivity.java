@@ -1,11 +1,14 @@
 package com.example.joblinker.activities;
 
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -15,32 +18,34 @@ import com.example.joblinker.firebase.JobLinkerFirebaseManager;
 import com.example.joblinker.models.Call;
 import com.example.joblinker.utils.ImageUtils;
 
+/**
+ * Call screen — UI and Firebase call record management.
+ * Voice/video transmission requires a real-time SDK (Agora/WebRTC).
+ * To enable calls: add your Agora App ID in strings.xml as "agora_app_id"
+ * and integrate the Agora SDK dependency.
+ */
 public class CallActivity extends AppCompatActivity {
 
-    public static final String EXTRA_RECEIVER_ID = "receiver_id";
-    public static final String EXTRA_RECEIVER_NAME = "receiver_name";
+    public static final String EXTRA_RECEIVER_ID     = "receiver_id";
+    public static final String EXTRA_RECEIVER_NAME   = "receiver_name";
     public static final String EXTRA_RECEIVER_AVATAR = "receiver_avatar";
-    public static final String EXTRA_CALL_TYPE = "call_type";
-    private static final String AGORA_APP_ID = "5f5ff135957649da88c44e3487fe1e4a";
+    public static final String EXTRA_CALL_TYPE       = "call_type";
 
-    private ImageView ivUserAvatar;
-    private TextView tvUserName, tvCallStatus, tvCallTimer;
-    private View viewPulse, remoteVideoContainer, localVideoContainer;
+    private ImageView  ivUserAvatar;
+    private TextView   tvUserName, tvCallStatus, tvCallTimer;
+    private View       viewPulse, remoteVideoContainer, localVideoContainer;
     private FloatingActionButton btnMute, btnSpeaker, btnHangUp, btnVideoToggle;
+
     private JobLinkerFirebaseManager firebaseManager;
-    private String receiverId;
-    private String receiverName;
-    private String receiverAvatar;
-    private String callType;
-    private String callId;
+    private String receiverId, receiverName, receiverAvatar, callType, callId;
 
-    private boolean isMuted = false;
+    private boolean isMuted     = false;
     private boolean isSpeakerOn = false;
-    private boolean isVideoOn = true;
+    private boolean isVideoOn   = true;
+    private long    callStartTime = 0;
 
-    private Handler timerHandler;
+    private final Handler timerHandler = new Handler(Looper.getMainLooper());
     private Runnable timerRunnable;
-    private long callStartTime = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,210 +53,168 @@ public class CallActivity extends AppCompatActivity {
         setContentView(R.layout.activity_call);
 
         firebaseManager = JobLinkerFirebaseManager.getInstance();
-
         getIntentData();
         initializeViews();
         setupUI();
         setupClickListeners();
-        initiateCall();
+        startCall();
     }
 
     private void getIntentData() {
-        Intent intent = getIntent();
-        receiverId = intent.getStringExtra(EXTRA_RECEIVER_ID);
-        receiverName = intent.getStringExtra(EXTRA_RECEIVER_NAME);
-        receiverAvatar = intent.getStringExtra(EXTRA_RECEIVER_AVATAR);
-        callType = intent.getStringExtra(EXTRA_CALL_TYPE);
+        receiverId     = getIntent().getStringExtra(EXTRA_RECEIVER_ID);
+        receiverName   = getIntent().getStringExtra(EXTRA_RECEIVER_NAME);
+        receiverAvatar = getIntent().getStringExtra(EXTRA_RECEIVER_AVATAR);
+        callType       = getIntent().getStringExtra(EXTRA_CALL_TYPE);
     }
 
     private void initializeViews() {
-        ivUserAvatar = findViewById(R.id.iv_user_avatar);
-        tvUserName = findViewById(R.id.tv_user_name);
-        tvCallStatus = findViewById(R.id.tv_call_status);
-        tvCallTimer = findViewById(R.id.tv_call_timer);
-        viewPulse = findViewById(R.id.view_pulse);
+        ivUserAvatar         = findViewById(R.id.iv_user_avatar);
+        tvUserName           = findViewById(R.id.tv_user_name);
+        tvCallStatus         = findViewById(R.id.tv_call_status);
+        tvCallTimer          = findViewById(R.id.tv_call_timer);
+        viewPulse            = findViewById(R.id.view_pulse);
         remoteVideoContainer = findViewById(R.id.remote_video_container);
-        localVideoContainer = findViewById(R.id.local_video_container);
-        btnMute = findViewById(R.id.btn_mute);
-        btnSpeaker = findViewById(R.id.btn_speaker);
-        btnHangUp = findViewById(R.id.btn_hang_up);
-        btnVideoToggle = findViewById(R.id.btn_video_toggle);
+        localVideoContainer  = findViewById(R.id.local_video_container);
+        btnMute              = findViewById(R.id.btn_mute);
+        btnSpeaker           = findViewById(R.id.btn_speaker);
+        btnHangUp            = findViewById(R.id.btn_hang_up);
+        btnVideoToggle       = findViewById(R.id.btn_video_toggle);
     }
 
     private void setupUI() {
-        tvUserName.setText(receiverName);
-        ImageUtils.loadCircularImage(this, receiverAvatar, ivUserAvatar);
+        if (tvUserName  != null) tvUserName.setText(receiverName);
+        if (ivUserAvatar != null)
+            ImageUtils.loadCircularImage(this, receiverAvatar, ivUserAvatar);
+        if (tvCallStatus != null) tvCallStatus.setText(R.string.calling);
 
-        if ("video".equals(callType)) {
-            btnVideoToggle.setVisibility(View.VISIBLE);
-            // Show video containers when call connects
-        } else {
-            btnVideoToggle.setVisibility(View.GONE);
-        }
+        boolean isVideo = "video".equals(callType);
+        if (btnVideoToggle != null)
+            btnVideoToggle.setVisibility(isVideo ? View.VISIBLE : View.GONE);
+        if (remoteVideoContainer != null)
+            remoteVideoContainer.setVisibility(View.GONE);
+        if (localVideoContainer != null)
+            localVideoContainer.setVisibility(View.GONE);
     }
 
     private void setupClickListeners() {
-        btnMute.setOnClickListener(v -> toggleMute());
-
-        btnSpeaker.setOnClickListener(v -> toggleSpeaker());
-
-        btnVideoToggle.setOnClickListener(v -> toggleVideo());
-
-        btnHangUp.setOnClickListener(v -> endCall());
+        if (btnMute      != null) btnMute.setOnClickListener(v -> toggleMute());
+        if (btnSpeaker   != null) btnSpeaker.setOnClickListener(v -> toggleSpeaker());
+        if (btnVideoToggle != null) btnVideoToggle.setOnClickListener(v -> toggleVideo());
+        if (btnHangUp    != null) btnHangUp.setOnClickListener(v -> endCall());
     }
 
-    private void initiateCall() {
-        tvCallStatus.setText(R.string.calling);
-
-        // Create call record in Firebase
+    // ── Start call ────────────────────────────────
+    private void startCall() {
         Call call = new Call(firebaseManager.getCurrentUserId(), receiverId, callType);
-        call.setCallerName(receiverName);
+        call.setCallerName(firebaseManager.getCurrentUserId());
         call.setReceiverName(receiverName);
 
         firebaseManager.createCall(call, new JobLinkerFirebaseManager.DataCallback<String>() {
             @Override
             public void onSuccess(String id) {
                 callId = id;
-                // TODO: Integrate with Agora SDK
-                simulateCallConnection();
+                // Simulate connection after 2s (replace with real SDK connection)
+                timerHandler.postDelayed(CallActivity.this::onCallConnected, 2000);
             }
-
             @Override
             public void onFailure(String error) {
-                tvCallStatus.setText("Call failed");
+                Toast.makeText(CallActivity.this,
+                    "Call failed: " + error, Toast.LENGTH_SHORT).show();
                 finish();
             }
         });
     }
 
-    private void simulateCallConnection() {
-        // Simulate call connection after 2 seconds
-        new Handler().postDelayed(() -> {
-            onCallConnected();
-        }, 2000);
-    }
-
     private void onCallConnected() {
-        tvCallStatus.setText(R.string.connections);
-        viewPulse.setVisibility(View.GONE);
+        if (tvCallStatus != null) tvCallStatus.setText("Connected");
+        if (viewPulse    != null) viewPulse.setVisibility(View.GONE);
         callStartTime = System.currentTimeMillis();
 
-        // Update call status in Firebase
-        firebaseManager.updateCallStatus(callId, "connected",
+        if (callId != null) {
+            firebaseManager.updateCallStatus(callId, "connected",
                 new JobLinkerFirebaseManager.VoidCallback() {
-                    @Override
-                    public void onSuccess() {}
-
-                    @Override
-                    public void onFailure(String error) {}
+                    @Override public void onSuccess() {}
+                    @Override public void onFailure(String e) {}
                 });
+        }
 
-        // Start timer
         startCallTimer();
 
-        // Show video for video calls
         if ("video".equals(callType)) {
-            ivUserAvatar.setVisibility(View.GONE);
-            remoteVideoContainer.setVisibility(View.VISIBLE);
-            localVideoContainer.setVisibility(View.VISIBLE);
+            if (ivUserAvatar        != null) ivUserAvatar.setVisibility(View.GONE);
+            if (remoteVideoContainer != null) remoteVideoContainer.setVisibility(View.VISIBLE);
+            if (localVideoContainer  != null) localVideoContainer.setVisibility(View.VISIBLE);
         }
     }
 
+    // ── Timer ─────────────────────────────────────
     private void startCallTimer() {
-        tvCallTimer.setVisibility(View.VISIBLE);
-
-        timerHandler = new Handler();
+        if (tvCallTimer != null) tvCallTimer.setVisibility(View.VISIBLE);
         timerRunnable = new Runnable() {
-            @Override
-            public void run() {
+            @Override public void run() {
                 long elapsed = System.currentTimeMillis() - callStartTime;
-                int seconds = (int) (elapsed / 1000);
-                int minutes = seconds / 60;
-                seconds = seconds % 60;
-
-                tvCallTimer.setText(String.format("%02d:%02d", minutes, seconds));
+                int total = (int)(elapsed / 1000);
+                if (tvCallTimer != null)
+                    tvCallTimer.setText(String.format("%02d:%02d", total/60, total%60));
                 timerHandler.postDelayed(this, 1000);
             }
         };
         timerHandler.post(timerRunnable);
     }
 
+    // ── Controls ──────────────────────────────────
     private void toggleMute() {
         isMuted = !isMuted;
-
-        if (isMuted) {
-            btnMute.setImageResource(R.drawable.ic_mic);
-            btnMute.setBackgroundTintList(getResources().getColorStateList(R.color.error, null));
-        } else {
-            btnMute.setImageResource(R.drawable.ic_mic);
-            btnMute.setBackgroundTintList(getResources().getColorStateList(R.color.secondary, null));
+        if (btnMute != null) {
+            btnMute.setImageResource(isMuted ? R.drawable.ic_mic_off : R.drawable.ic_mic);
+            btnMute.setBackgroundTintList(getResources().getColorStateList(
+                isMuted ? R.color.error : R.color.secondary, null));
         }
-
-        // TODO: Mute audio in Agora SDK
+        AudioManager am = (AudioManager) getSystemService(AUDIO_SERVICE);
+        if (am != null) am.setMicrophoneMute(isMuted);
     }
 
     private void toggleSpeaker() {
         isSpeakerOn = !isSpeakerOn;
-
-        if (isSpeakerOn) {
+        AudioManager am = (AudioManager) getSystemService(AUDIO_SERVICE);
+        if (am != null) am.setSpeakerphoneOn(isSpeakerOn);
+        if (btnSpeaker != null) {
             btnSpeaker.setImageResource(R.drawable.ic_volume_up);
-            btnSpeaker.setBackgroundTintList(getResources().getColorStateList(R.color.primary, null));
-        } else {
-            btnSpeaker.setImageResource(R.drawable.ic_volume_up);
-            btnSpeaker.setBackgroundTintList(getResources().getColorStateList(R.color.secondary, null));
+            btnSpeaker.setBackgroundTintList(getResources().getColorStateList(
+                isSpeakerOn ? R.color.primary : R.color.secondary, null));
         }
-
-        // TODO: Toggle speaker in Agora SDK
     }
 
     private void toggleVideo() {
         isVideoOn = !isVideoOn;
-
-        if (isVideoOn) {
-            btnVideoToggle.setImageResource(R.drawable.ic_videocam);
-            localVideoContainer.setVisibility(View.VISIBLE);
-        } else {
-            btnVideoToggle.setImageResource(R.drawable.ic_videocam);
-            localVideoContainer.setVisibility(View.GONE);
-        }
-
-        // TODO: Toggle video in Agora SDK
+        if (btnVideoToggle != null)
+            btnVideoToggle.setImageResource(
+                isVideoOn ? R.drawable.ic_videocam : R.drawable.ic_videocam_off);
+        if (localVideoContainer != null)
+            localVideoContainer.setVisibility(isVideoOn ? View.VISIBLE : View.GONE);
     }
 
+    // ── End call ──────────────────────────────────
     private void endCall() {
-        // Stop timer
-        if (timerHandler != null && timerRunnable != null) {
-            timerHandler.removeCallbacks(timerRunnable);
-        }
-
-        // Update call status
+        timerHandler.removeCallbacksAndMessages(null);
         if (callId != null) {
             firebaseManager.updateCallStatus(callId, "ended",
-                    new JobLinkerFirebaseManager.VoidCallback() {
-                        @Override
-                        public void onSuccess() {}
-
-                        @Override
-                        public void onFailure(String error) {}
-                    });
+                new JobLinkerFirebaseManager.VoidCallback() {
+                    @Override public void onSuccess() {}
+                    @Override public void onFailure(String e) {}
+                });
         }
-
-        // TODO: End call in Agora SDK
-
         finish();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (timerHandler != null && timerRunnable != null) {
-            timerHandler.removeCallbacks(timerRunnable);
-        }
+        timerHandler.removeCallbacksAndMessages(null);
     }
 
     @Override
     public void onBackPressed() {
-        // Prevent back button during call
         endCall();
     }
 }
