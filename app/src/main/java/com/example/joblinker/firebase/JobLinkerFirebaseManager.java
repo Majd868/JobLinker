@@ -478,16 +478,18 @@ public class JobLinkerFirebaseManager {
      * Search users by name or email
      */
     public void searchUsers(String query, final ListCallback<User> callback) {
+        // Get all users and filter in memory — avoids needing index on userName
+        String lowerQuery = query.toLowerCase();
         db.collection(USERS_COLLECTION)
-                .orderBy("userName")
-                .startAt(query)
-                .endAt(query + "\uf8ff")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<User> users = new ArrayList<>();
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         User user = document.toObject(User.class);
-                        users.add(user);
+                        if (user.getUserName() != null &&
+                            user.getUserName().toLowerCase().contains(lowerQuery)) {
+                            users.add(user);
+                        }
                     }
                     callback.onSuccess(users);
                 })
@@ -1107,7 +1109,7 @@ public class JobLinkerFirebaseManager {
         // Get calls where user is caller
         db.collection(CALLS_COLLECTION)
                 .whereEqualTo("callerId", userId)
-                .orderBy("startTime", Query.Direction.DESCENDING)
+                // No orderBy — sort in memory
                 .limit(50)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -1119,7 +1121,7 @@ public class JobLinkerFirebaseManager {
                     // Get calls where user is receiver
                     db.collection(CALLS_COLLECTION)
                             .whereEqualTo("receiverId", userId)
-                            .orderBy("startTime", Query.Direction.DESCENDING)
+                            // No orderBy — sort in memory
                             .limit(50)
                             .get()
                             .addOnSuccessListener(receivedCallsSnapshot -> {
@@ -1435,7 +1437,7 @@ public class JobLinkerFirebaseManager {
                                            final ListCallback<com.example.joblinker.models.Application> callback) {
         db.collection(APPLICATIONS_COLLECTION)
                 .whereEqualTo("jobSeekerUserId", jobSeekerUserId)
-                .orderBy("appliedAt", Query.Direction.DESCENDING)
+                // No orderBy — sort in memory to avoid composite index requirement
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<com.example.joblinker.models.Application> applications = new ArrayList<>();
@@ -1444,6 +1446,8 @@ public class JobLinkerFirebaseManager {
                                 document.toObject(com.example.joblinker.models.Application.class);
                         applications.add(app);
                     }
+                    // Sort newest first in memory
+                    applications.sort((a, b) -> Long.compare(b.getAppliedAt(), a.getAppliedAt()));
                     callback.onSuccess(applications);
                     Log.d(TAG, "Retrieved " + applications.size() + " applications for user: " + jobSeekerUserId);
                 })
