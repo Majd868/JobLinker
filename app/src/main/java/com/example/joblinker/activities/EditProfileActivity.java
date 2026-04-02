@@ -282,6 +282,7 @@ public class EditProfileActivity extends AppCompatActivity {
         // Fixed path per user — overwrites previous avatar automatically
         String path = "avatars/" + userId + ".jpg";
 
+        // Use context-aware overload so FileProvider URIs work correctly
         firebaseManager.uploadBytes(imageBytes, path,
             new JobLinkerFirebaseManager.UploadCallback() {
                 @Override public void onSuccess(String downloadUrl) {

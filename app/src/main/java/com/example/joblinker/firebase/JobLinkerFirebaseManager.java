@@ -1148,8 +1148,20 @@ public class JobLinkerFirebaseManager {
      */
     public void uploadImage(Uri imageUri, String path, final UploadCallback callback) {
         if (imageUri == null) { callback.onFailure("Image URI is null"); return; }
-        // Read bytes immediately on calling thread (URI is still valid here)
+        // NOTE: This uses ApplicationContext which may fail for FileProvider URIs.
+        // Callers should read bytes first using their Activity context, then call uploadBytes().
         byte[] bytes = readBytesFromUri(imageUri, storage.getApp().getApplicationContext());
+        if (bytes == null || bytes.length == 0) {
+            callback.onFailure("Cannot read file — try calling uploadBytes() with pre-read bytes");
+            return;
+        }
+        uploadBytes(bytes, path, callback);
+    }
+
+    // Overload that accepts a Context — use from Activities for FileProvider URIs
+    public void uploadImage(android.content.Context ctx, Uri imageUri, String path, final UploadCallback callback) {
+        if (imageUri == null) { callback.onFailure("Image URI is null"); return; }
+        byte[] bytes = readBytesFromUri(imageUri, ctx);
         if (bytes == null || bytes.length == 0) {
             callback.onFailure("Cannot read file");
             return;

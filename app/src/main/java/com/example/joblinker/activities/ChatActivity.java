@@ -549,8 +549,14 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void sendImageMessage(Uri imageUri) {
-        String uploadPath = "chat_images/" + conversationId + "/" + System.currentTimeMillis();
-        firebaseManager.uploadImage(imageUri, uploadPath,
+        // Read bytes on main thread NOW while URI permissions are still valid
+        byte[] bytes = readUriBytes(imageUri);
+        if (bytes == null || bytes.length == 0) {
+            Toast.makeText(this, "Could not read image", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String uploadPath = "chat_images/" + conversationId + "/" + System.currentTimeMillis() + ".jpg";
+        firebaseManager.uploadBytes(bytes, uploadPath,
             new JobLinkerFirebaseManager.UploadCallback() {
                 @Override public void onSuccess(String downloadUrl) {
                     Message msg = new Message(conversationId, currentUserId, otherUserId, "📷 Photo");
@@ -561,12 +567,29 @@ public class ChatActivity extends AppCompatActivity {
                 @Override public void onProgress(int p) {}
                 @Override public void onFailure(String error) {
                     Toast.makeText(ChatActivity.this,
-                        "Failed to upload image", Toast.LENGTH_SHORT).show();
+                        "Failed to send image: " + error, Toast.LENGTH_SHORT).show();
                 }
             });
     }
 
+    // Reads all bytes from any URI using Activity's ContentResolver (FileProvider safe)
+    private byte[] readUriBytes(Uri uri) {
+        try {
+            java.io.InputStream is = getContentResolver().openInputStream(uri);
+            if (is == null) return null;
+            java.io.ByteArrayOutputStream buffer = new java.io.ByteArrayOutputStream();
+            byte[] chunk = new byte[8192]; int read;
+            while ((read = is.read(chunk)) != -1) buffer.write(chunk, 0, read);
+            is.close();
+            return buffer.toByteArray();
+        } catch (Exception e) {
+            Log.e("ChatActivity", "readUriBytes failed: " + e.getMessage());
+            return null;
+        }
+    }
+
     private void sendDocumentMessage(Uri documentUri) {
+        // Get file name
         String fileName = "document";
         try {
             android.database.Cursor cursor = getContentResolver().query(
@@ -578,9 +601,16 @@ public class ChatActivity extends AppCompatActivity {
             }
         } catch (Exception ignored) {}
 
+        // Read bytes on main thread NOW while URI permissions are still valid
+        byte[] bytes = readUriBytes(documentUri);
+        if (bytes == null || bytes.length == 0) {
+            Toast.makeText(this, "Could not read document", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         final String finalName = fileName;
         String uploadPath = "chat_documents/" + conversationId + "/" + System.currentTimeMillis();
-        firebaseManager.uploadImage(documentUri, uploadPath,
+        firebaseManager.uploadBytes(bytes, uploadPath,
             new JobLinkerFirebaseManager.UploadCallback() {
                 @Override public void onSuccess(String downloadUrl) {
                     Message msg = new Message(conversationId, currentUserId, otherUserId,
