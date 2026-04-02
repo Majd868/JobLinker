@@ -253,55 +253,48 @@ public class EditProfileActivity extends AppCompatActivity {
         btnSaveChanges.setEnabled(false);
         btnSaveChanges.setText("Uploading photo…");
 
-        // Step 1: Copy image bytes to app's private cache directory FIRST
-        // This avoids "Object does not exist at location" caused by FileProvider
-        // URI permissions being revoked by the time the async upload starts.
-        // The cache file is always readable by our app regardless of URI type.
-        java.io.File cachedFile = copyUriToCache(imageUri);
-        if (cachedFile == null) {
-            isUploadingPhoto = false;
-            progressBar.setVisibility(View.GONE);
-            btnSaveChanges.setEnabled(true);
-            btnSaveChanges.setText("Save Changes");
-            Toast.makeText(this, "Could not read photo. Please try again.", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        // Fixed path per user — overwrites previous avatar automatically
+        String path = "avatars/" + userId + ".jpg";
 
-        android.net.Uri cachedUri = android.net.Uri.fromFile(cachedFile);
-        String path = "avatars/" + userId + ".jpg"; // fixed path — overwrites previous
-
-        firebaseManager.uploadImage(cachedUri, path,
+        firebaseManager.uploadImage(imageUri, path,
             new JobLinkerFirebaseManager.UploadCallback() {
                 @Override public void onSuccess(String downloadUrl) {
-                    // Delete temp cache file
-                    cachedFile.delete();
-
                     currentAvatarUrl = downloadUrl;
                     isUploadingPhoto = false;
                     progressBar.setVisibility(View.GONE);
                     btnSaveChanges.setEnabled(true);
                     btnSaveChanges.setText("Save Changes");
 
-                    // Save URL to Firestore immediately
-                    if (userId != null) {
-                        firestore.collection("users").document(userId)
-                            .update("avatarUrl", downloadUrl);
+                    // Save to Firestore immediately so it persists even without tapping Save
+                    firestore.collection("users").document(userId)
+                        .update("avatarUrl", downloadUrl);
+
+                    // Refresh the preview with no-cache
+                    if (ivAvatar != null) {
+                        com.bumptech.glide.Glide.with(EditProfileActivity.this)
+                            .load(downloadUrl)
+                            .circleCrop()
+                            .skipMemoryCache(true)
+                            .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.NONE)
+                            .into(ivAvatar);
                     }
+
                     Toast.makeText(EditProfileActivity.this,
-                        "Photo ready — tap Save to confirm all changes",
-                        Toast.LENGTH_SHORT).show();
+                        "✅ Photo updated!", Toast.LENGTH_SHORT).show();
                 }
+
                 @Override public void onProgress(int progress) {
                     btnSaveChanges.setText("Uploading " + progress + "%…");
                 }
+
                 @Override public void onFailure(String error) {
-                    cachedFile.delete();
                     isUploadingPhoto = false;
                     progressBar.setVisibility(View.GONE);
                     btnSaveChanges.setEnabled(true);
                     btnSaveChanges.setText("Save Changes");
                     Toast.makeText(EditProfileActivity.this,
-                        "Photo upload failed: " + error, Toast.LENGTH_LONG).show();
+                        "Upload failed: " + error, Toast.LENGTH_LONG).show();
+                    Log.e(TAG, "Avatar upload failed: " + error);
                 }
             });
     }

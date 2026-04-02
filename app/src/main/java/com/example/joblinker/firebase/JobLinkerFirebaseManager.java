@@ -1135,34 +1135,8 @@ public class JobLinkerFirebaseManager {
 
         StorageReference fileRef = storage.getReference().child(path);
 
-        // If it's a file:// URI (from our cache copy), use putFile directly — faster and reliable
-        if ("file".equals(imageUri.getScheme())) {
-            java.io.File file = new java.io.File(imageUri.getPath());
-            if (!file.exists()) {
-                callback.onFailure("Image file not found: " + imageUri.getPath());
-                return;
-            }
-            UploadTask uploadTask = fileRef.putFile(imageUri);
-            uploadTask.addOnProgressListener(taskSnapshot -> {
-                double progress = (100.0 * taskSnapshot.getBytesTransferred())
-                    / taskSnapshot.getTotalByteCount();
-                callback.onProgress((int) progress);
-            }).addOnSuccessListener(taskSnapshot ->
-                fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                    callback.onSuccess(uri.toString());
-                    Log.d(TAG, "Image uploaded: " + uri);
-                }).addOnFailureListener(e -> {
-                    callback.onFailure(e.getMessage());
-                    Log.e(TAG, "Error getting download URL", e);
-                })
-            ).addOnFailureListener(e -> {
-                callback.onFailure(e.getMessage());
-                Log.e(TAG, "Error uploading image", e);
-            });
-            return;
-        }
-
-        // For content:// URIs — use putStream via ContentResolver
+        // Read all bytes first using ContentResolver (works for file://, content://, FileProvider)
+        // Then upload with putBytes() — most reliable method across all Android versions
         try {
             java.io.InputStream inputStream =
                 storage.getApp().getApplicationContext()
@@ -1174,35 +1148,49 @@ public class JobLinkerFirebaseManager {
                 return;
             }
 
+            // Read all bytes into memory
+            java.io.ByteArrayOutputStream buffer = new java.io.ByteArrayOutputStream();
+            byte[] chunk = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(chunk)) != -1) {
+                buffer.write(chunk, 0, bytesRead);
+            }
+            inputStream.close();
+            byte[] imageBytes = buffer.toByteArray();
+
+            if (imageBytes.length == 0) {
+                callback.onFailure("Image is empty");
+                return;
+            }
+
             com.google.firebase.storage.StorageMetadata metadata =
                 new com.google.firebase.storage.StorageMetadata.Builder()
                     .setContentType("image/jpeg")
                     .build();
 
-            UploadTask uploadTask = fileRef.putStream(inputStream, metadata);
+            // putBytes() is the most reliable — no URI permission issues
+            UploadTask uploadTask = fileRef.putBytes(imageBytes, metadata);
 
             uploadTask.addOnProgressListener(taskSnapshot -> {
                 double progress = (100.0 * taskSnapshot.getBytesTransferred())
                     / taskSnapshot.getTotalByteCount();
                 callback.onProgress((int) progress);
-            }).addOnSuccessListener(taskSnapshot -> {
-                try { inputStream.close(); } catch (Exception ignored) {}
+            }).addOnSuccessListener(taskSnapshot ->
                 fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
                     callback.onSuccess(uri.toString());
                     Log.d(TAG, "Image uploaded successfully: " + uri);
                 }).addOnFailureListener(e -> {
                     callback.onFailure(e.getMessage());
                     Log.e(TAG, "Error getting download URL", e);
-                });
-            }).addOnFailureListener(e -> {
-                try { inputStream.close(); } catch (Exception ignored) {}
+                })
+            ).addOnFailureListener(e -> {
                 callback.onFailure(e.getMessage());
-                Log.e(TAG, "Error uploading image", e);
+                Log.e(TAG, "Error uploading image: " + e.getMessage(), e);
             });
 
-        } catch (java.io.IOException e) {
+        } catch (Exception e) {
             callback.onFailure("Cannot read image: " + e.getMessage());
-            Log.e(TAG, "Error opening input stream for image URI", e);
+            Log.e(TAG, "Error reading image bytes", e);
         }
     }
 

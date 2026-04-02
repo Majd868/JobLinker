@@ -126,6 +126,10 @@ public class ChatActivity extends AppCompatActivity {
         currentUserId   = firebaseManager.getCurrentUserId();
 
         getIntentData();
+
+        // If getIntentData called finish() due to missing employer ID, stop here
+        if (isFinishing()) return;
+
         initializeViews();
         setupToolbar();
         setupRecyclerView();
