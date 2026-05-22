@@ -15,7 +15,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import com.example.joblinker.R;
 import com.example.joblinker.activities.MainActivity;
 
-public class JobLinkerFirebaseMessagingService extends FirebaseMessagingService {
+public class JobLinkerFireBaseMessagingServices extends FirebaseMessagingService {
 
     private static final String TAG = "FCMService";
     private static final String CHANNEL_ID = "joblinker_notifications";
