@@ -52,22 +52,19 @@ import java.util.Locale;
 
 public class ChatActivity extends AppCompatActivity {
 
-    // ── Intent extras ─────────────────────────────
     public static final String EXTRA_USER_ID         = "user_id";
     public static final String EXTRA_USER_NAME       = "user_name";
     public static final String EXTRA_USER_AVATAR     = "user_avatar";
     public static final String EXTRA_CONVERSATION_ID = "conversation_id";
 
-    // ── Permissions ───────────────────────────────
-    private static final int REQUEST_RECORD_AUDIO  = 201;
-    private static final int REQUEST_CAMERA        = 202;
+    private static final int REQUEST_RECORD_AUDIO = 201;
+    private static final int REQUEST_CAMERA       = 202;
 
-    // ── Views ─────────────────────────────────────
     private MaterialToolbar toolbar;
     private ImageView ivUserAvatar;
     private TextView tvUserName, tvStatus, tvTyping, tvRecordingTime;
     private ImageButton btnVoiceCall, btnVideoCall, btnAttachment, btnEmoji,
-                        btnCamera, btnCancelRecording;
+            btnCamera, btnCancelRecording;
     private LinearLayout layoutAttachmentTray, layoutRecordingBar;
     private LinearLayout trayCamera, trayGallery, trayDocument, trayLocation, trayContact;
     private View viewRecordingDot;
@@ -75,7 +72,6 @@ public class ChatActivity extends AppCompatActivity {
     private TextInputEditText etMessage;
     private FloatingActionButton btnSend;
 
-    // ── Data ──────────────────────────────────────
     private MessageAdapter messageAdapter;
     private final List<Message> messages = new ArrayList<>();
     private JobLinkerFirebaseManager firebaseManager;
@@ -83,6 +79,11 @@ public class ChatActivity extends AppCompatActivity {
     // ── Audio playback ────────────────────────────
     private MediaPlayer audioPlayer = null;
     private String      playingUrl  = null;
+
+    // ── Audio focus ───────────────────────────────
+    private android.media.AudioManager      audioManager;
+    private android.media.AudioFocusRequest audioFocusRequest;
+
     private ListenerRegistration messageListener;
     private String otherUserId, otherUserName, otherUserAvatar, conversationId, currentUserId;
 
@@ -94,34 +95,30 @@ public class ChatActivity extends AppCompatActivity {
     private Runnable recordingTimerRunnable;
     private int recordingSeconds = 0;
 
-    // ── Camera capture ────────────────────────────
     private Uri cameraImageUri;
 
-    // ── Activity result launchers ─────────────────
     private final ActivityResultLauncher<Intent> galleryLauncher =
-        registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                Uri uri = result.getData().getData();
-                if (uri != null) sendImageMessage(uri);
-            }
-        });
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    Uri uri = result.getData().getData();
+                    if (uri != null) sendImageMessage(uri);
+                }
+            });
 
     private final ActivityResultLauncher<Intent> cameraLauncher =
-        registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-            if (result.getResultCode() == RESULT_OK && cameraImageUri != null) {
-                sendImageMessage(cameraImageUri);
-            }
-        });
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK && cameraImageUri != null)
+                    sendImageMessage(cameraImageUri);
+            });
 
     private final ActivityResultLauncher<Intent> documentLauncher =
-        registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                Uri uri = result.getData().getData();
-                if (uri != null) sendDocumentMessage(uri);
-            }
-        });
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    Uri uri = result.getData().getData();
+                    if (uri != null) sendDocumentMessage(uri);
+                }
+            });
 
-    // ─────────────────────────────────────────────
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -131,8 +128,6 @@ public class ChatActivity extends AppCompatActivity {
         currentUserId   = firebaseManager.getCurrentUserId();
 
         getIntentData();
-
-        // If getIntentData called finish() due to missing employer ID, stop here
         if (isFinishing()) return;
 
         initializeViews();
@@ -143,28 +138,23 @@ public class ChatActivity extends AppCompatActivity {
         loadUserStatus();
     }
 
-    // ── Intent data ───────────────────────────────
     private void getIntentData() {
-        Intent i       = getIntent();
-        otherUserId    = i.getStringExtra(EXTRA_USER_ID);
-        otherUserName  = i.getStringExtra(EXTRA_USER_NAME);
+        Intent i        = getIntent();
+        otherUserId     = i.getStringExtra(EXTRA_USER_ID);
+        otherUserName   = i.getStringExtra(EXTRA_USER_NAME);
         otherUserAvatar = i.getStringExtra(EXTRA_USER_AVATAR);
-        conversationId = i.getStringExtra(EXTRA_CONVERSATION_ID);
+        conversationId  = i.getStringExtra(EXTRA_CONVERSATION_ID);
 
-        // Guard: if otherUserId is null the chat cannot work — finish safely
         if (otherUserId == null || otherUserId.isEmpty()) {
-            android.widget.Toast.makeText(this,
-                "Could not open chat — employer info missing",
-                android.widget.Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Could not open chat — employer info missing",
+                    Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
-
         if (conversationId == null)
             conversationId = JobLinkerFirebaseManager.generateConversationId(currentUserId, otherUserId);
     }
 
-    // ── View binding ──────────────────────────────
     private void initializeViews() {
         toolbar              = findViewById(R.id.toolbar);
         ivUserAvatar         = findViewById(R.id.iv_user_avatar);
@@ -207,90 +197,55 @@ public class ChatActivity extends AppCompatActivity {
         recyclerMessages.setAdapter(messageAdapter);
     }
 
-    // ══════════════════════════════════════════════
-    // CLICK LISTENERS
-    // ══════════════════════════════════════════════
     private void setupClickListeners() {
-
-        // ── Calls ─────────────────────────────────
         btnVoiceCall.setOnClickListener(v -> initiateCall("voice"));
         btnVideoCall.setOnClickListener(v -> initiateCall("video"));
 
-        // ── Emoji (opens system keyboard in emoji mode) ──
         btnEmoji.setOnClickListener(v -> {
             etMessage.requestFocus();
-            // Toggle between emoji and keyboard
             if (etMessage.isShown()) {
                 etMessage.setInputType(
-                    android.text.InputType.TYPE_CLASS_TEXT |
-                    android.text.InputType.TYPE_TEXT_VARIATION_NORMAL);
+                        android.text.InputType.TYPE_CLASS_TEXT |
+                                android.text.InputType.TYPE_TEXT_VARIATION_NORMAL);
             }
             android.view.inputmethod.InputMethodManager imm =
-                (android.view.inputmethod.InputMethodManager)
-                    getSystemService(INPUT_METHOD_SERVICE);
+                    (android.view.inputmethod.InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
             if (imm != null) imm.showSoftInput(etMessage, 0);
         });
 
-        // ── Camera (quick) ────────────────────────
         btnCamera.setOnClickListener(v -> openCamera());
-
-        // ── Attachment tray toggle ─────────────────
         btnAttachment.setOnClickListener(v -> toggleAttachmentTray());
 
-        // ── Tray items ────────────────────────────
-        trayCamera.setOnClickListener(v -> { closeTray(); openCamera(); });
-        trayGallery.setOnClickListener(v -> { closeTray(); openGallery(); });
-        trayDocument.setOnClickListener(v -> { closeTray(); openDocument(); });
+        trayCamera.setOnClickListener(v   -> { closeTray(); openCamera();    });
+        trayGallery.setOnClickListener(v  -> { closeTray(); openGallery();   });
+        trayDocument.setOnClickListener(v -> { closeTray(); openDocument();  });
         trayLocation.setOnClickListener(v -> { closeTray(); shareLocation(); });
-        trayContact.setOnClickListener(v -> { closeTray(); shareContact(); });
+        trayContact.setOnClickListener(v  -> { closeTray(); shareContact();  });
 
-        // ── Recording cancel ──────────────────────
         btnCancelRecording.setOnClickListener(v -> cancelRecording());
 
-        // ── Send / Mic FAB ────────────────────────
-        // Short tap → send text (if text present) or start/stop recording
         btnSend.setOnClickListener(v -> {
-            if (isRecording) {
-                // Always stop & send when recording, regardless of text
-                stopRecordingAndSend();
-                return;
-            }
+            if (isRecording) { stopRecordingAndSend(); return; }
             String text = etMessage.getText() != null ? etMessage.getText().toString().trim() : "";
-            if (!text.isEmpty()) {
-                sendTextMessage(text);
-            } else {
-                startVoiceRecording();
-            }
+            if (!text.isEmpty()) sendTextMessage(text);
+            else                 startVoiceRecording();
         });
 
-        // Long press → always start recording
-        btnSend.setOnLongClickListener(v -> {
-            startVoiceRecording();
-            return true;
-        });
+        btnSend.setOnLongClickListener(v -> { startVoiceRecording(); return true; });
 
-        // ── Text watcher: swap mic ↔ send icon ────
         etMessage.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int i, int i1, int i2) {}
             @Override public void afterTextChanged(Editable s) {}
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s.length() > 0) {
-                    btnSend.setImageResource(R.drawable.ic_send);
-                } else {
-                    btnSend.setImageResource(R.drawable.ic_mic);
-                }
+                btnSend.setImageResource(s.length() > 0 ? R.drawable.ic_send : R.drawable.ic_mic);
             }
         });
     }
 
-    // ══════════════════════════════════════════════
-    // ATTACHMENT TRAY
-    // ══════════════════════════════════════════════
     private void toggleAttachmentTray() {
-        if (layoutAttachmentTray.getVisibility() == View.VISIBLE) {
-            closeTray();
-        } else {
+        if (layoutAttachmentTray.getVisibility() == View.VISIBLE) closeTray();
+        else {
             layoutAttachmentTray.setVisibility(View.VISIBLE);
             btnAttachment.setImageResource(R.drawable.ic_close);
         }
@@ -301,20 +256,17 @@ public class ChatActivity extends AppCompatActivity {
         btnAttachment.setImageResource(R.drawable.ic_attachment);
     }
 
-    // ══════════════════════════════════════════════
-    // CAMERA
-    // ══════════════════════════════════════════════
     private void openCamera() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA);
+                    new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA);
             return;
         }
         try {
             File photoFile = createTempImageFile();
             cameraImageUri = FileProvider.getUriForFile(this,
-                getPackageName() + ".fileprovider", photoFile);
+                    getPackageName() + ".fileprovider", photoFile);
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             intent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri);
             cameraLauncher.launch(intent);
@@ -325,26 +277,19 @@ public class ChatActivity extends AppCompatActivity {
 
     private File createTempImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        File storageDir = getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES);
+        File storageDir  = getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES);
         return File.createTempFile("IMG_" + timeStamp, ".jpg", storageDir);
     }
 
-    // ══════════════════════════════════════════════
-    // GALLERY
-    // ══════════════════════════════════════════════
     private void openGallery() {
         Intent intent;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
             intent = new Intent(MediaStore.ACTION_PICK_IMAGES);
-        } else {
+        else
             intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        }
         galleryLauncher.launch(intent);
     }
 
-    // ══════════════════════════════════════════════
-    // DOCUMENT PICKER
-    // ══════════════════════════════════════════════
     private void openDocument() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
@@ -352,13 +297,9 @@ public class ChatActivity extends AppCompatActivity {
         documentLauncher.launch(Intent.createChooser(intent, "Select Document"));
     }
 
-    // ══════════════════════════════════════════════
-    // LOCATION SHARE
-    // ══════════════════════════════════════════════
     private void shareLocation() {
-        // Send a Google Maps link with the device's last known location
         android.location.LocationManager lm =
-            (android.location.LocationManager) getSystemService(LOCATION_SERVICE);
+                (android.location.LocationManager) getSystemService(LOCATION_SERVICE);
         try {
             android.location.Location loc = null;
             if (ContextCompat.checkSelfPermission(this,
@@ -368,29 +309,24 @@ public class ChatActivity extends AppCompatActivity {
                     loc = lm.getLastKnownLocation(android.location.LocationManager.NETWORK_PROVIDER);
             }
             if (loc != null) {
-                double lat = loc.getLatitude();
-                double lng = loc.getLongitude();
-                String mapsUrl = "https://maps.google.com/?q=" + lat + "," + lng;
+                String mapsUrl = "https://maps.google.com/?q=" + loc.getLatitude() + "," + loc.getLongitude();
                 Message msg = new Message(conversationId, currentUserId, otherUserId,
-                    "📍 Location: " + mapsUrl);
+                        "📍 Location: " + mapsUrl);
                 msg.setMessageType("location");
                 sendMessageObject(msg);
             } else {
                 Toast.makeText(this, "Could not get location. Enable GPS and try again.",
-                    Toast.LENGTH_SHORT).show();
+                        Toast.LENGTH_SHORT).show();
             }
         } catch (SecurityException e) {
             ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 203);
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 203);
         }
     }
 
-    // ══════════════════════════════════════════════
-    // CONTACT SHARE
-    // ══════════════════════════════════════════════
     private void shareContact() {
         Intent intent = new Intent(Intent.ACTION_PICK,
-            android.provider.ContactsContract.Contacts.CONTENT_URI);
+                android.provider.ContactsContract.Contacts.CONTENT_URI);
         startActivityForResult(intent, 204);
     }
 
@@ -401,14 +337,14 @@ public class ChatActivity extends AppCompatActivity {
             Uri contactUri = data.getData();
             if (contactUri != null) {
                 android.database.Cursor cursor = getContentResolver().query(
-                    contactUri, null, null, null, null);
+                        contactUri, null, null, null, null);
                 if (cursor != null && cursor.moveToFirst()) {
                     int nameIdx = cursor.getColumnIndex(
-                        android.provider.ContactsContract.Contacts.DISPLAY_NAME);
+                            android.provider.ContactsContract.Contacts.DISPLAY_NAME);
                     String name = nameIdx >= 0 ? cursor.getString(nameIdx) : "Contact";
                     cursor.close();
                     Message msg = new Message(conversationId, currentUserId, otherUserId,
-                        "👤 Contact: " + name);
+                            "👤 Contact: " + name);
                     msg.setMessageType("contact");
                     sendMessageObject(msg);
                 }
@@ -423,24 +359,21 @@ public class ChatActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO);
+                    new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO);
             return;
         }
 
-        // Show UI immediately
         isRecording = true;
         recordingSeconds = 0;
         layoutRecordingBar.setVisibility(View.VISIBLE);
         btnSend.setImageResource(R.drawable.ic_stop);
         tvRecordingTime.setText("0:00");
 
-        // Start timer immediately
         recordingTimerRunnable = new Runnable() {
             @Override public void run() {
                 if (!isRecording) return;
                 recordingSeconds++;
-                int m = recordingSeconds / 60;
-                int s = recordingSeconds % 60;
+                int m = recordingSeconds / 60, s = recordingSeconds % 60;
                 tvRecordingTime.setText(String.format(Locale.getDefault(), "%d:%02d", m, s));
                 recordingHandler.postDelayed(this, 1000);
             }
@@ -448,9 +381,8 @@ public class ChatActivity extends AppCompatActivity {
         recordingHandler.postDelayed(recordingTimerRunnable, 1000);
         startRecordingDotAnimation();
 
-        // Run MediaRecorder setup on background thread to avoid blocking main thread
         audioFilePath = getExternalCacheDir().getAbsolutePath()
-            + "/voice_" + System.currentTimeMillis() + ".3gp";
+                + "/voice_" + System.currentTimeMillis() + ".3gp";
         final String filePath = audioFilePath;
 
         new Thread(() -> {
@@ -462,8 +394,16 @@ public class ChatActivity extends AppCompatActivity {
                 recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
                 recorder.prepare();
                 recorder.start();
-                // Assign to field on main thread
-                runOnUiThread(() -> mediaRecorder = recorder);
+                // ✅ FIX: check isRecording in case user cancelled before runOnUiThread fired
+                runOnUiThread(() -> {
+                    if (!isRecording) {
+                        try { recorder.stop(); } catch (Exception ignored) {}
+                        recorder.release();
+                        new File(filePath).delete();
+                    } else {
+                        mediaRecorder = recorder;
+                    }
+                });
             } catch (Exception e) {
                 runOnUiThread(() -> {
                     isRecording = false;
@@ -471,7 +411,7 @@ public class ChatActivity extends AppCompatActivity {
                     layoutRecordingBar.setVisibility(View.GONE);
                     btnSend.setImageResource(R.drawable.ic_mic);
                     Toast.makeText(this, "Failed to start recording: " + e.getMessage(),
-                        Toast.LENGTH_SHORT).show();
+                            Toast.LENGTH_SHORT).show();
                 });
             }
         }).start();
@@ -481,7 +421,6 @@ public class ChatActivity extends AppCompatActivity {
         if (!isRecording) return;
         stopRecording();
 
-        // Read audio bytes from file directly (file:// path, always readable)
         String duration = tvRecordingTime != null ? tvRecordingTime.getText().toString() : "0:00";
         try {
             java.io.File audioFile = new java.io.File(audioFilePath);
@@ -489,40 +428,40 @@ public class ChatActivity extends AppCompatActivity {
                 Toast.makeText(this, "Recording failed", Toast.LENGTH_SHORT).show();
                 return;
             }
+            // ✅ FIX: readFully guarantees ALL bytes are read — read() may return early
             byte[] audioBytes = new byte[(int) audioFile.length()];
-            java.io.FileInputStream fis = new java.io.FileInputStream(audioFile);
-            fis.read(audioBytes);
-            fis.close();
+            try (java.io.DataInputStream dis = new java.io.DataInputStream(
+                    new java.io.FileInputStream(audioFile))) {
+                dis.readFully(audioBytes);
+            }
 
             String uploadPath = "chat_audio/" + conversationId + "/" + System.currentTimeMillis() + ".3gp";
-            // Use uploadRawBytes — audio must NOT be processed through BitmapFactory
             firebaseManager.uploadRawBytes(audioBytes, uploadPath, "audio/3gpp",
-                new JobLinkerFirebaseManager.UploadCallback() {
-                    @Override public void onSuccess(String downloadUrl) {
-                        audioFile.delete();
-                        Message msg = new Message(conversationId, currentUserId, otherUserId,
-                            "🎤 Voice message (" + duration + ")");
-                        msg.setMessageType("audio");
-                        msg.setImageUrl(downloadUrl);
-                        sendMessageObject(msg);
-                    }
-                    @Override public void onProgress(int progress) {}
-                    @Override public void onFailure(String error) {
-                        audioFile.delete();
-                        Toast.makeText(ChatActivity.this,
-                            "Failed to send voice message", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                    new JobLinkerFirebaseManager.UploadCallback() {
+                        @Override public void onSuccess(String downloadUrl) {
+                            audioFile.delete();
+                            Message msg = new Message(conversationId, currentUserId, otherUserId,
+                                    "🎤 Voice message (" + duration + ")");
+                            msg.setMessageType("audio");
+                            msg.setImageUrl(downloadUrl);
+                            sendMessageObject(msg);
+                        }
+                        @Override public void onProgress(int progress) {}
+                        @Override public void onFailure(String error) {
+                            audioFile.delete();
+                            Toast.makeText(ChatActivity.this,
+                                    "Failed to send voice message", Toast.LENGTH_SHORT).show();
+                        }
+                    });
         } catch (Exception e) {
             Toast.makeText(this, "Could not send voice message: " + e.getMessage(),
-                Toast.LENGTH_SHORT).show();
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
     private void cancelRecording() {
         if (!isRecording) return;
         stopRecording();
-        // Delete file
         File f = new File(audioFilePath);
         if (f.exists()) f.delete();
         Toast.makeText(this, "Recording cancelled", Toast.LENGTH_SHORT).show();
@@ -550,8 +489,8 @@ public class ChatActivity extends AppCompatActivity {
             @Override public void run() {
                 if (!isRecording) return;
                 viewRecordingDot.animate().alpha(0f).setDuration(500)
-                    .withEndAction(() -> viewRecordingDot.animate().alpha(1f).setDuration(500)
-                        .withEndAction(this).start()).start();
+                        .withEndAction(() -> viewRecordingDot.animate().alpha(1f).setDuration(500)
+                                .withEndAction(this).start()).start();
             }
         };
         blink.run();
@@ -568,7 +507,6 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void sendImageMessage(Uri imageUri) {
-        // Read bytes on main thread NOW while URI permissions are still valid
         byte[] bytes = readUriBytes(imageUri);
         if (bytes == null || bytes.length == 0) {
             Toast.makeText(this, "Could not read image", Toast.LENGTH_SHORT).show();
@@ -576,22 +514,21 @@ public class ChatActivity extends AppCompatActivity {
         }
         String uploadPath = "chat_images/" + conversationId + "/" + System.currentTimeMillis() + ".jpg";
         firebaseManager.uploadBytes(bytes, uploadPath,
-            new JobLinkerFirebaseManager.UploadCallback() {
-                @Override public void onSuccess(String downloadUrl) {
-                    Message msg = new Message(conversationId, currentUserId, otherUserId, "📷 Photo");
-                    msg.setMessageType("image");
-                    msg.setImageUrl(downloadUrl);
-                    sendMessageObject(msg);
-                }
-                @Override public void onProgress(int p) {}
-                @Override public void onFailure(String error) {
-                    Toast.makeText(ChatActivity.this,
-                        "Failed to send image: " + error, Toast.LENGTH_SHORT).show();
-                }
-            });
+                new JobLinkerFirebaseManager.UploadCallback() {
+                    @Override public void onSuccess(String downloadUrl) {
+                        Message msg = new Message(conversationId, currentUserId, otherUserId, "📷 Photo");
+                        msg.setMessageType("image");
+                        msg.setImageUrl(downloadUrl);
+                        sendMessageObject(msg);
+                    }
+                    @Override public void onProgress(int p) {}
+                    @Override public void onFailure(String error) {
+                        Toast.makeText(ChatActivity.this,
+                                "Failed to send image: " + error, Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
-    // Reads all bytes from any URI using Activity's ContentResolver (FileProvider safe)
     private byte[] readUriBytes(Uri uri) {
         try {
             java.io.InputStream is = getContentResolver().openInputStream(uri);
@@ -608,11 +545,10 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void sendDocumentMessage(Uri documentUri) {
-        // Get file name
         String fileName = "document";
         try {
             android.database.Cursor cursor = getContentResolver().query(
-                documentUri, null, null, null, null);
+                    documentUri, null, null, null, null);
             if (cursor != null && cursor.moveToFirst()) {
                 int idx = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME);
                 if (idx >= 0) fileName = cursor.getString(idx);
@@ -620,7 +556,6 @@ public class ChatActivity extends AppCompatActivity {
             }
         } catch (Exception ignored) {}
 
-        // Read bytes on main thread NOW while URI permissions are still valid
         byte[] bytes = readUriBytes(documentUri);
         if (bytes == null || bytes.length == 0) {
             Toast.makeText(this, "Could not read document", Toast.LENGTH_SHORT).show();
@@ -630,20 +565,20 @@ public class ChatActivity extends AppCompatActivity {
         final String finalName = fileName;
         String uploadPath = "chat_documents/" + conversationId + "/" + System.currentTimeMillis();
         firebaseManager.uploadBytes(bytes, uploadPath,
-            new JobLinkerFirebaseManager.UploadCallback() {
-                @Override public void onSuccess(String downloadUrl) {
-                    Message msg = new Message(conversationId, currentUserId, otherUserId,
-                        "📄 " + finalName);
-                    msg.setMessageType("document");
-                    msg.setImageUrl(downloadUrl);
-                    sendMessageObject(msg);
-                }
-                @Override public void onProgress(int p) {}
-                @Override public void onFailure(String error) {
-                    Toast.makeText(ChatActivity.this,
-                        "Failed to upload document", Toast.LENGTH_SHORT).show();
-                }
-            });
+                new JobLinkerFirebaseManager.UploadCallback() {
+                    @Override public void onSuccess(String downloadUrl) {
+                        Message msg = new Message(conversationId, currentUserId, otherUserId,
+                                "📄 " + finalName);
+                        msg.setMessageType("document");
+                        msg.setImageUrl(downloadUrl);
+                        sendMessageObject(msg);
+                    }
+                    @Override public void onProgress(int p) {}
+                    @Override public void onFailure(String error) {
+                        Toast.makeText(ChatActivity.this,
+                                "Failed to upload document", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void sendMessageObject(Message message) {
@@ -656,7 +591,7 @@ public class ChatActivity extends AppCompatActivity {
             }
             @Override public void onFailure(String error) {
                 Toast.makeText(ChatActivity.this,
-                    "Failed to send: " + error, Toast.LENGTH_SHORT).show();
+                        "Failed to send: " + error, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -666,20 +601,20 @@ public class ChatActivity extends AppCompatActivity {
     // ══════════════════════════════════════════════
     private void setupMessageListener() {
         messageListener = firebaseManager.listenToMessages(conversationId,
-            new JobLinkerFirebaseManager.ListCallback<Message>() {
-                @Override public void onSuccess(List<Message> list) {
-                    messages.clear();
-                    messages.addAll(list);
-                    messageAdapter.notifyDataSetChanged();
-                    if (!messages.isEmpty())
-                        recyclerMessages.scrollToPosition(messages.size() - 1);
-                    markMessagesAsRead();
-                }
-                @Override public void onFailure(String error) {
-                    Toast.makeText(ChatActivity.this,
-                        "Error loading messages: " + error, Toast.LENGTH_SHORT).show();
-                }
-            });
+                new JobLinkerFirebaseManager.ListCallback<Message>() {
+                    @Override public void onSuccess(List<Message> list) {
+                        messages.clear();
+                        messages.addAll(list);
+                        messageAdapter.notifyDataSetChanged();
+                        if (!messages.isEmpty())
+                            recyclerMessages.scrollToPosition(messages.size() - 1);
+                        markMessagesAsRead();
+                    }
+                    @Override public void onFailure(String error) {
+                        Toast.makeText(ChatActivity.this,
+                                "Error loading messages: " + error, Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void loadUserStatus() {
@@ -701,10 +636,10 @@ public class ChatActivity extends AppCompatActivity {
         for (Message m : messages) {
             if (!m.isMessageRead() && currentUserId.equals(m.getMessageReceiverId())) {
                 firebaseManager.markMessageAsRead(m.getMessageId(),
-                    new JobLinkerFirebaseManager.VoidCallback() {
-                        @Override public void onSuccess() {}
-                        @Override public void onFailure(String e) {}
-                    });
+                        new JobLinkerFirebaseManager.VoidCallback() {
+                            @Override public void onSuccess() {}
+                            @Override public void onFailure(String e) {}
+                        });
             }
         }
     }
@@ -730,19 +665,25 @@ public class ChatActivity extends AppCompatActivity {
             if (requestCode == REQUEST_RECORD_AUDIO) startVoiceRecording();
             else if (requestCode == REQUEST_CAMERA)  openCamera();
         } else {
-            String msg = requestCode == REQUEST_RECORD_AUDIO
-                ? "Microphone permission required for voice messages"
-                : "Camera permission required";
-            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,
+                    requestCode == REQUEST_RECORD_AUDIO
+                            ? "Microphone permission required for voice messages"
+                            : "Camera permission required",
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
     // ══════════════════════════════════════════════
-    // LIFECYCLE
+    // AUDIO PLAYBACK  (called by MessageAdapter)
     // ══════════════════════════════════════════════
-    // ── Public audio playback for MessageAdapter ─
     public void playVoiceMessage(String url, Runnable onStart, Runnable onStop) {
-        // Stop current if same URL (toggle)
+        // ✅ FIX #5: guard null URL before calling .equals()
+        if (url == null || url.isEmpty()) {
+            if (onStop != null) onStop.run();
+            return;
+        }
+
+        // Toggle: tap same message while playing → stop
         if (url.equals(playingUrl) && audioPlayer != null) {
             stopAudioPlayer();
             if (onStop != null) onStop.run();
@@ -753,52 +694,103 @@ public class ChatActivity extends AppCompatActivity {
 
         audioPlayer = new MediaPlayer();
         playingUrl  = url;
+        final MediaPlayer player = audioPlayer; // local ref guards against race condition
 
         try {
-            audioPlayer.setDataSource(url);
+            // ✅ FIX #3: AudioAttributes MUST be set before setDataSource
             audioPlayer.setAudioAttributes(
-                new android.media.AudioAttributes.Builder()
-                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH)
-                    .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
-                    .build());
+                    new android.media.AudioAttributes.Builder()
+                            .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH)
+                            .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
+                            .build());
 
-            final MediaPlayer player = audioPlayer;
+            audioPlayer.setDataSource(url);
+
             audioPlayer.setOnPreparedListener(mp -> {
-                if (mp == player) {  // still valid
-                    if (onStart != null) onStart.run();
-                    mp.start();
+                // ✅ FIX #4: stale-player guard — player may have been released already
+                if (mp != player || audioPlayer != player) {
+                    try { mp.release(); } catch (Exception ignored) {}
+                    return;
                 }
+                // ✅ FIX #2: request audio focus — without this the OS silences playback
+                if (!requestAudioFocus()) {
+                    if (onStop != null) onStop.run();
+                    stopAudioPlayer();
+                    return;
+                }
+                if (onStart != null) onStart.run();
+                mp.start();
             });
+
             audioPlayer.setOnCompletionListener(mp -> {
+                abandonAudioFocus();
                 if (onStop != null) onStop.run();
                 stopAudioPlayer();
             });
+
             audioPlayer.setOnErrorListener((mp, what, extra) -> {
+                Log.e("ChatActivity", "MediaPlayer error what=" + what + " extra=" + extra);
                 Toast.makeText(this, "Cannot play audio", Toast.LENGTH_SHORT).show();
+                abandonAudioFocus();
                 if (onStop != null) onStop.run();
                 stopAudioPlayer();
                 return true;
             });
+
             audioPlayer.prepareAsync();
 
         } catch (Exception e) {
+            Log.e("ChatActivity", "playVoiceMessage failed: " + e.getMessage(), e);
             Toast.makeText(this, "Cannot play audio: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             if (onStop != null) onStop.run();
             stopAudioPlayer();
         }
     }
 
-    public void stopAudioPlayer() {
-        if (audioPlayer != null) {
-            try {
-                if (audioPlayer.isPlaying()) audioPlayer.stop();
-                audioPlayer.release();
-            } catch (Exception ignored) {}
-            audioPlayer = null;
-            playingUrl  = null;
+    private boolean requestAudioFocus() {
+        if (audioManager == null)
+            audioManager = (android.media.AudioManager) getSystemService(AUDIO_SERVICE);
+
+        audioFocusRequest = new android.media.AudioFocusRequest.Builder(
+                android.media.AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+                .setAudioAttributes(new android.media.AudioAttributes.Builder()
+                        .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
+                        .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH)
+                        .build())
+                .setOnAudioFocusChangeListener(focusChange -> {
+                    if (focusChange == android.media.AudioManager.AUDIOFOCUS_LOSS ||
+                            focusChange == android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
+                        runOnUiThread(this::stopAudioPlayer);
+                    }
+                })
+                .build();
+
+        return audioManager.requestAudioFocus(audioFocusRequest)
+                == android.media.AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+    }
+
+    private void abandonAudioFocus() {
+        if (audioManager != null && audioFocusRequest != null) {
+            audioManager.abandonAudioFocusRequest(audioFocusRequest);
+            audioFocusRequest = null;
         }
     }
 
+    public void stopAudioPlayer() {
+        // ✅ FIX #4: capture then null — prevents double-release on re-entrant calls
+        MediaPlayer p = audioPlayer;
+        audioPlayer   = null;
+        playingUrl    = null;
+        if (p != null) {
+            try { p.stop();    } catch (Exception ignored) {}
+            try { p.release(); } catch (Exception ignored) {}
+        }
+        abandonAudioFocus();
+    }
+
+    // ══════════════════════════════════════════════
+    // LIFECYCLE
+    // ══════════════════════════════════════════════
     @Override
     protected void onDestroy() {
         super.onDestroy();

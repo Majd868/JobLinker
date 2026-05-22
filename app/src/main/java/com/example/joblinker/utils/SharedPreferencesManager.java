@@ -73,7 +73,8 @@ public class SharedPreferencesManager {
     }
 
     public boolean isEmployer() {
-        return "Employer".equals(getUserRole());
+        // Case-insensitive — EditProfileActivity saves "employer", RegisterStep1 saves "Employer"
+        return "employer".equalsIgnoreCase(getUserRole());
     }
 
     // User Avatar

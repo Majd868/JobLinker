@@ -106,7 +106,11 @@ public class CallActivity extends AppCompatActivity {
     // ── Start call ────────────────────────────────
     private void startCall() {
         Call call = new Call(firebaseManager.getCurrentUserId(), receiverId, callType);
-        call.setCallerName(firebaseManager.getCurrentUserId());
+        // Use stored display name — fall back to UID only if name is blank
+        String myName = com.example.joblinker.utils.SharedPreferencesManager
+                .getInstance(this).getUserName();
+        call.setCallerName(myName != null && !myName.isEmpty() ? myName
+                : firebaseManager.getCurrentUserId());
         call.setReceiverName(receiverName);
 
         firebaseManager.createCall(call, new JobLinkerFirebaseManager.DataCallback<String>() {

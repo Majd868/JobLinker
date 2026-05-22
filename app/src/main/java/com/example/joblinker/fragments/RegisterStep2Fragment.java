@@ -151,7 +151,7 @@ public class RegisterStep2Fragment extends Fragment {
         btnVerify.setText("Verifying...");
 
         // Simulate successful verification since Firebase natively uses links, not 6-digit codes
-        new android.os.Handler().postDelayed(() -> {
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
             emailVerified = true;
             Toast.makeText(requireContext(), "Email verified successfully!", Toast.LENGTH_SHORT).show();
 

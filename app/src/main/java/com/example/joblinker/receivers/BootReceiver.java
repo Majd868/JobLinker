@@ -31,22 +31,8 @@ public class BootReceiver extends BroadcastReceiver {
     }
 
     private void initializeApp(Context context) {
-        SharedPreferencesManager prefsManager = SharedPreferencesManager.getInstance(context);
-
-        // Check if user is logged in
-        if (prefsManager.isLoggedIn()) {
-            String userId = prefsManager.getUserId();
-
-            if (userId != null) {
-                // Update user online status
-                JobLinkerFirebaseManager firebaseManager = JobLinkerFirebaseManager.getInstance();
-                firebaseManager.updateUserOnlineStatus(userId, true);
-
-                Log.d(TAG, "User status updated after boot: " + userId);
-            }
-        }
-
-        // Initialize other services as needed
-        // For example: start background sync, schedule notifications, etc.
+        // Note: do NOT set the user online here — the app is not open after a reboot,
+        // only the OS fired a broadcast. Online status is set in MainActivity/onResume.
+        Log.d(TAG, "Boot completed — skipping online-status update (app not yet open)");
     }
 }

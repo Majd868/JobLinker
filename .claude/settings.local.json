@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs grep -l \"voice\\\\|audio\\\\|Voice\\\\|Audio\\\\|Recording\\\\|recording\")"
+    ]
+  }
+}

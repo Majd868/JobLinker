@@ -689,9 +689,10 @@ public class JobLinkerFirebaseManager {
 
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         Job job = document.toObject(Job.class);
-                        if (job.getJobTitle().toLowerCase().contains(lowerQuery) ||
-                                job.getJobCompany().toLowerCase().contains(lowerQuery) ||
-                                job.getJobDescription().toLowerCase().contains(lowerQuery)) {
+                        String title   = job.getJobTitle()       != null ? job.getJobTitle().toLowerCase()       : "";
+                        String company = job.getJobCompany()     != null ? job.getJobCompany().toLowerCase()     : "";
+                        String desc    = job.getJobDescription() != null ? job.getJobDescription().toLowerCase() : "";
+                        if (title.contains(lowerQuery) || company.contains(lowerQuery) || desc.contains(lowerQuery)) {
                             jobs.add(job);
                         }
                     }

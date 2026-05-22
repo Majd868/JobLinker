@@ -10,7 +10,7 @@ import android.widget.Toast;
 
 import com.example.joblinker.R;
 import com.example.joblinker.activities.LoginActivity;
-import com.google.firebase.auth.FirebaseAuth;
+import com.example.joblinker.firebase.JobLinkerFirebaseManager;
 
 import java.io.File;
 
@@ -37,41 +37,37 @@ public class LogoutHelper {
         ProgressDialogHelper progressDialog = new ProgressDialogHelper(activity, "Logging out...");
         progressDialog.show();
 
-        // Perform logout after short delay (for better UX)
+        JobLinkerFirebaseManager firebaseManager = JobLinkerFirebaseManager.getInstance();
+        // Read userId BEFORE clearing prefs
+        String userId = SharedPreferencesManager.getInstance(activity).getUserId();
+
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            // Sign out from Firebase
-            FirebaseAuth.getInstance().signOut();
+            // Mark user offline before signing out
+            if (userId != null) {
+                firebaseManager.updateUserOnlineStatus(userId, false);
+            }
+            // Full logout — removes all Firestore listeners and signs out of Firebase Auth
+            firebaseManager.logout();
 
-            // Clear SharedPreferences
             clearSharedPreferences(activity);
-
-            // Clear app cache
             clearCache(activity);
 
-            // Dismiss progress dialog
             progressDialog.dismiss();
-
-            // Show success message
             Toast.makeText(activity, "Logged out successfully", Toast.LENGTH_SHORT).show();
-
-            // Navigate to login screen
             navigateToLogin(activity);
-
-        }, 1000); // 1 second delay
+        }, 1000);
     }
 
     /**
      * Quick logout without dialog
      */
     public static void quickLogout(Activity activity) {
-        // Sign out from Firebase
-        FirebaseAuth.getInstance().signOut();
-
-        // Clear all data
+        JobLinkerFirebaseManager firebaseManager = JobLinkerFirebaseManager.getInstance();
+        String userId = SharedPreferencesManager.getInstance(activity).getUserId();
+        if (userId != null) firebaseManager.updateUserOnlineStatus(userId, false);
+        firebaseManager.logout();
         clearSharedPreferences(activity);
         clearCache(activity);
-
-        // Navigate to login
         Toast.makeText(activity, "Logged out", Toast.LENGTH_SHORT).show();
         navigateToLogin(activity);
     }

@@ -122,7 +122,7 @@ public class RegisterStep3Fragment extends Fragment {
 
     private void simulateSendSms() {
         // Simulate delay
-        new android.os.Handler().postDelayed(() -> {
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
             // Show verification input
             btnSendSmsCode.setVisibility(View.GONE);
             tilSmsVerificationCode.setVisibility(View.VISIBLE);
@@ -159,7 +159,7 @@ public class RegisterStep3Fragment extends Fragment {
         btnVerifySms.setText("Verifying...");
 
         // Simulate verification
-        new android.os.Handler().postDelayed(() -> {
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
             smsVerified = true;
             Toast.makeText(requireContext(),
                     "Phone number verified successfully!",

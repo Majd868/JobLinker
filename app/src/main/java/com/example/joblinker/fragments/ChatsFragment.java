@@ -109,7 +109,8 @@ public class ChatsFragment extends Fragment
 
         progressBar.setVisibility(View.VISIBLE);
 
-        firebaseManager.getUserConversations(userId,
+        // Real-time listener — updates the list whenever Firestore changes
+        conversationsListener = firebaseManager.listenToConversations(userId,
             new JobLinkerFirebaseManager.ListCallback<Conversation>() {
                 @Override
                 public void onSuccess(List<Conversation> list) {

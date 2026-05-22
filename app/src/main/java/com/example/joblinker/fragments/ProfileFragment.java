@@ -391,12 +391,10 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // Clear Glide disk cache on background thread, memory cache on main thread
-        // This ensures updated profile photos always show fresh
-        new Thread(() -> {
-            Glide.get(requireContext()).clearDiskCache();
-        }).start();
-        Glide.get(requireContext()).clearMemory(); // must be on main thread
+        // ✅ Removed full Glide cache clear — it wiped every image in the app on
+        // every tab switch. loadCircularImage() already uses DiskCacheStrategy.NONE
+        // + skipMemoryCache(true) so the profile photo always loads fresh without
+        // flushing the entire shared cache.
         loadUserProfile();
     }
 }

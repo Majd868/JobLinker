@@ -165,7 +165,7 @@ public class Message implements Serializable {
     }
 
     public boolean isVoiceMessage() {
-        return "voice".equals(messageType);
+        return "audio".equals(messageType) || "voice".equals(messageType);
     }
 
     @Override

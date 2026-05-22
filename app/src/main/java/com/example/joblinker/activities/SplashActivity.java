@@ -2,7 +2,8 @@ package com.example.joblinker.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
@@ -18,10 +19,23 @@ import com.example.joblinker.utils.SharedPreferencesManager;
 
 public class SplashActivity extends AppCompatActivity {
 
+    private final Handler handler = new Handler(Looper.getMainLooper());
+
+    // true after the 2-second splash delay elapses
+    private boolean splashReady = false;
+    // true between onStart() and onStop() — i.e. app is in foreground
+    private boolean isVisible   = false;
+
+    private JobLinkerFirebaseManager firebaseManager;
+    private SharedPreferencesManager prefsManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+
+        firebaseManager = JobLinkerFirebaseManager.getInstance();
+        prefsManager    = SharedPreferencesManager.getInstance(this);
 
         ImageView ivLogo   = findViewById(R.id.iv_logo);
         TextView tvAppName = findViewById(R.id.tv_app_name);
@@ -55,20 +69,46 @@ public class SplashActivity extends AppCompatActivity {
             tvTagline.startAnimation(tagAnim);
         }
 
-        // Navigate after 2s
-        JobLinkerFirebaseManager firebaseManager = JobLinkerFirebaseManager.getInstance();
-        SharedPreferencesManager prefsManager    = SharedPreferencesManager.getInstance(this);
-
-        ivLogo.postDelayed(() -> {
-            Intent intent;
-            if (prefsManager.isLoggedIn() && firebaseManager.getCurrentUser() != null) {
-                intent = new Intent(SplashActivity.this, MainActivity.class);
-            } else {
-                intent = new Intent(SplashActivity.this, LoginActivity.class);
-            }
-            startActivity(intent);
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            finish();
+        // After 2s mark splash as ready; if the app is still visible, navigate
+        // immediately. If the screen was locked in the meantime, navigation is
+        // deferred to onStart() — this avoids the BAL (Background Activity Launch)
+        // block that Android 10+ enforces on TOP_SLEEPING processes.
+        handler.postDelayed(() -> {
+            splashReady = true;
+            if (isVisible) navigate();
         }, 2000);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        isVisible = true;
+        // If the 2-second delay already elapsed while we were in background, navigate now
+        if (splashReady) navigate();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        isVisible = false;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        handler.removeCallbacksAndMessages(null);
+    }
+
+    private void navigate() {
+        if (isFinishing() || isDestroyed()) return;
+        Intent intent;
+        if (prefsManager.isLoggedIn() && firebaseManager.getCurrentUser() != null) {
+            intent = new Intent(this, MainActivity.class);
+        } else {
+            intent = new Intent(this, LoginActivity.class);
+        }
+        startActivity(intent);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        finish();
     }
 }

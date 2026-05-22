@@ -82,13 +82,16 @@ public class CallService extends Service {
     }
 
     private void handleAnswerCall(Intent intent) {
-        String callId = intent.getStringExtra(EXTRA_CALL_ID);
+        String callId    = intent.getStringExtra(EXTRA_CALL_ID);
         String callerName = intent.getStringExtra(EXTRA_CALLER_NAME);
+        String callerId  = intent.getStringExtra(EXTRA_CALLER_ID); // may be null for older notifications
 
-        // Launch CallActivity
+        // Launch CallActivity with full caller info so CallActivity can save the call record
         Intent callIntent = new Intent(this, CallActivity.class);
-        callIntent.putExtra(CallActivity.EXTRA_CALL_TYPE, callType);
+        callIntent.putExtra(CallActivity.EXTRA_CALL_TYPE,     callType);
         callIntent.putExtra(CallActivity.EXTRA_RECEIVER_NAME, callerName);
+        if (callerId != null)
+            callIntent.putExtra(CallActivity.EXTRA_RECEIVER_ID, callerId);
         callIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(callIntent);
 

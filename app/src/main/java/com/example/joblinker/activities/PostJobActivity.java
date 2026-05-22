@@ -222,12 +222,22 @@ public class PostJobActivity extends AppCompatActivity {
         job.setDeadline(deadlineTimestamp);
         if (switchUrgent != null) job.setUrgent(switchUrgent.isChecked());
 
-        // Parse salary
+        // Parse salary — guard against non-numeric input
         if (!ValidationHelper.isEmpty(salaryMinStr)) {
-            job.setJobSalaryMin(Double.parseDouble(salaryMinStr));
+            try {
+                job.setJobSalaryMin(Double.parseDouble(salaryMinStr));
+            } catch (NumberFormatException e) {
+                Toast.makeText(this, "Invalid minimum salary value", Toast.LENGTH_SHORT).show();
+                return;
+            }
         }
         if (!ValidationHelper.isEmpty(salaryMaxStr)) {
-            job.setJobSalaryMax(Double.parseDouble(salaryMaxStr));
+            try {
+                job.setJobSalaryMax(Double.parseDouble(salaryMaxStr));
+            } catch (NumberFormatException e) {
+                Toast.makeText(this, "Invalid maximum salary value", Toast.LENGTH_SHORT).show();
+                return;
+            }
         }
 
         // Show progress

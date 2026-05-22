@@ -199,29 +199,15 @@ public class SettingActivity extends BaseActivity {
 
         // Saved jobs → open SavedJobsActivity
         if (btnSavedJobs != null) {
-            btnSavedJobs.setOnClickListener(v -> {
-                try {
-                    startActivity(new Intent(this,
-                            Class.forName("com.example.joblinker.activities.SavedJobsActivity")));
-                } catch (ClassNotFoundException e) {
-                    // Activity not created yet — show placeholder screen
-                    showSimpleInfo("Saved Jobs",
-                        "Your saved jobs will appear here.\nBrowse jobs and tap the bookmark icon to save them.");
-                }
-            });
+            btnSavedJobs.setOnClickListener(v ->
+                startActivity(new Intent(this, com.example.joblinker.activities.SavedJobsActivity.class)));
         }
 
-        // My Applications → open ApplicationsActivity
+        // My Applications → placeholder (activity not yet implemented)
         if (btnMyApplications != null) {
-            btnMyApplications.setOnClickListener(v -> {
-                try {
-                    startActivity(new Intent(this,
-                            Class.forName("com.example.joblinker.activities.MyApplicationsActivity")));
-                } catch (ClassNotFoundException e) {
-                    showSimpleInfo("My Applications",
-                        "All your job applications will appear here with their current status.");
-                }
-            });
+            btnMyApplications.setOnClickListener(v ->
+                showSimpleInfo("My Applications",
+                    "All your job applications will appear here with their current status."));
         }
 
         // ── PREFERENCES / SWITCHES ────────────────────

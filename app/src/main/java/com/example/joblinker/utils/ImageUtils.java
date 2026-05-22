@@ -89,40 +89,39 @@ public class ImageUtils {
      * Compress image
      */
     public static File compressImage(Context context, Uri imageUri) throws IOException {
-        InputStream inputStream = context.getContentResolver().openInputStream(imageUri);
-        Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-
-        if (inputStream != null) {
-            inputStream.close();
+        // Decode inside try-with-resources so the stream is always closed,
+        // even if BitmapFactory.decodeStream() throws
+        Bitmap original;
+        try (InputStream inputStream = context.getContentResolver().openInputStream(imageUri)) {
+            original = BitmapFactory.decodeStream(inputStream);
         }
+        if (original == null) throw new IOException("Could not decode image");
 
         // Resize if too large
-        int maxWidth = 1024;
-        int maxHeight = 1024;
-
-        if (bitmap.getWidth() > maxWidth || bitmap.getHeight() > maxHeight) {
+        int maxWidth = 1024, maxHeight = 1024;
+        Bitmap bitmap;
+        if (original.getWidth() > maxWidth || original.getHeight() > maxHeight) {
             float scale = Math.min(
-                    (float) maxWidth / bitmap.getWidth(),
-                    (float) maxHeight / bitmap.getHeight()
-            );
-
-            int newWidth = Math.round(bitmap.getWidth() * scale);
-            int newHeight = Math.round(bitmap.getHeight() * scale);
-
-            bitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true);
+                    (float) maxWidth  / original.getWidth(),
+                    (float) maxHeight / original.getHeight());
+            bitmap = Bitmap.createScaledBitmap(original,
+                    Math.round(original.getWidth()  * scale),
+                    Math.round(original.getHeight() * scale), true);
+            original.recycle(); // ✅ free original after scaling
+        } else {
+            bitmap = original;
         }
 
         // Compress to JPEG
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream);
-
-        // Save to file
-        File tempFile = new File(context.getCacheDir(), "compressed_" + System.currentTimeMillis() + ".jpg");
-        FileOutputStream fos = new FileOutputStream(tempFile);
-        fos.write(outputStream.toByteArray());
-        fos.close();
-        outputStream.close();
-
+        File tempFile = new File(context.getCacheDir(),
+                "compressed_" + System.currentTimeMillis() + ".jpg");
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+             FileOutputStream fos = new FileOutputStream(tempFile)) {
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, bos);
+            fos.write(bos.toByteArray());
+        } finally {
+            if (bitmap != original) bitmap.recycle();
+        }
         return tempFile;
     }
 
