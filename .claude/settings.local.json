@@ -1,7 +1,18 @@
 {
   "permissions": {
     "allow": [
-      "Bash(xargs grep -l \"voice\\\\|audio\\\\|Voice\\\\|Audio\\\\|Recording\\\\|recording\")"
+      "Bash(xargs grep -l \"voice\\\\|audio\\\\|Voice\\\\|Audio\\\\|Recording\\\\|recording\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\emmaj\\\\StudioProjects\\\\JobLinker\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(python -c ' *)",
+      "Bash(pip install *)",
+      "Bash(python -m pdfplumber --version)",
+      "Bash(python -c \"import sys; sys.stdout.buffer.write\\(sys.stdin.buffer.read\\(\\)\\)\")",
+      "Bash(python)",
+      "Bash(python -c \"from PIL import Image; print\\('PIL OK'\\)\")",
+      "Bash(python -c \"from reportlab.lib.pagesizes import A4; print\\('ReportLab OK'\\)\")",
+      "Bash(python generate_book.py)",
+      "PowerShell(Start-Process \"C:\\\\Users\\\\emmaj\\\\StudioProjects\\\\JobLinker\\\\JobLinker_Book.pdf\")"
     ]
   }
 }
