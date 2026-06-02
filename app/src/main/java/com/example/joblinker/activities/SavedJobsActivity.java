@@ -53,6 +53,7 @@ public class SavedJobsActivity extends AppCompatActivity {
         loadSavedJobs();
     }
 
+    // يجلب قائمة معرّفات الوظائف المحفوظة للمستخدم الحالي ويحمّل كل وظيفة في RecyclerView
     private void loadSavedJobs() {
         String userId = firebaseManager.getCurrentUserId();
         if (userId == null) return;

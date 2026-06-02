@@ -46,7 +46,7 @@ public class MainActivity extends BaseActivity {
         listenForUnreadMessages();
     }
 
-    // ── Create all fragments once, hide/show instead of replace ──
+    // ينشئ الأجزاء الثلاثة مرة واحدة ويضيفها إلى الحاوية مع إظهار قسم الوظائف فقط في البداية
     private void setupFragments() {
         jobsFragment    = new JobsFragment();
         chatsFragment   = new ChatsFragment();
@@ -61,6 +61,7 @@ public class MainActivity extends BaseActivity {
         activeFragment = jobsFragment;
     }
 
+    // يربط تحديد عنصر شريط التنقل السفلي لعرض الجزء المقابل
     private void setupBottomNav() {
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
@@ -71,6 +72,7 @@ public class MainActivity extends BaseActivity {
         });
     }
 
+    // يخفي الجزء النشط ويعرض الجزء المستهدف مع تأثير تلاشي
     private void switchTo(Fragment target) {
         if (target == activeFragment) return;
         getSupportFragmentManager().beginTransaction()
@@ -81,7 +83,7 @@ public class MainActivity extends BaseActivity {
         activeFragment = target;
     }
 
-    // ── Unread messages badge on Chats tab ────────
+    // يستمع للرسائل غير المقروءة في الوقت الفعلي ويحدّث عداد الشارة في تبويب المحادثات
     private void listenForUnreadMessages() {
         String uid = FirebaseAuth.getInstance().getUid();
         if (uid == null) return;
@@ -106,12 +108,14 @@ public class MainActivity extends BaseActivity {
             });
     }
 
+    // يُنشئ قائمة الخيارات من ملف القائمة الرئيسية
     @Override
     public boolean onCreateOptionsMenu(android.view.Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
     }
 
+    // يعالج النقر على عناصر قائمة الخيارات (الإعدادات وتسجيل الخروج)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -125,6 +129,7 @@ public class MainActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    // يزيل مستمع الرسائل غير المقروءة عند تدمير النشاط لمنع تسرب الذاكرة
     @Override
     protected void onDestroy() {
         super.onDestroy();

@@ -39,12 +39,14 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         this.currentUserId = currentUserId;
     }
 
+    // يُعيد VIEW_SENT أو VIEW_RECEIVED بناءً على ما إذا كانت الرسالة تخصّ المستخدم الحالي
     @Override public int getItemViewType(int position) {
         String senderId = messages.get(position).getMessageSenderId();
         return senderId != null && senderId.equals(currentUserId)
             ? VIEW_SENT : VIEW_RECEIVED;
     }
 
+    // يُحمّل تخطيط الرسالة المُرسَلة أو المُستلَمة بحسب نوع العرض
     @NonNull @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inf = LayoutInflater.from(context);
@@ -53,6 +55,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         return new ReceivedHolder(inf.inflate(R.layout.item_message_received, parent, false));
     }
 
+    // يُوزّع الربط على bindSent أو bindReceived بناءً على نوع الحامل
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         Message msg = messages.get(position);
@@ -60,6 +63,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         else                                   bindReceived((ReceivedHolder) holder, msg);
     }
 
+    // يملأ حامل الرسالة المُرسَلة بالمحتوى والوقت وأيقونة حالة القراءة/التسليم
     private void bindSent(SentHolder h, Message msg) {
         bindContent(h.tvMessage, h.ivImage, h.layoutMedia, h.tvMediaLabel, msg);
         h.tvTimestamp.setText(DateTimeHelper.formatTime(msg.getMessageTimestamp()));
@@ -68,12 +72,14 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 ? R.drawable.ic_check_double : R.drawable.ic_check);
     }
 
+    // يملأ حامل الرسالة المُستلَمة بصورة المُرسِل والمحتوى والوقت
     private void bindReceived(ReceivedHolder h, Message msg) {
         ImageUtils.loadCircularImageCached(context, msg.getSenderAvatarUrl(), h.ivAvatar);
         bindContent(h.tvMessage, h.ivImage, h.layoutMedia, h.tvMediaLabel, msg);
         h.tvTimestamp.setText(DateTimeHelper.formatTime(msg.getMessageTimestamp()));
     }
 
+    // يعرض واجهة المستخدم الصحيحة لأنواع الرسائل: نصية، صورة، صوت، مستند، أو موقع
     private void bindContent(TextView tvMessage, ImageView ivImage,
                               View layoutMedia, TextView tvMediaLabel, Message msg) {
         String type = msg.getMessageType();
@@ -167,6 +173,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
+    // يفتح الرابط المُعطى في متصفح خارجي أو تطبيق عرض
     private void openUrl(String url) {
         if (url == null || url.isEmpty()) return;
         try {
@@ -181,6 +188,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         TextView  tvMessage, tvTimestamp, tvMediaLabel;
         ImageView ivStatus, ivImage;
         View      layoutMedia;
+        // يُهيّئ مكوّنات واجهة الرسالة المُرسَلة
         SentHolder(@NonNull View v) {
             super(v);
             tvMessage    = v.findViewById(R.id.tv_message);
@@ -196,6 +204,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         ImageView ivAvatar, ivImage;
         TextView  tvMessage, tvTimestamp, tvMediaLabel;
         View      layoutMedia;
+        // يُهيّئ مكوّنات واجهة الرسالة المُستلَمة
         ReceivedHolder(@NonNull View v) {
             super(v);
             ivAvatar     = v.findViewById(R.id.iv_avatar);

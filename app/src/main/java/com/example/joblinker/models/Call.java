@@ -21,12 +21,14 @@ public class Call implements Serializable {
     private String agoraChannelName;
     private String agoraToken;
 
+    // مُنشئ افتراضي يُهيئ وقت البدء وحالة المكالمة والمدة
     public Call() {
         this.startTime = System.currentTimeMillis();
         this.callStatus = "initiated";
         this.duration = 0;
     }
 
+    // مُنشئ بالحقول الأساسية: معرف المتصل، المستقبل، ونوع المكالمة
     public Call(String callerId, String receiverId, String callType) {
         this();
         this.callerId = callerId;
@@ -34,7 +36,7 @@ public class Call implements Serializable {
         this.callType = callType;
     }
 
-    // Getters and Setters with PropertyName annotations
+    // الدوال الجالبة والمحددة مع تعليقات PropertyName
 
     @PropertyName("callId")
     public String getCallId() {
@@ -176,33 +178,40 @@ public class Call implements Serializable {
         this.agoraToken = agoraToken;
     }
 
-    // Helper methods
+    // دوال مساعدة
+    // تُرجع true إذا كانت المكالمة صوتية
     public boolean isVoiceCall() {
         return "voice".equals(callType);
     }
 
+    // تُرجع true إذا كانت المكالمة مرئية
     public boolean isVideoCall() {
         return "video".equals(callType);
     }
 
+    // تُرجع true إذا كانت المكالمة متصلة حالياً
     public boolean isConnected() {
         return "connected".equals(callStatus);
     }
 
+    // تُرجع true إذا انتهت المكالمة
     public boolean isEnded() {
         return "ended".equals(callStatus);
     }
 
+    // تُرجع true إذا رفض المستقبل المكالمة
     public boolean isRejected() {
         return "rejected".equals(callStatus);
     }
 
+    // يحسب ويخزن مدة المكالمة بالثواني من أوقات البدء والانتهاء
     public void calculateDuration() {
         if (endTime > 0 && startTime > 0) {
             this.duration = (endTime - startTime) / 1000;
         }
     }
 
+    // تُرجع المدة منسقةً بصيغة MM:SS أو HH:MM:SS
     public String getFormattedDuration() {
         long hours = duration / 3600;
         long minutes = (duration % 3600) / 60;

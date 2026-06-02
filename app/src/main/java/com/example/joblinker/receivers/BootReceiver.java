@@ -16,6 +16,7 @@ public class BootReceiver extends BroadcastReceiver {
 
     private static final String TAG = "BootReceiver";
 
+    // يعالج بث BOOT_COMPLETED ويُطلق تهيئة التطبيق بعد إعادة التشغيل
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent == null || intent.getAction() == null) {
@@ -30,6 +31,7 @@ public class BootReceiver extends BroadcastReceiver {
         }
     }
 
+    // يُنفّذ أي تهيئة مطلوبة بعد إقلاع الجهاز دون تحديث حالة الاتصال لأن التطبيق غير مفتوح
     private void initializeApp(Context context) {
         // Note: do NOT set the user online here — the app is not open after a reboot,
         // only the OS fired a broadcast. Online status is set in MainActivity/onResume.

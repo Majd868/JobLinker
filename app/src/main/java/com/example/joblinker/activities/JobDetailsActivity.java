@@ -86,6 +86,7 @@ public class JobDetailsActivity extends AppCompatActivity {
         loadJobDetails();
     }
 
+    // يربط جميع مراجع العناصر من تخطيط تفاصيل الوظيفة
     private void initializeViews() {
         toolbar = findViewById(R.id.toolbar);
         scrollView = findViewById(R.id.scroll_view);
@@ -121,11 +122,13 @@ public class JobDetailsActivity extends AppCompatActivity {
         btnShare = findViewById(R.id.btn_share);
     }
 
+    // يضبط شريط الأدوات بمستمع للرجوع للخلف
     private void setupToolbar() {
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
     }
 
+    // يستخرج كائن الوظيفة أو معرّفها من intent المُطلِق
     private void getIntentData() {
         Intent intent = getIntent();
 
@@ -143,6 +146,7 @@ public class JobDetailsActivity extends AppCompatActivity {
         }
     }
 
+    // يربط مستمعي النقر بأزرار الحفظ والتقديم والمشاركة والتواصل مع صاحب العمل
     private void setupClickListeners() {
         btnSave.setOnClickListener(v -> toggleSaveJob());
         btnApply.setOnClickListener(v -> applyForJob());
@@ -150,6 +154,7 @@ public class JobDetailsActivity extends AppCompatActivity {
         btnContactEmployer.setOnClickListener(v -> contactEmployer());
     }
 
+    // يعرض الوظيفة إذا كانت محمّلة مسبقاً، أو يجلبها من Firebase باستخدام المعرّف
     private void loadJobDetails() {
         if (currentJob != null) {
             displayJobDetails(currentJob);
@@ -181,6 +186,7 @@ public class JobDetailsActivity extends AppCompatActivity {
         }
     }
 
+    // يملأ جميع حقول الواجهة ببيانات الوظيفة بما في ذلك رقائق المهارات والموعد النهائي وحالة زر التقديم
     private void displayJobDetails(Job job) {
         // Header
         ImageUtils.loadCompanyLogo(this, job.getCompanyLogoUrl(), ivCompanyLogo);
@@ -246,6 +252,7 @@ public class JobDetailsActivity extends AppCompatActivity {
         }
     }
 
+    // يجلب ملف صاحب العمل من Firebase ويعرض صورته واسمه وبريده الإلكتروني
     private void loadEmployerInfo(String employerId) {
         firebaseManager.getUser(employerId, new JobLinkerFirebaseManager.DataCallback<User>() {
             @Override
@@ -264,12 +271,14 @@ public class JobDetailsActivity extends AppCompatActivity {
         });
     }
 
+    // يزيد عداد المشاهدات للوظيفة الحالية في Firebase
     private void incrementViewCount() {
         if (jobId != null) {
             firebaseManager.incrementJobViewCount(jobId);
         }
     }
 
+    // يتحقق من Firebase إذا كان المستخدم الحالي قد حفظ هذه الوظيفة ويحدّث زر الحفظ
     private void checkIfSaved() {
         String userId = firebaseManager.getCurrentUserId();
         if (userId != null && jobId != null) {
@@ -289,6 +298,7 @@ public class JobDetailsActivity extends AppCompatActivity {
         }
     }
 
+    // يحفظ أو يلغي حفظ الوظيفة للمستخدم الحالي ويحدّث أيقونة زر الإشارة المرجعية
     private void toggleSaveJob() {
         String userId = firebaseManager.getCurrentUserId();
         if (userId == null || jobId == null) {
@@ -339,6 +349,7 @@ public class JobDetailsActivity extends AppCompatActivity {
         }
     }
 
+    // يحدّث أيقونة زر الإشارة المرجعية لتعكس ما إذا كانت الوظيفة محفوظة حالياً
     private void updateSaveButton() {
         if (isSaved) {
             btnSave.setImageResource(R.drawable.ic_bookmark);
@@ -347,6 +358,7 @@ public class JobDetailsActivity extends AppCompatActivity {
         }
     }
 
+    // يعرض مربع حوار خطاب التقديم ويُشغّل إرسال الطلب عند التأكيد
     private void applyForJob() {
         if (currentJob == null) return;
 
@@ -392,6 +404,7 @@ public class JobDetailsActivity extends AppCompatActivity {
             .show();
     }
 
+    // يبني كائن طلب التوظيف ويرسله إلى Firebase ثم يضع علامة على الوظيفة بوصفها مُقدَّماً عليها
     private void submitApplication(String coverLetter) {
         String userId = firebaseManager.getCurrentUserId();
         if (userId == null || currentJob == null) return;
@@ -432,6 +445,7 @@ public class JobDetailsActivity extends AppCompatActivity {
             });
     }
 
+    // يشارك عنوان الوظيفة والشركة والموقع والراتب عبر نافذة المشاركة في النظام
     private void shareJob() {
         if (currentJob == null) return;
 
@@ -454,6 +468,7 @@ public class JobDetailsActivity extends AppCompatActivity {
         startActivity(Intent.createChooser(shareIntent, "Share job via"));
     }
 
+    // يقرأ معرّف صاحب العمل من مستند Firestore ويفتح محادثة معه
     private void contactEmployer() {
         if (currentJob == null || jobId == null) {
             Toast.makeText(this, "Job info not available", Toast.LENGTH_SHORT).show();
@@ -506,6 +521,7 @@ public class JobDetailsActivity extends AppCompatActivity {
             });
     }
 
+    // يشغّل ChatActivity موجّهاً نحو صاحب العمل المحدد
     private void openChat(String employerId, String employerName) {
         Intent intent = new Intent(JobDetailsActivity.this, ChatActivity.class);
         intent.putExtra(ChatActivity.EXTRA_USER_ID,   employerId);
@@ -513,6 +529,7 @@ public class JobDetailsActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    // يعرض مربع حوار لاختيار سبب الإبلاغ عن الوظيفة الحالية
     private void showReportDialog() {
         String[] reasons = {
             "Fake or scam job",
@@ -536,6 +553,7 @@ public class JobDetailsActivity extends AppCompatActivity {
             .show();
     }
 
+    // يحفظ مستند بلاغ للوظيفة الحالية في Firestore مع السبب المختار
     private void submitReport(String reason) {
         if (currentJob == null) return;
 
@@ -556,6 +574,7 @@ public class JobDetailsActivity extends AppCompatActivity {
                 Toast.makeText(this, "Failed to submit report", Toast.LENGTH_SHORT).show());
     }
 
+    // يبدّل ظهور شريط التحميل وعرض التمرير للإشارة إلى حالة التحميل
     private void showLoading(boolean show) {
         progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
         scrollView.setVisibility(show ? View.GONE : View.VISIBLE);

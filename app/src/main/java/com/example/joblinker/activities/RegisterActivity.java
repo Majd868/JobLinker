@@ -56,6 +56,7 @@ public class RegisterActivity extends AppCompatActivity {
         updateStepIndicators();
     }
 
+    // يربط شريط الأدوات وعارض الصفحات وأزرار التنقل وعناصر مؤشر الخطوات
     private void initializeViews() {
         toolbar = findViewById(R.id.toolbar);
         viewPager = findViewById(R.id.view_pager);
@@ -66,11 +67,13 @@ public class RegisterActivity extends AppCompatActivity {
         indicatorStep3 = findViewById(R.id.indicator_step3);
     }
 
+    // يضبط شريط الأدوات بمستمع للرجوع للخلف
     private void setupToolbar() {
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
     }
 
+    // يضبط ViewPager2 مع تعطيل السحب وإضافة callback لتتبع الخطوة الحالية
     private void setupViewPager() {
         pagerAdapter = new RegisterPagerAdapter(this);
         viewPager.setAdapter(pagerAdapter);
@@ -87,6 +90,7 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
+    // يضبط مستمعي زرّي الرجوع والتالي للتنقل بين الخطوات وتشغيل التسجيل في الخطوة الأخيرة
     private void setupClickListeners() {
         btnBack.setOnClickListener(v -> {
             if (currentStep > 0) {
@@ -105,6 +109,7 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
+    // يُضيء أشرطة مؤشر الخطوات حتى الخطوة الحالية بما فيها
     private void updateStepIndicators() {
         int primaryColor = getResources().getColor(R.color.primary, null);
         int dividerColor = getResources().getColor(R.color.divider, null);
@@ -114,6 +119,7 @@ public class RegisterActivity extends AppCompatActivity {
         indicatorStep3.setBackgroundColor(currentStep >= 2 ? primaryColor : dividerColor);
     }
 
+    // يبدّل ظهور زر الرجوع ويغيّر تسمية زر التالي إلى "اكتمال" في الخطوة الأخيرة
     private void updateButtons() {
         btnBack.setVisibility(currentStep > 0 ? View.VISIBLE : View.GONE);
 
@@ -124,13 +130,13 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    // --- MAGIC FIX 1: Correctly get ViewPager2 Fragments ---
+    // يُعيد الجزء المرئي حالياً من ViewPager2 باستخدام وسم معرّفه الثابت
     private Fragment getCurrentFragment() {
         long itemId = pagerAdapter.getItemId(viewPager.getCurrentItem());
         return getSupportFragmentManager().findFragmentByTag("f" + itemId);
     }
 
-    // --- MAGIC FIX 2: Use the safe fragment getter ---
+    // يُفوّض التحقق من المدخلات إلى جزء الخطوة المرئي حالياً ويُعيد نتيجته
     private boolean validateCurrentStep() {
         Fragment currentFragment = getCurrentFragment();
 
@@ -146,6 +152,7 @@ public class RegisterActivity extends AppCompatActivity {
         return false;
     }
 
+    // يُشغّل منطق إتمام التسجيل في جزء الخطوة الثالثة
     private void completeRegistration() {
         Fragment currentFragment = getCurrentFragment();
 
@@ -154,11 +161,13 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
+    // يُستدعى من جزء الخطوة الثالثة عند اكتمال التسجيل بنجاح؛ يعرض رسالة ويتنقل إلى الشاشة الرئيسية
     public void onRegistrationComplete() {
         Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
         navigateToMain();
     }
 
+    // يشغّل MainActivity ويمسح مكدس التنقل بعد التسجيل الناجح
     private void navigateToMain() {
         Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -166,30 +175,34 @@ public class RegisterActivity extends AppCompatActivity {
         finish();
     }
 
-    // Getters and Setters for registration data
+    // يُعيد كائن المستخدم المشترك الذي يتراكم فيه البيانات عبر خطوات التسجيل
     public User getRegistrationUser() {
         return registrationUser;
     }
 
+    // يحدّث كائن المستخدم المشترك بالبيانات المجمّعة في جزء خطوة التسجيل
     public void setRegistrationUser(User user) {
         this.registrationUser = user;
     }
 
+    // يُعيد كلمة المرور المُدخلة أثناء التسجيل لاستخدامها عند إنشاء حساب Firebase
     public String getRegistrationPassword() {
         return registrationPassword;
     }
 
+    // يخزّن كلمة المرور المقدَّمة في خطوة تسجيل لإنشاء الحساب لاحقاً
     public void setRegistrationPassword(String password) {
         this.registrationPassword = password;
     }
 
-    // --- ADDED THIS METHOD BACK IN ---
+    // يُقدّم ViewPager2 إلى خطوة التسجيل التالية إذا لم تكن على الخطوة الأخيرة بعد
     public void moveToNextStep() {
         if (currentStep < 2) {
             viewPager.setCurrentItem(currentStep + 1, true);
         }
     }
 
+    // ينتقل إلى خطوة التسجيل السابقة عند الضغط على زر الرجوع بدلاً من إغلاق النشاط
     @Override
     public void onBackPressed() {
         if (currentStep > 0) {

@@ -15,6 +15,7 @@ public class ProgressDialogHelper {
 
     private final AlertDialog dialog;
 
+    // مُنشئ يبني نافذة تقدم بسياق ورسالة نصية محددة
     public ProgressDialogHelper(Context context, String message) {
         // Build layout programmatically — no extra XML needed
         android.widget.LinearLayout layout = new android.widget.LinearLayout(context);
@@ -47,22 +48,26 @@ public class ProgressDialogHelper {
                 .create();
     }
 
+    // تُظهر نافذة التقدم إذا لم تكن مرئية بالفعل
     public void show() {
         if (!dialog.isShowing()) {
             dialog.show();
         }
     }
 
+    // تُغلق نافذة التقدم إذا كانت مرئية حالياً
     public void dismiss() {
         if (dialog.isShowing()) {
             dialog.dismiss();
         }
     }
 
+    // تُرجع true إذا كانت نافذة التقدم مرئية حالياً
     public boolean isShowing() {
         return dialog.isShowing();
     }
 
+    // تحوّل قيمة dp إلى بكسل باستخدام كثافة شاشة الجهاز
     private static int dp(Context context, int dp) {
         return (int) (dp * context.getResources().getDisplayMetrics().density);
     }

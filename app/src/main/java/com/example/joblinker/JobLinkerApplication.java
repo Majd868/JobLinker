@@ -18,6 +18,7 @@ public class JobLinkerApplication extends Application {
     public static final String CHANNEL_CALLS = "calls_channel";
     public static final String CHANNEL_GENERAL = "general_channel";
 
+    // Initializes Firebase and creates all notification channels when the application process starts
     @Override
     public void onCreate() {
         super.onCreate();

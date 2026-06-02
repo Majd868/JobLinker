@@ -66,12 +66,14 @@ public class ChatsFragment extends Fragment
         return view;
     }
 
+    // يُهيّئ الـ RecyclerView مع ConversationAdapter مدعوماً بالقائمة المُصفَّاة
     private void setupRecyclerView() {
         conversationAdapter = new ConversationAdapter(requireContext(), filtered, this);
         recyclerConversations.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerConversations.setAdapter(conversationAdapter);
     }
 
+    // يُرفق TextWatcher بحقل البحث لتصفية المحادثات عند كل ضغطة مفتاح
     private void setupSearch() {
         if (etSearch == null) return;
         etSearch.addTextChangedListener(new TextWatcher() {
@@ -84,6 +86,7 @@ public class ChatsFragment extends Fragment
         });
     }
 
+    // يُصفّي allConversations بالاسم أو جزء من آخر رسالة ويُحدّث المحوّل
     private void filterConversations(String query) {
         filtered.clear();
         if (query.isEmpty()) {
@@ -103,6 +106,7 @@ public class ChatsFragment extends Fragment
         updateEmptyState();
     }
 
+    // يُرفق مستمع Firestore في الوقت الفعلي لمحادثات المستخدم الحالي ويُحمّل كل محادثة
     private void loadConversations() {
         String userId = firebaseManager.getCurrentUserId();
         if (userId == null) return;
@@ -131,6 +135,7 @@ public class ChatsFragment extends Fragment
             });
     }
 
+    // يجلب اسم المشارك الآخر وصورته وحالته عبر الإنترنت ويُحدّث كائن المحادثة
     private void loadOtherUserDetails(Conversation conversation) {
         String currentUserId = firebaseManager.getCurrentUserId();
         String otherUserId   = null;
@@ -160,6 +165,7 @@ public class ChatsFragment extends Fragment
         });
     }
 
+    // يُظهر تخطيط الحالة الفارغة أو الـ RecyclerView بناءً على ما إذا كانت القائمة المُصفَّاة فارغة
     private void updateEmptyState() {
         if (!isAdded()) return;
         boolean empty = filtered.isEmpty();
@@ -167,6 +173,7 @@ public class ChatsFragment extends Fragment
         recyclerConversations.setVisibility(empty ? View.GONE : View.VISIBLE);
     }
 
+    // يفتح ChatActivity للمحادثة التي نُقر عليها مع تمرير معرّف المستخدم الآخر واسمه وصورته ومعرّف المحادثة
     @Override
     public void onConversationClick(Conversation conversation) {
         String currentUserId = firebaseManager.getCurrentUserId();

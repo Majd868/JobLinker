@@ -60,6 +60,7 @@ public class CallActivity extends AppCompatActivity {
         startCall();
     }
 
+    // يستخرج معرّف المستقبل واسمه وصورته ونوع المكالمة من Intent المُطلِق
     private void getIntentData() {
         receiverId     = getIntent().getStringExtra(EXTRA_RECEIVER_ID);
         receiverName   = getIntent().getStringExtra(EXTRA_RECEIVER_NAME);
@@ -67,6 +68,7 @@ public class CallActivity extends AppCompatActivity {
         callType       = getIntent().getStringExtra(EXTRA_CALL_TYPE);
     }
 
+    // يربط جميع عناصر شاشة المكالمة من التخطيط
     private void initializeViews() {
         ivUserAvatar         = findViewById(R.id.iv_user_avatar);
         tvUserName           = findViewById(R.id.tv_user_name);
@@ -81,6 +83,7 @@ public class CallActivity extends AppCompatActivity {
         btnVideoToggle       = findViewById(R.id.btn_video_toggle);
     }
 
+    // يضبط الحالة الأولية للواجهة بناءً على معلومات المستقبل ونوع المكالمة (صوت أو فيديو)
     private void setupUI() {
         if (tvUserName  != null) tvUserName.setText(receiverName);
         if (ivUserAvatar != null)
@@ -96,6 +99,7 @@ public class CallActivity extends AppCompatActivity {
             localVideoContainer.setVisibility(View.GONE);
     }
 
+    // يربط مستمعي النقر بأزرار كتم الصوت والسماعة وتبديل الفيديو وإنهاء المكالمة
     private void setupClickListeners() {
         if (btnMute      != null) btnMute.setOnClickListener(v -> toggleMute());
         if (btnSpeaker   != null) btnSpeaker.setOnClickListener(v -> toggleSpeaker());
@@ -103,7 +107,7 @@ public class CallActivity extends AppCompatActivity {
         if (btnHangUp    != null) btnHangUp.setOnClickListener(v -> endCall());
     }
 
-    // ── Start call ────────────────────────────────
+    // ينشئ سجل مكالمة في Firebase ويحاكي اتصالاً بعد تأخير ثانيتين
     private void startCall() {
         Call call = new Call(firebaseManager.getCurrentUserId(), receiverId, callType);
         // Use stored display name — fall back to UID only if name is blank
@@ -129,6 +133,7 @@ public class CallActivity extends AppCompatActivity {
         });
     }
 
+    // يحدّث الواجهة إلى حالة الاتصال ويبدأ مؤقت المكالمة ويعرض حاويات الفيديو لمكالمات الفيديو
     private void onCallConnected() {
         if (tvCallStatus != null) tvCallStatus.setText("Connected");
         if (viewPulse    != null) viewPulse.setVisibility(View.GONE);
@@ -151,7 +156,7 @@ public class CallActivity extends AppCompatActivity {
         }
     }
 
-    // ── Timer ─────────────────────────────────────
+    // يبدأ مؤقتاً يحدّث حقل نص مدة المكالمة كل ثانية
     private void startCallTimer() {
         if (tvCallTimer != null) tvCallTimer.setVisibility(View.VISIBLE);
         timerRunnable = new Runnable() {
@@ -166,7 +171,7 @@ public class CallActivity extends AppCompatActivity {
         timerHandler.post(timerRunnable);
     }
 
-    // ── Controls ──────────────────────────────────
+    // يبدّل حالة كتم الميكروفون ويحدّث أيقونة زر الكتم ولونه
     private void toggleMute() {
         isMuted = !isMuted;
         if (btnMute != null) {
@@ -178,6 +183,7 @@ public class CallActivity extends AppCompatActivity {
         if (am != null) am.setMicrophoneMute(isMuted);
     }
 
+    // يبدّل السماعة الخارجية ويحدّث لون زر السماعة
     private void toggleSpeaker() {
         isSpeakerOn = !isSpeakerOn;
         AudioManager am = (AudioManager) getSystemService(AUDIO_SERVICE);
@@ -189,6 +195,7 @@ public class CallActivity extends AppCompatActivity {
         }
     }
 
+    // يبدّل ظهور بث الفيديو المحلي ويحدّث أيقونة زر تبديل الفيديو
     private void toggleVideo() {
         isVideoOn = !isVideoOn;
         if (btnVideoToggle != null)
@@ -198,7 +205,7 @@ public class CallActivity extends AppCompatActivity {
             localVideoContainer.setVisibility(isVideoOn ? View.VISIBLE : View.GONE);
     }
 
-    // ── End call ──────────────────────────────────
+    // يوقف مؤقت المكالمة ويضع علامة إنهاء عليها في Firebase وينهي النشاط
     private void endCall() {
         timerHandler.removeCallbacksAndMessages(null);
         if (callId != null) {
@@ -211,12 +218,14 @@ public class CallActivity extends AppCompatActivity {
         finish();
     }
 
+    // يزيل جميع callbacks المعلّقة في Handler عند تدمير النشاط
     @Override
     protected void onDestroy() {
         super.onDestroy();
         timerHandler.removeCallbacksAndMessages(null);
     }
 
+    // ينهي المكالمة بدلاً من الرجوع للخلف عند الضغط على زر الرجوع
     @Override
     public void onBackPressed() {
         endCall();

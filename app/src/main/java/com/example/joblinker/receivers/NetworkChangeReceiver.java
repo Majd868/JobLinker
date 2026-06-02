@@ -21,6 +21,7 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
 
     private static final String TAG = "NetworkChangeReceiver";
 
+    // يعالج بث تغييرات الاتصال الواردة ويُحدّث حالة الاتصال بالإنترنت للمستخدم
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent == null || intent.getAction() == null) {
@@ -36,9 +37,7 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
         }
     }
 
-    /**
-     * Check if network is available
-     */
+    // التحقق من توافر الشبكة
     private boolean isNetworkAvailable(Context context) {
         ConnectivityManager connectivityManager =
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -65,9 +64,7 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
         }
     }
 
-    /**
-     * Handle network connectivity changes
-     */
+    // معالجة تغييرات الاتصال بالشبكة وتحديث حالة المستخدم
     private void handleNetworkChange(Context context, boolean isConnected) {
         SharedPreferencesManager prefsManager = SharedPreferencesManager.getInstance(context);
 

@@ -31,7 +31,7 @@ public class Job implements Serializable {
     private String contactEmail;
     private String contactPhone;
 
-    // Default Constructor (Required for Firebase)
+    // المُنشئ الافتراضي (مطلوب لـ Firebase)
     public Job() {
         this.jobActive = true;
         this.createdAt = System.currentTimeMillis();
@@ -41,7 +41,7 @@ public class Job implements Serializable {
         this.salaryCurrency = "USD";
     }
 
-    // Constructor with essential fields
+    // مُنشئ بالحقول الأساسية
     public Job(String jobTitle, String jobCompany, String jobEmployerId,
                String jobCategory, String jobType) {
         this();
@@ -54,204 +54,254 @@ public class Job implements Serializable {
 
     // ==================== GETTERS ====================
 
+    // تُرجع المعرف الفريد للوظيفة
     public String getJobId() {
         return jobId;
     }
 
+    // تُرجع مسمى الوظيفة
     public String getJobTitle() {
         return jobTitle;
     }
 
+    // تُرجع اسم الشركة التي تعرض الوظيفة
     public String getJobCompany() {
         return jobCompany;
     }
 
+    // تُرجع معرف مستخدم صاحب العمل الذي نشر الوظيفة
     public String getJobEmployerId() {
         return jobEmployerId;
     }
 
+    // تُرجع تصنيف الوظيفة (مثلاً: هندسة، تسويق)
     public String getJobCategory() {
         return jobCategory;
     }
 
+    // تُرجع نوع الوظيفة (مثلاً: دوام كامل، دوام جزئي، عن بُعد)
     public String getJobType() {
         return jobType;
     }
 
+    // تُرجع طريقة العمل (مثلاً: في الموقع، هجين، عن بُعد)
     public String getEmploymentType() {
         return employmentType;
     }
 
+    // تُرجع البلد الذي توجد فيه الوظيفة
     public String getJobCountry() {
         return jobCountry;
     }
 
+    // تُرجع المدينة التي توجد فيها الوظيفة
     public String getJobCity() {
         return jobCity;
     }
 
+    // تُرجع الوصف الكامل للوظيفة
     public String getJobDescription() {
         return jobDescription;
     }
 
+    // تُرجع قائمة المهارات المطلوبة للوظيفة
     public List<String> getJobSkills() {
         return jobSkills;
     }
 
+    // تُرجع الحد الأدنى للراتب لهذه الوظيفة
     public double getJobSalaryMin() {
         return jobSalaryMin;
     }
 
+    // تُرجع الحد الأقصى للراتب لهذه الوظيفة
     public double getJobSalaryMax() {
         return jobSalaryMax;
     }
 
+    // تُرجع رمز العملة المستخدم للراتب (مثلاً: USD)
     public String getSalaryCurrency() {
         return salaryCurrency;
     }
 
+    // تُرجع الطابع الزمني لآخر موعد لتقديم الطلبات
     public long getDeadline() {
         return deadline;
     }
 
+    // تُرجع الطابع الزمني لوقت إنشاء الوظيفة
     public long getCreatedAt() {
         return createdAt;
     }
 
+    // تُرجع الطابع الزمني لآخر تحديث للوظيفة
     public long getUpdatedAt() {
         return updatedAt;
     }
 
+    // تُرجع true إذا كان إعلان الوظيفة نشطاً حالياً
     public boolean isJobActive() {
         return jobActive;
     }
 
+    // تُرجع عدد مرات مشاهدة إعلان الوظيفة
     public int getViewCount() {
         return viewCount;
     }
 
+    // تُرجع عدد المتقدمين للوظيفة
     public int getApplicantCount() {
         return applicantCount;
     }
 
+    // تُرجع قائمة معرّفات المستخدمين الذين تقدموا لهذه الوظيفة
     public List<String> getApplicants() {
         return applicants;
     }
 
+    // تُرجع رابط صورة شعار الشركة
     public String getCompanyLogoUrl() {
         return companyLogoUrl;
     }
 
+    // تُرجع رابط موقع الشركة الإلكتروني
     public String getCompanyWebsite() {
         return companyWebsite;
     }
 
+    // تُرجع البريد الإلكتروني للتواصل بشأن الوظيفة
     public String getContactEmail() {
         return contactEmail;
     }
 
+    // تُرجع رقم الهاتف للتواصل بشأن الوظيفة
     public String getContactPhone() {
         return contactPhone;
     }
 
     // ==================== SETTERS ====================
 
+    // تُعيّن المعرف الفريد للوظيفة
     public void setJobId(String jobId) {
         this.jobId = jobId;
     }
 
+    // تُعيّن مسمى الوظيفة
     public void setJobTitle(String jobTitle) {
         this.jobTitle = jobTitle;
     }
 
+    // تُعيّن اسم الشركة التي تعرض الوظيفة
     public void setJobCompany(String jobCompany) {
         this.jobCompany = jobCompany;
     }
 
+    // تُعيّن معرف مستخدم صاحب العمل الذي نشر الوظيفة
     public void setJobEmployerId(String jobEmployerId) {
         this.jobEmployerId = jobEmployerId;
     }
 
+    // تُعيّن تصنيف الوظيفة
     public void setJobCategory(String jobCategory) {
         this.jobCategory = jobCategory;
     }
 
+    // تُعيّن نوع الوظيفة (مثلاً: دوام كامل، دوام جزئي)
     public void setJobType(String jobType) {
         this.jobType = jobType;
     }
 
+    // تُعيّن طريقة العمل (مثلاً: في الموقع، هجين)
     public void setEmploymentType(String employmentType) {
         this.employmentType = employmentType;
     }
 
+    // تُعيّن البلد الذي توجد فيه الوظيفة
     public void setJobCountry(String jobCountry) {
         this.jobCountry = jobCountry;
     }
 
+    // تُعيّن المدينة التي توجد فيها الوظيفة
     public void setJobCity(String jobCity) {
         this.jobCity = jobCity;
     }
 
+    // تُعيّن الوصف الكامل للوظيفة
     public void setJobDescription(String jobDescription) {
         this.jobDescription = jobDescription;
     }
 
+    // تُعيّن قائمة المهارات المطلوبة للوظيفة
     public void setJobSkills(List<String> jobSkills) {
         this.jobSkills = jobSkills;
     }
 
+    // تُعيّن الحد الأدنى للراتب لهذه الوظيفة
     public void setJobSalaryMin(double jobSalaryMin) {
         this.jobSalaryMin = jobSalaryMin;
     }
 
+    // تُعيّن الحد الأقصى للراتب لهذه الوظيفة
     public void setJobSalaryMax(double jobSalaryMax) {
         this.jobSalaryMax = jobSalaryMax;
     }
 
+    // تُعيّن رمز العملة للراتب
     public void setSalaryCurrency(String salaryCurrency) {
         this.salaryCurrency = salaryCurrency;
     }
 
+    // تُعيّن الطابع الزمني لآخر موعد لتقديم الطلبات
     public void setDeadline(long deadline) {
         this.deadline = deadline;
     }
 
+    // تُعيّن الطابع الزمني لوقت إنشاء الوظيفة
     public void setCreatedAt(long createdAt) {
         this.createdAt = createdAt;
     }
 
+    // تُعيّن الطابع الزمني لآخر تحديث للوظيفة
     public void setUpdatedAt(long updatedAt) {
         this.updatedAt = updatedAt;
     }
 
+    // تُعيّن ما إذا كان إعلان الوظيفة نشطاً حالياً
     public void setJobActive(boolean jobActive) {
         this.jobActive = jobActive;
     }
 
+    // تُعيّن عداد المشاهدات لهذا الإعلان
     public void setViewCount(int viewCount) {
         this.viewCount = viewCount;
     }
 
+    // تُعيّن عدد المتقدمين لهذه الوظيفة
     public void setApplicantCount(int applicantCount) {
         this.applicantCount = applicantCount;
     }
 
+    // تُعيّن قائمة معرّفات المستخدمين الذين تقدموا لهذه الوظيفة
     public void setApplicants(List<String> applicants) {
         this.applicants = applicants;
     }
 
+    // تُعيّن رابط صورة شعار الشركة
     public void setCompanyLogoUrl(String companyLogoUrl) {
         this.companyLogoUrl = companyLogoUrl;
     }
 
+    // تُعيّن رابط موقع الشركة الإلكتروني
     public void setCompanyWebsite(String companyWebsite) {
         this.companyWebsite = companyWebsite;
     }
 
+    // تُعيّن البريد الإلكتروني للتواصل بشأن الوظيفة
     public void setContactEmail(String contactEmail) {
         this.contactEmail = contactEmail;
     }
 
+    // تُعيّن رقم الهاتف للتواصل بشأن الوظيفة
     public void setContactPhone(String contactPhone) {
         this.contactPhone = contactPhone;
     }
@@ -394,9 +444,11 @@ public class Job implements Serializable {
     // ── Urgent flag ───────────────────────────────
     private boolean urgent = false;
 
+    // تُرجع true إذا كانت الوظيفة مُصنَّفة على أنها عاجلة
     @com.google.firebase.firestore.PropertyName("urgent")
     public boolean isUrgent() { return urgent; }
 
+    // تُعيّن ما إذا كانت الوظيفة مُصنَّفة على أنها عاجلة
     @com.google.firebase.firestore.PropertyName("urgent")
     public void setUrgent(boolean urgent) { this.urgent = urgent; }
 

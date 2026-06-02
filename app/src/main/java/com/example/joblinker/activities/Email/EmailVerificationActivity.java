@@ -42,6 +42,7 @@ public class EmailVerificationActivity extends AppCompatActivity {
         startResendTimer();
     }
 
+    // يربط جميع مراجع العناصر من التخطيط
     private void initializeViews() {
         toolbar = findViewById(R.id.toolbar);
         tvVerificationMessage = findViewById(R.id.tv_verification_message);
@@ -52,11 +53,13 @@ public class EmailVerificationActivity extends AppCompatActivity {
         btnSkipVerification = findViewById(R.id.btn_skip_verification);
     }
 
+    // يضبط شريط الأدوات بمستمع للرجوع للخلف
     private void setupToolbar() {
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
     }
 
+    // يربط مستمعي النقر بأزرار التحقق وإعادة الإرسال والتخطي
     private void setupClickListeners() {
         btnVerify.setOnClickListener(v -> verifyCode());
 
@@ -69,6 +72,7 @@ public class EmailVerificationActivity extends AppCompatActivity {
         btnSkipVerification.setOnClickListener(v -> finish());
     }
 
+    // يتحقق من صحة رمز التحقق المكوّن من 6 أرقام وينهي النشاط عند النجاح
     private void verifyCode() {
         String code = etVerificationCode.getText().toString().trim();
 
@@ -82,6 +86,7 @@ public class EmailVerificationActivity extends AppCompatActivity {
         finish();
     }
 
+    // يطلب من Firebase إعادة إرسال بريد التحقق ويعيد تشغيل مؤقت العد التنازلي
     private void resendCode() {
         firebaseManager.sendEmailVerification(new JobLinkerFirebaseManager.VoidCallback() {
             @Override
@@ -99,6 +104,7 @@ public class EmailVerificationActivity extends AppCompatActivity {
         });
     }
 
+    // يبدأ عداً تنازلياً مدته 60 ثانية يعطّل زر إعادة الإرسال حتى ينتهي
     private void startResendTimer() {
         canResend = false;
         tvResendCode.setEnabled(false);
@@ -123,6 +129,7 @@ public class EmailVerificationActivity extends AppCompatActivity {
         resendTimer.start();
     }
 
+    // يلغي مؤقت إعادة الإرسال عند تدمير النشاط لتجنب تسرب الذاكرة
     @Override
     protected void onDestroy() {
         super.onDestroy();

@@ -127,6 +127,7 @@ public class EditProfileActivity extends AppCompatActivity {
         setupListeners();
     }
 
+    // يربط جميع مراجع العناصر من التخطيط
     private void initViews() {
         toolbar        = findViewById(R.id.toolbar);
         fabChangePhoto = findViewById(R.id.fabChangePhoto);
@@ -150,6 +151,7 @@ public class EditProfileActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
     }
 
+    // يربط مستمعي النقر والتحديد بجميع العناصر التفاعلية
     private void setupListeners() {
         toolbar.setNavigationOnClickListener(v -> finish());
         fabChangePhoto.setOnClickListener(v -> showPhotoOptions());
@@ -162,6 +164,7 @@ public class EditProfileActivity extends AppCompatActivity {
     // PHOTO HANDLING
     // ══════════════════════════════════════════════════
 
+    // يعرض مربع حوار يتيح للمستخدم التقاط صورة أو اختيارها من المعرض أو حذف صورته الحالية
     private void showPhotoOptions() {
         String[] options = {"Take Photo", "Choose from Gallery", "Remove Photo"};
         new AlertDialog.Builder(this)
@@ -176,6 +179,7 @@ public class EditProfileActivity extends AppCompatActivity {
                 .show();
     }
 
+    // يتحقق من إذن الكاميرا ويفتحها إن كان ممنوحاً، وإلا يطلب الإذن
     private void checkCameraPermissionAndOpen() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_GRANTED) {
@@ -186,6 +190,7 @@ public class EditProfileActivity extends AppCompatActivity {
         }
     }
 
+    // يعالج نتيجة طلب إذن الكاميرا ويفتحها إن تم منح الإذن
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -198,6 +203,7 @@ public class EditProfileActivity extends AppCompatActivity {
         }
     }
 
+    // ينشئ ملف صورة مؤقتاً ويشغّل intent الكاميرا لالتقاط صورة
     private void openCamera() {
         try {
             File photoFile = createImageFile();
@@ -213,6 +219,7 @@ public class EditProfileActivity extends AppCompatActivity {
         }
     }
 
+    // يشغّل intent اختيار صورة من المعرض (يستخدم منتقي الصور في Android 13+)
     private void openGallery() {
         Intent galleryIntent;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -224,6 +231,7 @@ public class EditProfileActivity extends AppCompatActivity {
         galleryLauncher.launch(galleryIntent);
     }
 
+    // يحذف الصورة الرمزية محلياً ويزيل حقل avatarUrl من Firestore
     private void removePhoto() {
         currentAvatarUrl = null;
         if (ivAvatar != null) {
@@ -240,12 +248,14 @@ public class EditProfileActivity extends AppCompatActivity {
         }
     }
 
+    // يحمّل الصورة من URI ويعرضها في ImageView الصورة الرمزية بشكل دائري
     private void showAvatarPreview(Uri uri) {
         if (ivAvatar != null) {
             Glide.with(this).load(uri).circleCrop().into(ivAvatar);
         }
     }
 
+    // يقرأ جميع بيانات URI المحتوى في مصفوفة بايت للرفع
     private byte[] readImageBytes(Uri uri) {
         try {
             java.io.InputStream is = getContentResolver().openInputStream(uri);
@@ -261,6 +271,7 @@ public class EditProfileActivity extends AppCompatActivity {
         }
     }
 
+    // يقرأ بيانات الصورة من URI ويرفعها إلى Firebase Storage ثم يحفظ الرابط في Firestore
     private void uploadAvatar(Uri imageUri) {
         if (userId == null) return;
         isUploadingPhoto = true;
@@ -349,6 +360,7 @@ public class EditProfileActivity extends AppCompatActivity {
         }
     }
 
+    // ينشئ ملف JPEG مؤقتاً بمسمى فريد في مجلد الصور الخارجي لناتج الكاميرا
     private File createImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
@@ -360,6 +372,7 @@ public class EditProfileActivity extends AppCompatActivity {
     // LOAD / SAVE PROFILE
     // ══════════════════════════════════════════════════
 
+    // يحمّل ملف المستخدم الحالي من Firestore ويملأ حقول النموذج
     private void loadUserData() {
         progressBar.setVisibility(View.VISIBLE);
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
@@ -405,6 +418,7 @@ public class EditProfileActivity extends AppCompatActivity {
             });
     }
 
+    // يتحقق من مدخلات النموذج ويؤكد تغيير الدور إن لزم قبل حفظ التحديثات
     private void saveChanges() {
         // Block save if photo is still uploading
         if (isUploadingPhoto) {
@@ -451,6 +465,7 @@ public class EditProfileActivity extends AppCompatActivity {
         }
     }
 
+    // يكتب حقول الملف المحدّثة إلى Firestore ثم يعكسها في SharedPreferences
     private void updateProfile(String name, String phone, String bio,
                                String city, String country, String language,
                                String currency, String role) {
@@ -488,13 +503,16 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     // ── Helpers ───────────────────────────────────────
+    // يضبط نص EditText فقط إذا كان كلٌّ من العنصر والقيمة غير null
     private void setText(TextInputEditText et, String value) {
         if (et != null && value != null) et.setText(value);
     }
+    // يضبط نص القائمة المنسدلة دون تصفية المحوّل
     private void setDropdown(AutoCompleteTextView tv, String value) {
         if (tv != null && value != null) tv.setText(value, false);
     }
 
+    // يحدّث نص وصف الدور بناءً على ما إذا كان المستخدم باحثاً عن عمل أو صاحب عمل
     private void updateRoleInfo(boolean isJobSeeker) {
         if (tvRoleInfo == null) return;
         tvRoleInfo.setText(isJobSeeker
@@ -502,6 +520,7 @@ public class EditProfileActivity extends AppCompatActivity {
             : "As an Employer, you can post jobs and view applicants for your job postings.");
     }
 
+    // يملأ حقول النموذج من SharedPreferences كبديل عند عدم توفر Firestore
     private void loadFromSharedPreferences() {
         android.content.SharedPreferences prefs =
             getSharedPreferences("JobLinkerPrefs", MODE_PRIVATE);
@@ -520,6 +539,7 @@ public class EditProfileActivity extends AppCompatActivity {
         progressBar.setVisibility(View.GONE);
     }
 
+    // يحفظ بيانات الملف المحدّثة في SharedPreferences بعد الكتابة الناجحة في Firestore
     private void updateSharedPreferences(String name, String phone, String bio,
                                          String city, String country, String language,
                                          String currency, String role) {
@@ -537,6 +557,7 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     // ── Data arrays ───────────────────────────────────
+    // يهيّئ مصفوفات السلاسل النصية للدول واللغات والعملات المستخدمة في القوائم المنسدلة
     private void initializeDataArrays() {
         countries = new String[]{"Select Country","United States","United Kingdom","Canada",
             "Australia","Germany","France","Italy","Spain","Netherlands","Belgium","Switzerland",
@@ -561,6 +582,7 @@ public class EditProfileActivity extends AppCompatActivity {
             "MXN - Mexican Peso","SGD - Singapore Dollar","NZD - New Zealand Dollar"};
     }
 
+    // يربط ArrayAdapters بحقول القوائم المنسدلة للدولة واللغة والعملة
     private void setupDropdowns() {
         actvCountry.setAdapter(new ArrayAdapter<>(this,
             android.R.layout.simple_dropdown_item_1line, countries));

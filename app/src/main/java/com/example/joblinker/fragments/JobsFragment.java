@@ -101,6 +101,7 @@ public class JobsFragment extends Fragment {
         return view;
     }
 
+    // يُسجّل ActivityResultLauncher الذي يستقبل تحديدات الفلتر من FilterActivity
     private void setupFilterLauncher() {
         filterLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -121,6 +122,7 @@ public class JobsFragment extends Fragment {
                 });
     }
 
+    // يبحث عن جميع المكوّنات ويخزّنها، ويُظهر/يُخفي زر نشر الوظيفة بناءً على دور المستخدم
     private void initializeViews(View view) {
         etSearch      = view.findViewById(R.id.et_search);
         btnFilter     = view.findViewById(R.id.btn_filter);
@@ -134,6 +136,7 @@ public class JobsFragment extends Fragment {
         fabPostJob.setVisibility(prefsManager.isEmployer() ? View.VISIBLE : View.GONE);
     }
 
+    // يُهيّئ الـ RecyclerView مع JobAdapter ويربط استدعاءات النقر على الوظيفة وزر الحفظ
     private void setupRecyclerView() {
         jobAdapter = new JobAdapter(requireContext(), filteredJobs);
         recyclerJobs.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -179,6 +182,7 @@ public class JobsFragment extends Fragment {
         loadSavedJobIds();
     }
 
+    // يجلب معرّفات الوظائف المحفوظة للمستخدم الحالي من Firebase ويُحدّث أيقونات الإشارة المرجعية
     private void loadSavedJobIds() {
         String userId = firebaseManager.getCurrentUserId();
         if (userId == null) return;
@@ -214,6 +218,7 @@ public class JobsFragment extends Fragment {
         });
     }
 
+    // يضبط مجموعة الرقائق للفلترة السريعة لتحديث currentFilter وإعادة تشغيل الفلاتر عند الاختيار
     private void setupChipListener() {
         chipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
             if (checkedIds == null || checkedIds.isEmpty()) return;
@@ -231,6 +236,7 @@ public class JobsFragment extends Fragment {
         });
     }
 
+    // يربط زر الفلتر لفتح FilterActivity وزر الإجراء العائم لفتح PostJobActivity
     private void setupClickListeners() {
         btnFilter.setOnClickListener(v -> {
             Intent intent = new Intent(requireContext(), FilterActivity.class);
@@ -247,6 +253,7 @@ public class JobsFragment extends Fragment {
                 startActivity(new Intent(requireContext(), PostJobActivity.class)));
     }
 
+    // يبدأ مستمع Firestore في الوقت الفعلي للوظائف النشطة ويُشغّل الفلترة عند كل تحديث
     private void loadJobs() {
         progressBar.setVisibility(View.VISIBLE);
         layoutEmpty.setVisibility(View.GONE);
@@ -275,6 +282,7 @@ public class JobsFragment extends Fragment {
                 });
     }
 
+    // يُطبّق البحث النصي وفلتر الرقائق وجميع الفلاتر المتقدمة على allJobs ثم يُرتّب النتيجة ويعرضها
     private void applyAllFilters() {
         String query = etSearch.getText() == null ? "" : etSearch.getText().toString().trim();
 
@@ -355,11 +363,13 @@ public class JobsFragment extends Fragment {
         }
     }
 
+    // يُعيد true إذا كانت src تحتوي على q كسلسلة فرعية بغض النظر عن حالة الأحرف
     private boolean containsCI(String src, String q) {
         if (src == null || q == null) return false;
         return src.toLowerCase().contains(q.toLowerCase());
     }
 
+    // يُعيد بأمان طابع الوقت الزمني لإنشاء الوظيفة، أو 0 في حالة حدوث استثناء
     private long safeCreatedAt(Job job) {
         try { return job.getCreatedAt(); } catch (Exception e) { return 0; }
     }

@@ -34,6 +34,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         this.listener = listener;
     }
 
+    // ينشئ ViewHolder جديداً ويُحمّل تخطيط عنصر المحادثة
     @NonNull
     @Override
     public ConversationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -41,6 +42,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         return new ConversationViewHolder(view);
     }
 
+    // يربط بيانات المحادثة (الصورة، الاسم، آخر رسالة، الوقت، الحالة، عدد غير المقروء) بالحامل
     @Override
     public void onBindViewHolder(@NonNull ConversationViewHolder holder, int position) {
         Conversation conversation = conversations.get(position);
@@ -72,6 +74,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         });
     }
 
+    // يُعيد إجمالي عدد المحادثات في القائمة
     @Override
     public int getItemCount() {
         return conversations.size();
@@ -82,6 +85,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         View viewOnline;
         TextView tvName, tvLastMessage, tvTimestamp, tvUnreadCount;
 
+        // يُهيّئ مكوّنات واجهة عنصر المحادثة
         public ConversationViewHolder(@NonNull View itemView) {
             super(itemView);
             ivAvatar = itemView.findViewById(R.id.iv_avatar);

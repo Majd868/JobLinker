@@ -13,20 +13,21 @@ public class DatabaseManager {
     private static final String JOBS_COLLECTION = "jobs";
     private static final String APPLICATIONS_COLLECTION = "applications";
 
+    // يُنشئ كائن DatabaseManager ويُهيئ مثيل FirebaseFirestore
     public DatabaseManager() {
         this.firestore = FirebaseFirestore.getInstance();
     }
 
     // ===== USER OPERATIONS =====
 
-    // Create/Update user
+    // إنشاء مستخدم أو تحديث بياناته
     public Task<Void> saveUser(User user) {
         return firestore.collection(USERS_COLLECTION)
                 .document(user.getUserId())
                 .set(user);
     }
 
-    // Get user by ID
+    // الحصول على المستخدم بواسطة المعرّف
     public Task<com.google.firebase.firestore.DocumentSnapshot> getUser(String userId) {
         return firestore.collection(USERS_COLLECTION)
                 .document(userId)
@@ -35,35 +36,35 @@ public class DatabaseManager {
 
     // ===== JOB OPERATIONS =====
 
-    // Create/Update job
+    // إنشاء وظيفة أو تحديث بياناتها
     public Task<Void> saveJob(Job job) {
         return firestore.collection(JOBS_COLLECTION)
                 .document(job.getJobId())
                 .set(job);
     }
 
-    // Get job by ID
+    // الحصول على الوظيفة بواسطة المعرّف
     public Task<com.google.firebase.firestore.DocumentSnapshot> getJob(String jobId) {
         return firestore.collection(JOBS_COLLECTION)
                 .document(jobId)
                 .get();
     }
 
-    // Get all jobs (with pagination)
+    // الحصول على جميع الوظائف مع دعم التصفح الصفحي
     public Query getAllJobs() {
         return firestore.collection(JOBS_COLLECTION)
                 .whereEqualTo("status", "Open")
                 .orderBy("createdAt", Query.Direction.DESCENDING);
     }
 
-    // Get jobs by employer
+    // الحصول على الوظائف الخاصة بصاحب العمل
     public Query getJobsByEmployer(String employerId) {
         return firestore.collection(JOBS_COLLECTION)
                 .whereEqualTo("employerId", employerId)
                 .orderBy("createdAt", Query.Direction.DESCENDING);
     }
 
-    // Delete job
+    // حذف وظيفة
     public Task<Void> deleteJob(String jobId) {
         return firestore.collection(JOBS_COLLECTION)
                 .document(jobId)
@@ -72,41 +73,41 @@ public class DatabaseManager {
 
     // ===== APPLICATION OPERATIONS =====
 
-    // Create/Update application
+    // إنشاء طلب توظيف أو تحديثه
     public Task<Void> saveApplication(Application application) {
         return firestore.collection(APPLICATIONS_COLLECTION)
                 .document(application.getApplicationId())
                 .set(application);
     }
 
-    // Get application by ID
+    // الحصول على طلب التوظيف بواسطة المعرّف
     public Task<com.google.firebase.firestore.DocumentSnapshot> getApplication(String applicationId) {
         return firestore.collection(APPLICATIONS_COLLECTION)
                 .document(applicationId)
                 .get();
     }
 
-    // Get applications for a job seeker
+    // الحصول على الطلبات المقدَّمة من قبل باحث عن عمل
     public Query getApplicationsByJobSeeker(String jobSeekerUserId) {
         return firestore.collection(APPLICATIONS_COLLECTION)
                 .whereEqualTo("jobSeekerUserId", jobSeekerUserId)
                 .orderBy("appliedAt", Query.Direction.DESCENDING);
     }
 
-    // Get applications for a job
+    // الحصول على الطلبات المقدَّمة لوظيفة معيّنة
     public Query getApplicationsByJob(String jobId) {
         return firestore.collection(APPLICATIONS_COLLECTION)
                 .whereEqualTo("jobId", jobId);
     }
 
-    // Update application status
+    // تحديث حالة طلب التوظيف
     public Task<Void> updateApplicationStatus(String applicationId, String status) {
         return firestore.collection(APPLICATIONS_COLLECTION)
                 .document(applicationId)
                 .update("status", status);
     }
 
-    // Delete application
+    // حذف طلب التوظيف
     public Task<Void> deleteApplication(String applicationId) {
         return firestore.collection(APPLICATIONS_COLLECTION)
                 .document(applicationId)

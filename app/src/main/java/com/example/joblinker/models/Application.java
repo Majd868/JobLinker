@@ -12,10 +12,10 @@ public class Application {
     private String jobTitle;
     private String jobSeekerName;
 
-    // Empty constructor (required for Firebase)
+    // مُنشئ فارغ (مطلوب لـ Firebase)
     public Application() {}
 
-    // Constructor with main fields
+    // مُنشئ بالحقول الأساسية
     public Application(String applicationId, String jobId, String jobSeekerUserId,
                        String employerUserId, String coverLetter) {
         this.applicationId = applicationId;
@@ -28,34 +28,54 @@ public class Application {
         this.updatedAt = System.currentTimeMillis();
     }
 
-    // Getters and Setters
+    // الدوال الجالبة والمحددة
+    // تُرجع المعرف الفريد للطلب
     public String getApplicationId() { return applicationId; }
+    // تُعيّن المعرف الفريد للطلب
     public void setApplicationId(String applicationId) { this.applicationId = applicationId; }
 
+    // تُرجع معرف الوظيفة التي يخص هذا الطلب
     public String getJobId() { return jobId; }
+    // تُعيّن معرف الوظيفة التي يخص هذا الطلب
     public void setJobId(String jobId) { this.jobId = jobId; }
 
+    // تُرجع معرف المستخدم الباحث عن عمل الذي قدّم الطلب
     public String getJobSeekerUserId() { return jobSeekerUserId; }
+    // تُعيّن معرف المستخدم الباحث عن عمل الذي قدّم الطلب
     public void setJobSeekerUserId(String jobSeekerUserId) { this.jobSeekerUserId = jobSeekerUserId; }
 
+    // تُرجع معرف مستخدم صاحب العمل الذي نشر الوظيفة
     public String getEmployerUserId() { return employerUserId; }
+    // تُعيّن معرف مستخدم صاحب العمل الذي نشر الوظيفة
     public void setEmployerUserId(String employerUserId) { this.employerUserId = employerUserId; }
 
+    // تُرجع الحالة الحالية للطلب (مثلاً: مقدَّم، مختصَر)
     public String getStatus() { return status; }
+    // تُعيّن الحالة الحالية للطلب
     public void setStatus(String status) { this.status = status; }
 
+    // تُرجع نص خطاب التغطية المرفق مع الطلب
     public String getCoverLetter() { return coverLetter; }
+    // تُعيّن نص خطاب التغطية للطلب
     public void setCoverLetter(String coverLetter) { this.coverLetter = coverLetter; }
 
+    // تُرجع الطابع الزمني لوقت تقديم الطلب
     public long getAppliedAt() { return appliedAt; }
+    // تُعيّن الطابع الزمني لوقت تقديم الطلب
     public void setAppliedAt(long appliedAt) { this.appliedAt = appliedAt; }
 
+    // تُرجع الطابع الزمني لآخر تحديث للحالة
     public long getUpdatedAt() { return updatedAt; }
+    // تُعيّن الطابع الزمني لآخر تحديث للحالة
     public void setUpdatedAt(long updatedAt) { this.updatedAt = updatedAt; }
 
+    // تُرجع مسمى الوظيفة التي يتقدم إليها
     public String getJobTitle() { return jobTitle; }
+    // تُعيّن مسمى الوظيفة التي يتقدم إليها
     public void setJobTitle(String jobTitle) { this.jobTitle = jobTitle; }
 
+    // تُرجع الاسم المعروض للباحث عن عمل
     public String getJobSeekerName() { return jobSeekerName; }
+    // تُعيّن الاسم المعروض للباحث عن عمل
     public void setJobSeekerName(String jobSeekerName) { this.jobSeekerName = jobSeekerName; }
 }

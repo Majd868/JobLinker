@@ -55,6 +55,7 @@ public class PostJobActivity extends AppCompatActivity {
         setupClickListeners();
     }
 
+    // يربط جميع عناصر نموذج نشر الوظيفة من التخطيط
     private void initializeViews() {
         toolbar = findViewById(R.id.toolbar);
         etJobTitle = findViewById(R.id.et_job_title);
@@ -76,11 +77,13 @@ public class PostJobActivity extends AppCompatActivity {
         switchUrgent = findViewById(R.id.switch_urgent);
     }
 
+    // يضبط شريط الأدوات بمستمع للرجوع للخلف
     private void setupToolbar() {
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
     }
 
+    // يملأ قوائم الفئة ونوع التوظيف والدولة من مصفوفات السلاسل في الموارد
     private void setupDropdowns() {
         // Categories
         String[] categories = getResources().getStringArray(R.array.job_categories);
@@ -101,6 +104,7 @@ public class PostJobActivity extends AppCompatActivity {
         etCountry.setAdapter(countryAdapter);
     }
 
+    // يربط معالجات النقر لزر إضافة مهارة ومنتقي تاريخ الموعد النهائي وزرّي الإلغاء والنشر
     private void setupClickListeners() {
         btnAddSkill.setOnClickListener(v -> addSkill());
 
@@ -111,6 +115,7 @@ public class PostJobActivity extends AppCompatActivity {
         btnPost.setOnClickListener(v -> postJob());
     }
 
+    // يضيف وسم مهارة إلى القائمة ويعرض رقيقة قابلة للإزالة في مجموعة الرقائق
     private void addSkill() {
         String skill = etSkillInput.getText().toString().trim();
 
@@ -139,6 +144,7 @@ public class PostJobActivity extends AppCompatActivity {
         etSkillInput.setText("");
     }
 
+    // يعرض مربع حوار منتقي تاريخ مقيّد بالتواريخ المستقبلية ويخزّن التاريخ المختار كطابع زمني
     private void showDatePicker() {
         Calendar calendar = Calendar.getInstance();
 
@@ -159,6 +165,7 @@ public class PostJobActivity extends AppCompatActivity {
         datePickerDialog.show();
     }
 
+    // يتحقق من جميع حقول النموذج وينشئ كائن وظيفة وينشره إلى Firebase
     private void postJob() {
         // Validate inputs
         String jobTitle = etJobTitle.getText().toString().trim();

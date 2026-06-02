@@ -40,10 +40,12 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
         this.jobs    = jobs;
     }
 
+    // يسجّل مستمع النقر لأحداث عنصر الوظيفة وزر الحفظ
     public void setOnJobClickListener(OnJobClickListener listener) {
         this.listener = listener;
     }
 
+    // يقارن قائمة الوظائف الجديدة بالحالية ويُرسل أدنى تحديثات ممكنة للـ RecyclerView
     public void submitList(List<Job> newJobs) {
         final List<Job> old = new ArrayList<>(jobs);
         DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
@@ -65,12 +67,14 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
         diff.dispatchUpdatesTo(this);
     }
 
+    // يستبدل مجموعة معرّفات الوظائف المحفوظة بالكامل ويُحدّث جميع أيقونات الإشارة المرجعية
     public void setSavedJobIds(Set<String> ids) {
         savedJobIds.clear();
         if (ids != null) savedJobIds.addAll(ids);
         notifyDataSetChanged();
     }
 
+    // يُبدّل حالة حفظ وظيفة واحدة ويُخطر فقط العنصر المتأثر
     public void markJobSaved(String jobId, boolean saved) {
         if (jobId == null) return;
         if (saved) savedJobIds.add(jobId); else savedJobIds.remove(jobId);
@@ -82,17 +86,20 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
         }
     }
 
+    // يُحمّل تخطيط عنصر الوظيفة ويُعيد ViewHolder جديداً
     @NonNull @Override
     public JobViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new JobViewHolder(LayoutInflater.from(context)
             .inflate(R.layout.item_job, parent, false));
     }
 
+    // يربط بيانات الوظيفة الكاملة بالـ ViewHolder في الموضع المحدد
     @Override
     public void onBindViewHolder(@NonNull JobViewHolder h, int pos) {
         bind(h, jobs.get(pos));
     }
 
+    // يتعامل مع إعادة الربط الجزئي: يُحدّث أيقونة الحفظ فقط عند وجود حمولة "save_changed"
     @Override
     public void onBindViewHolder(@NonNull JobViewHolder h, int pos, @NonNull List<Object> payloads) {
         if (!payloads.isEmpty() && "save_changed".equals(payloads.get(0))) {
@@ -101,6 +108,7 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
         super.onBindViewHolder(h, pos, payloads);
     }
 
+    // يملأ جميع مكوّنات الـ ViewHolder بتفاصيل الوظيفة وشارات العمل عن بُعد/العاجل ومعالجات النقر
     private void bind(@NonNull JobViewHolder h, Job job) {
         ImageUtils.loadCompanyLogo(context, job.getCompanyLogoUrl(), h.ivCompanyLogo);
 
@@ -139,6 +147,7 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
         });
     }
 
+    // يُحدّث أيقونة الإشارة المرجعية لتكون ممتلئة أو مجوّفة بحسب حالة حفظ الوظيفة
     private void updateSaveIcon(@NonNull JobViewHolder h, Job job) {
         boolean saved = job.getJobId() != null && savedJobIds.contains(job.getJobId());
         h.btnSave.setImageResource(saved ? R.drawable.ic_bookmark : R.drawable.ic_bookmark_border);
@@ -155,6 +164,7 @@ public class JobAdapter extends RecyclerView.Adapter<JobAdapter.JobViewHolder> {
         Chip chipCategory, chipJobType, chipRemote;
         ImageButton btnSave;
 
+        // يُهيّئ مكوّنات واجهة عنصر الوظيفة
         JobViewHolder(@NonNull View v) {
             super(v);
             ivCompanyLogo = v.findViewById(R.id.iv_company_logo);

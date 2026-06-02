@@ -53,6 +53,7 @@ public class LoginEmailFragment extends Fragment {
         return view;
     }
 
+    // يبحث عن جميع المكوّنات في تخطيط تسجيل الدخول بالبريد الإلكتروني ويخزّنها
     private void initViews(View v) {
         etEmail          = v.findViewById(R.id.et_email);
         etPassword       = v.findViewById(R.id.et_password);
@@ -62,6 +63,7 @@ public class LoginEmailFragment extends Fragment {
         progressBar      = v.findViewById(R.id.progress_bar);
     }
 
+    // يربط مستمعي النقر بأزرار تسجيل الدخول وجوجل واستعادة كلمة المرور
     private void setupListeners() {
         btnLogin.setOnClickListener(v -> loginWithEmail());
 
@@ -82,7 +84,7 @@ public class LoginEmailFragment extends Fragment {
         });
     }
 
-    // ── Email login ───────────────────────────────
+    // يتحقق من صحة البريد الإلكتروني وكلمة المرور ويُسجّل دخول المستخدم عبر مصادقة Firebase بالبريد
     private void loginWithEmail() {
         String email    = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
@@ -124,7 +126,7 @@ public class LoginEmailFragment extends Fragment {
             });
     }
 
-    // ── Google login ──────────────────────────────
+    // يُشغّل تدفق Google Credential Manager للحصول على رمز Google ID لتسجيل الدخول عبر Firebase
     private void loginWithGoogle() {
         progressBar.setVisibility(View.VISIBLE);
         if (btnGoogleLogin != null) btnGoogleLogin.setEnabled(false);
@@ -174,6 +176,7 @@ public class LoginEmailFragment extends Fragment {
         }
     }
 
+    // يستخرج رمز Google ID من استجابة بيانات الاعتماد ويُسجّل الدخول عبر Firebase
     private void handleGoogleCredential(GetCredentialResponse result) {
         try {
             GoogleIdTokenCredential googleCred =
@@ -205,6 +208,7 @@ public class LoginEmailFragment extends Fragment {
         }
     }
 
+    // يُنشئ ملف تعريف المستخدم في Firestore عند أول تسجيل دخول بجوجل ثم ينتقل للشاشة الرئيسية
     private void createUserIfNew(FirebaseUser firebaseUser) {
         firebaseManager.getUser(firebaseUser.getUid(),
             new JobLinkerFirebaseManager.DataCallback<com.example.joblinker.models.User>() {
@@ -242,7 +246,7 @@ public class LoginEmailFragment extends Fragment {
             });
     }
 
-    // ── Password reset ────────────────────────────
+    // يُرسل بريداً إلكترونياً لإعادة تعيين كلمة المرور عبر Firebase ويعرض رسالة تأكيد
     private void resetPassword(String email) {
         progressBar.setVisibility(View.VISIBLE);
         firebaseManager.sendPasswordResetEmail(email,

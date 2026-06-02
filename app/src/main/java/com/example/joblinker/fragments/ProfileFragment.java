@@ -80,7 +80,7 @@ public class ProfileFragment extends Fragment {
         return view;
     }
 
-    // ── View binding ──────────────────────────────────
+    // يبحث عن جميع مكوّنات صفحة الملف الشخصي في التخطيط ويخزّنها
     private void initializeViews(View view) {
         ivAvatar            = view.findViewById(R.id.iv_avatar);
         viewOnline          = view.findViewById(R.id.view_online);
@@ -107,7 +107,7 @@ public class ProfileFragment extends Fragment {
         btnLogout           = view.findViewById(R.id.btn_logout);
     }
 
-    // ── Click listeners ───────────────────────────────
+    // يربط مستمعي النقر لتعديل الملف الشخصي والإعدادات وتسجيل الخروج وصف الوظائف المحفوظة
     private void setupClickListeners() {
 
         if (btnEditProfile != null) {
@@ -137,6 +137,7 @@ public class ProfileFragment extends Fragment {
         }
     }
 
+    // يُهيّئ RecyclerView وظائف صاحب العمل المنشورة مع JobAdapter
     private void setupRecyclerView() {
         if (recyclerMyJobs == null) return;
         jobAdapter = new JobAdapter(requireContext(), myJobs);
@@ -149,6 +150,7 @@ public class ProfileFragment extends Fragment {
     // DATA LOADING
     // ══════════════════════════════════════════════════
 
+    // يجلب بيانات المستخدم الحالي من Firebase ويُشغّل ملء واجهة المستخدم وتحميل الإحصائيات
     public void loadUserProfile() {
         String userId = firebaseManager.getCurrentUserId();
         if (userId == null) return;
@@ -171,7 +173,7 @@ public class ProfileFragment extends Fragment {
         });
     }
 
-    // ── Display profile data ──────────────────────────
+    // يملأ جميع مكوّنات الملف الشخصي (الصورة، الاسم، الدور، الموقع، التواصل، السيرة، المهارات، والأقسام الخاصة بكل دور)
     private void displayUserProfile(User user) {
         // Avatar
         ImageUtils.loadCircularImage(requireContext(), user.getAvatarUrl(), ivAvatar);
@@ -265,7 +267,7 @@ public class ProfileFragment extends Fragment {
         }
     }
 
-    // ── Load stats (counts) ───────────────────────────
+    // يُحمّل ويعرض عدد الوظائف/الطلبات والوظائف المحفوظة والتقييم وعدد الاتصالات للمستخدم
     private void loadStats(User user) {
         String userId = user.getUserId();
         boolean isEmployer = "employer".equalsIgnoreCase(user.getUserRole());
@@ -330,7 +332,7 @@ public class ProfileFragment extends Fragment {
             });
     }
 
-    // ── Load employer's own jobs ───────────────────────
+    // يجلب ويعرض جميع الوظائف التي نشرها صاحب العمل المحدد في قسم الوظائف بالملف الشخصي
     private void loadMyJobs(String employerId) {
         firebaseManager.getJobsByEmployer(employerId,
             new JobLinkerFirebaseManager.ListCallback<Job>() {
@@ -353,7 +355,7 @@ public class ProfileFragment extends Fragment {
             });
     }
 
-    // ── Helpers ───────────────────────────────────────
+    // يبني نصاً للعرض من مدينة المستخدم وبلده، مُعيداً ما هو متاح منهما
     private String buildLocation(User user) {
         String city    = user.getUserCity();
         String country = user.getUserCountry();
@@ -364,7 +366,7 @@ public class ProfileFragment extends Fragment {
         return "";
     }
 
-    // ── Logout dialog ─────────────────────────────────
+    // يعرض مربع حوار AlertDialog يطلب من المستخدم تأكيد تسجيل الخروج
     private void showLogoutDialog() {
         new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.logout)
@@ -374,6 +376,7 @@ public class ProfileFragment extends Fragment {
                 .show();
     }
 
+    // يُسجّل خروج المستخدم من Firebase ويمسح التفضيلات المحلية وينتقل إلى LoginActivity
     private void performLogout() {
         String userId = firebaseManager.getCurrentUserId();
         if (userId != null) {

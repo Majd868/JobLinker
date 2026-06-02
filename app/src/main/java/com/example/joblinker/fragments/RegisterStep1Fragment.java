@@ -33,6 +33,7 @@ public class RegisterStep1Fragment extends Fragment {
         return view;
     }
 
+    // يبحث عن جميع حقول الإدخال ومجموعة تبديل الدور ويخزّنها
     private void initializeViews(View view) {
         etFullName = view.findViewById(R.id.et_full_name);
         etEmail = view.findViewById(R.id.et_email);
@@ -41,6 +42,7 @@ public class RegisterStep1Fragment extends Fragment {
         toggleRole = view.findViewById(R.id.toggle_role);
     }
 
+    // يتحقق من جميع حقول الخطوة الأولى، يُحدّد دور المستخدم، ويحفظ البيانات في RegisterActivity؛ يُعيد false عند فشل التحقق
     public boolean validateAndSaveData() {
         String fullName = etFullName.getText().toString().trim();
         String email = etEmail.getText().toString().trim();

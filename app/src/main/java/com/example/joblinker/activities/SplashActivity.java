@@ -79,6 +79,7 @@ public class SplashActivity extends AppCompatActivity {
         }, 2000);
     }
 
+    // يضبط حالة الظهور على true وينتقل فوراً إن كان تأخير الـ 2 ثانية قد انتهى مسبقاً
     @Override
     protected void onStart() {
         super.onStart();
@@ -87,18 +88,21 @@ public class SplashActivity extends AppCompatActivity {
         if (splashReady) navigate();
     }
 
+    // يضبط حالة الظهور على false عند انتقال النشاط إلى الخلفية
     @Override
     protected void onStop() {
         super.onStop();
         isVisible = false;
     }
 
+    // يلغي جميع callbacks المعلّقة في Handler عند تدمير النشاط
     @Override
     protected void onDestroy() {
         super.onDestroy();
         handler.removeCallbacksAndMessages(null);
     }
 
+    // ينتقل إلى MainActivity إذا كان مسجّلاً الدخول، أو إلى LoginActivity بخلاف ذلك، ثم يُنهي شاشة البداية
     private void navigate() {
         if (isFinishing() || isDestroyed()) return;
         Intent intent;

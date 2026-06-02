@@ -53,6 +53,7 @@ public class LoginPhoneFragment extends Fragment {
         return view;
     }
 
+    // يبحث عن جميع المكوّنات في تخطيط تسجيل الدخول بالهاتف ويخزّنها
     private void initializeViews(View view) {
         etCountryCode       = view.findViewById(R.id.et_country_code);
         etPhone             = view.findViewById(R.id.et_phone);
@@ -62,12 +63,13 @@ public class LoginPhoneFragment extends Fragment {
         progressBar         = view.findViewById(R.id.progress_bar);
     }
 
+    // يربط مستمعي النقر بزرَّي إرسال الرمز والتحقق
     private void setupClickListeners() {
         btnSendCode.setOnClickListener(v -> sendVerificationCode());
         btnVerify.setOnClickListener(v -> verifyCode());
     }
 
-    // ── Step 1: send OTP ──────────────────────────
+    // يتحقق من صحة رقم الهاتف ويُرسل رمز OTP عبر Firebase للرقم الدولي الكامل
     private void sendVerificationCode() {
         String countryCode = etCountryCode.getText().toString().trim();
         String phone       = etPhone.getText().toString().trim();
@@ -143,7 +145,7 @@ public class LoginPhoneFragment extends Fragment {
         PhoneAuthProvider.verifyPhoneNumber(options);
     }
 
-    // ── Step 2: verify OTP ────────────────────────
+    // يتحقق من صحة مدخل الرمز المكوّن من 6 أرقام ويُنشئ PhoneAuthCredential لتسجيل الدخول
     private void verifyCode() {
         String code = etVerificationCode.getText().toString().trim();
 
@@ -171,7 +173,7 @@ public class LoginPhoneFragment extends Fragment {
         signInWithCredential(credential);
     }
 
-    // ── Sign in ───────────────────────────────────
+    // يُسجّل الدخول ببيانات اعتماد الهاتف المُعطاة وينتقل للشاشة الرئيسية عند النجاح
     private void signInWithCredential(PhoneAuthCredential credential) {
         firebaseManager.signInWithPhoneCredential(credential,
             new JobLinkerFirebaseManager.AuthCallback() {

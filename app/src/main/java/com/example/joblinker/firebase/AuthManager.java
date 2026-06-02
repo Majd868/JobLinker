@@ -7,31 +7,32 @@ import com.google.android.gms.tasks.Task;
 public class AuthManager {
     private FirebaseAuth auth;
 
+    // يُنشئ كائن AuthManager ويُهيئ مثيل FirebaseAuth
     public AuthManager() {
         this.auth = FirebaseAuth.getInstance();
     }
 
-    // Register new user
+    // تسجيل مستخدم جديد
     public Task<AuthResult> registerUser(String email, String password) {
         return auth.createUserWithEmailAndPassword(email, password);
     }
 
-    // Login user
+    // تسجيل دخول المستخدم
     public Task<AuthResult> loginUser(String email, String password) {
         return auth.signInWithEmailAndPassword(email, password);
     }
 
-    // Logout user
+    // تسجيل خروج المستخدم
     public void logoutUser() {
         auth.signOut();
     }
 
-    // Send password reset email
+    // إرسال بريد إلكتروني لإعادة تعيين كلمة المرور
     public Task<Void> sendPasswordResetEmail(String email) {
         return auth.sendPasswordResetEmail(email);
     }
 
-    // Get current user ID
+    // الحصول على معرّف المستخدم الحالي
     public String getCurrentUserId() {
         if (auth.getCurrentUser() != null) {
             return auth.getCurrentUser().getUid();
@@ -39,7 +40,7 @@ public class AuthManager {
         return null;
     }
 
-    // Get current user email
+    // الحصول على البريد الإلكتروني للمستخدم الحالي
     public String getCurrentUserEmail() {
         if (auth.getCurrentUser() != null) {
             return auth.getCurrentUser().getEmail();
@@ -47,12 +48,12 @@ public class AuthManager {
         return null;
     }
 
-    // Check if user is logged in
+    // التحقق مما إذا كان المستخدم قد سجّل دخوله
     public boolean isUserLoggedIn() {
         return auth.getCurrentUser() != null;
     }
 
-    // Delete current user account
+    // حذف حساب المستخدم الحالي
     public Task<Void> deleteCurrentUser() {
         if (auth.getCurrentUser() != null) {
             return auth.getCurrentUser().delete();

@@ -112,9 +112,7 @@ public class JobLinkerFirebaseManager {
 
     // ==================== CONSTRUCTOR & INITIALIZATION ====================
 
-    /**
-     * Private constructor for singleton pattern
-     */
+    // مُنشئ خاص لنمط المفرد (Singleton)
     private JobLinkerFirebaseManager() {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
@@ -122,9 +120,7 @@ public class JobLinkerFirebaseManager {
         listenerRegistrations = new ArrayList<>();
     }
 
-    /**
-     * Get singleton instance
-     */
+    // الحصول على المثيل الوحيد من الكلاس (Singleton)
     public static synchronized JobLinkerFirebaseManager getInstance() {
         if (instance == null) {
             instance = new JobLinkerFirebaseManager();
@@ -134,9 +130,7 @@ public class JobLinkerFirebaseManager {
 
     // ==================== AUTHENTICATION METHODS ====================
 
-    /**
-     * Register user with email and password
-     */
+    // تسجيل مستخدم جديد باستخدام البريد الإلكتروني وكلمة المرور
     public void registerWithEmail(String email, String password, final AuthCallback callback) {
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
@@ -168,9 +162,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Login with email and password
-     */
+    // تسجيل دخول المستخدم باستخدام البريد الإلكتروني وكلمة المرور
     public void loginWithEmail(String email, String password, final AuthCallback callback) {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
@@ -191,9 +183,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Sign in with phone credential
-     */
+    // تسجيل الدخول باستخدام بيانات اعتماد رقم الهاتف
     public void signInWithPhoneCredential(PhoneAuthCredential credential, final AuthCallback callback) {
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(task -> {
@@ -213,9 +203,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Send email verification
-     */
+    // إرسال بريد إلكتروني للتحقق من الحساب
     public void sendEmailVerification(final VoidCallback callback) {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
@@ -236,9 +224,7 @@ public class JobLinkerFirebaseManager {
         }
     }
 
-    /**
-     * Send password reset email
-     */
+    // إرسال بريد إلكتروني لإعادة تعيين كلمة المرور
     public void sendPasswordResetEmail(String email, final VoidCallback callback) {
         mAuth.sendPasswordResetEmail(email)
                 .addOnCompleteListener(task -> {
@@ -254,9 +240,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Change password
-     */
+    // تغيير كلمة مرور المستخدم الحالي
     public void changePassword(String newPassword, final VoidCallback callback) {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
@@ -277,9 +261,7 @@ public class JobLinkerFirebaseManager {
         }
     }
 
-    /**
-     * Logout current user
-     */
+    // تسجيل خروج المستخدم الحالي وإزالة جميع المستمعين
     public void logout() {
         String userId = getCurrentUserId();
         if (userId != null) {
@@ -297,9 +279,7 @@ public class JobLinkerFirebaseManager {
         Log.d(TAG, "User logged out");
     }
 
-    /**
-     * Delete user account
-     */
+    // حذف حساب المستخدم من Firebase Auth وFirestore
     public void deleteAccount(final VoidCallback callback) {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
@@ -333,32 +313,24 @@ public class JobLinkerFirebaseManager {
         }
     }
 
-    /**
-     * Get current user ID
-     */
+    // الحصول على معرّف المستخدم الحالي
     public String getCurrentUserId() {
         FirebaseUser user = mAuth.getCurrentUser();
         return user != null ? user.getUid() : null;
     }
 
-    /**
-     * Get current Firebase user
-     */
+    // الحصول على كائن FirebaseUser للمستخدم الحالي
     public FirebaseUser getCurrentUser() {
         return mAuth.getCurrentUser();
     }
 
-    /**
-     * Check if email is verified
-     */
+    // التحقق مما إذا كان البريد الإلكتروني للمستخدم موثَّقاً
     public boolean isEmailVerified() {
         FirebaseUser user = mAuth.getCurrentUser();
         return user != null && user.isEmailVerified();
     }
 
-    /**
-     * Reload current user to get updated verification status
-     */
+    // إعادة تحميل بيانات المستخدم الحالي للحصول على حالة التحقق المحدَّثة
     public void reloadUser(final VoidCallback callback) {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
@@ -378,9 +350,7 @@ public class JobLinkerFirebaseManager {
 
     // ==================== USER CRUD OPERATIONS ====================
 
-    /**
-     * Create user in Firestore
-     */
+    // إنشاء سجل المستخدم في Firestore
     public void createUser(User user, final VoidCallback callback) {
         if (user.getUserId() == null || user.getUserId().isEmpty()) {
             callback.onFailure("User ID is required");
@@ -400,9 +370,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Get user by ID
-     */
+    // الحصول على بيانات المستخدم بواسطة المعرّف
     public void getUser(String userId, final DataCallback<User> callback) {
         db.collection(USERS_COLLECTION)
                 .document(userId)
@@ -423,9 +391,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Update user
-     */
+    // تحديث بيانات المستخدم في Firestore
     public void updateUser(String userId, Map<String, Object> updates, final VoidCallback callback) {
         db.collection(USERS_COLLECTION)
                 .document(userId)
@@ -440,9 +406,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Update user online status
-     */
+    // تحديث حالة الاتصال بالإنترنت للمستخدم
     public void updateUserOnlineStatus(String userId, boolean isOnline) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("isOnline", isOnline);
@@ -457,9 +421,7 @@ public class JobLinkerFirebaseManager {
                         Log.e(TAG, "Error updating online status", e));
     }
 
-    /**
-     * Delete user
-     */
+    // حذف بيانات المستخدم من Firestore
     public void deleteUser(String userId, final VoidCallback callback) {
         db.collection(USERS_COLLECTION)
                 .document(userId)
@@ -474,9 +436,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Search users by name or email
-     */
+    // البحث عن المستخدمين بالاسم أو البريد الإلكتروني
     public void searchUsers(String query, final ListCallback<User> callback) {
         // Get all users and filter in memory — avoids needing index on userName
         String lowerQuery = query.toLowerCase();
@@ -501,9 +461,7 @@ public class JobLinkerFirebaseManager {
 
     // ==================== JOB CRUD OPERATIONS ====================
 
-    /**
-     * Create job
-     */
+    // إنشاء وظيفة جديدة في Firestore
     public void createJob(Job job, final DataCallback<String> callback) {
         DocumentReference docRef = db.collection(JOBS_COLLECTION).document();
         job.setJobId(docRef.getId());
@@ -547,9 +505,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Get job by ID
-     */
+    // الحصول على بيانات الوظيفة بواسطة المعرّف
     public void getJob(String jobId, final DataCallback<Job> callback) {
         db.collection(JOBS_COLLECTION)
                 .document(jobId)
@@ -589,9 +545,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Get all active jobs
-     */
+    // الحصول على جميع الوظائف النشطة
     public void getActiveJobs(final ListCallback<Job> callback) {
         db.collection(JOBS_COLLECTION)
                 .whereEqualTo("jobActive", true)
@@ -625,9 +579,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Get jobs by type
-     */
+    // الحصول على الوظائف حسب النوع
     public void getJobsByType(String jobType, final ListCallback<Job> callback) {
         db.collection(JOBS_COLLECTION)
                 .whereEqualTo("jobActive", true)
@@ -649,9 +601,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Get jobs by employer
-     */
+    // الحصول على الوظائف المنشورة من قبل صاحب عمل معيّن
     public void getJobsByEmployer(String employerId, final ListCallback<Job> callback) {
         db.collection(JOBS_COLLECTION)
                 // Field name matches Job model: private String jobEmployerId
@@ -674,9 +624,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Search jobs by title, company, or description
-     */
+    // البحث عن الوظائف بالعنوان أو الشركة أو الوصف
     public void searchJobs(String query, final ListCallback<Job> callback) {
         // Note: Firestore doesn't support full-text search natively
         // This is a basic implementation - consider using Algolia or Elasticsearch for production
@@ -705,9 +653,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Update job
-     */
+    // تحديث بيانات الوظيفة في Firestore
     public void updateJob(String jobId, Map<String, Object> updates, final VoidCallback callback) {
         updates.put("updatedAt", System.currentTimeMillis());
 
@@ -724,9 +670,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Delete job
-     */
+    // حذف وظيفة من Firestore
     public void deleteJob(String jobId, final VoidCallback callback) {
         db.collection(JOBS_COLLECTION)
                 .document(jobId)
@@ -741,9 +685,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Listen to active jobs in real-time
-     */
+    // الاستماع إلى الوظائف النشطة في الوقت الفعلي
     public ListenerRegistration listenToActiveJobs(final ListCallback<Job> callback) {
         ListenerRegistration registration = db.collection(JOBS_COLLECTION)
                 .whereEqualTo("jobActive", true)
@@ -783,9 +725,7 @@ public class JobLinkerFirebaseManager {
         return registration;
     }
 
-    /**
-     * Increment job view count
-     */
+    // زيادة عداد مشاهدات الوظيفة بمقدار واحد
     public void incrementJobViewCount(String jobId) {
         db.collection(JOBS_COLLECTION)
                 .document(jobId)
@@ -796,9 +736,7 @@ public class JobLinkerFirebaseManager {
                         Log.e(TAG, "Error incrementing view count", e));
     }
 
-    /**
-     * Add applicant to job
-     */
+    // إضافة متقدّم جديد إلى قائمة المتقدمين للوظيفة
     public void addJobApplicant(String jobId, String userId, final VoidCallback callback) {
         db.collection(JOBS_COLLECTION)
                 .document(jobId)
@@ -815,9 +753,7 @@ public class JobLinkerFirebaseManager {
 
     // ==================== MESSAGE CRUD OPERATIONS ====================
 
-    /**
-     * Send message
-     */
+    // إرسال رسالة وحفظها في Firestore
     public void sendMessage(Message message, final DataCallback<String> callback) {
         DocumentReference docRef = db.collection(MESSAGES_COLLECTION).document();
         message.setMessageId(docRef.getId());
@@ -836,9 +772,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Get messages for a conversation
-     */
+    // الحصول على رسائل محادثة معيّنة
     public void getMessages(String conversationId, final ListCallback<Message> callback) {
         db.collection(MESSAGES_COLLECTION)
                 .whereEqualTo("conversationId", conversationId)
@@ -860,9 +794,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Listen to messages in real-time
-     */
+    // الاستماع إلى رسائل المحادثة في الوقت الفعلي
     public ListenerRegistration listenToMessages(String conversationId, final ListCallback<Message> callback) {
         ListenerRegistration registration = db.collection(MESSAGES_COLLECTION)
                 .whereEqualTo("conversationId", conversationId)
@@ -889,9 +821,7 @@ public class JobLinkerFirebaseManager {
         return registration;
     }
 
-    /**
-     * Mark message as read
-     */
+    // تحديد رسالة على أنها مقروءة
     public void markMessageAsRead(String messageId, final VoidCallback callback) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("messageRead", true);
@@ -909,9 +839,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Mark all messages in conversation as read
-     */
+    // تحديد جميع رسائل المحادثة على أنها مقروءة
     public void markAllMessagesAsRead(String conversationId, String userId, final VoidCallback callback) {
         db.collection(MESSAGES_COLLECTION)
                 .whereEqualTo("conversationId", conversationId)
@@ -931,9 +859,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Delete message
-     */
+    // حذف رسالة من Firestore
     public void deleteMessage(String messageId, final VoidCallback callback) {
         db.collection(MESSAGES_COLLECTION)
                 .document(messageId)
@@ -948,9 +874,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Update conversation's last message
-     */
+    // تحديث آخر رسالة في سجل المحادثة
     private void updateConversationLastMessage(Message message) {
         Map<String, Object> conversationData = new HashMap<>();
         conversationData.put("lastMessage", message.getMessageText());
@@ -970,9 +894,7 @@ public class JobLinkerFirebaseManager {
                         Log.e(TAG, "Error updating conversation", e));
     }
 
-    /**
-     * Get user conversations
-     */
+    // الحصول على قائمة محادثات المستخدم
     public void getUserConversations(String userId, final ListCallback<Conversation> callback) {
         db.collection(CONVERSATIONS_COLLECTION)
                 .whereArrayContains("participants", userId)
@@ -998,9 +920,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Listen to conversations in real-time
-     */
+    // الاستماع إلى محادثات المستخدم في الوقت الفعلي
     public ListenerRegistration listenToConversations(String userId, final ListCallback<Conversation> callback) {
         ListenerRegistration registration = db.collection(CONVERSATIONS_COLLECTION)
                 .whereArrayContains("participants", userId)
@@ -1033,9 +953,7 @@ public class JobLinkerFirebaseManager {
 
     // ==================== CALL OPERATIONS ====================
 
-    /**
-     * Create call record
-     */
+    // إنشاء سجل مكالمة جديدة في Firestore
     public void createCall(Call call, final DataCallback<String> callback) {
         DocumentReference docRef = db.collection(CALLS_COLLECTION).document();
         call.setCallId(docRef.getId());
@@ -1052,9 +970,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Update call status
-     */
+    // تحديث حالة المكالمة
     public void updateCallStatus(String callId, String status, final VoidCallback callback) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("callStatus", status);
@@ -1078,9 +994,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Get call by ID
-     */
+    // الحصول على بيانات المكالمة بواسطة المعرّف
     public void getCall(String callId, final DataCallback<Call> callback) {
         db.collection(CALLS_COLLECTION)
                 .document(callId)
@@ -1101,9 +1015,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Get call history for user
-     */
+    // الحصول على سجل مكالمات المستخدم
     public void getCallHistory(String userId, final ListCallback<Call> callback) {
         List<Call> allCalls = new ArrayList<>();
 
@@ -1146,9 +1058,7 @@ public class JobLinkerFirebaseManager {
 
     // ==================== STORAGE OPERATIONS ====================
 
-    /**
-     * Upload image to Firebase Storage
-     */
+    // رفع صورة إلى Firebase Storage
     public void uploadImage(Uri imageUri, String path, final UploadCallback callback) {
         if (imageUri == null) { callback.onFailure("Image URI is null"); return; }
         // NOTE: This uses ApplicationContext which may fail for FileProvider URIs.
@@ -1161,7 +1071,7 @@ public class JobLinkerFirebaseManager {
         uploadBytes(bytes, path, callback);
     }
 
-    // Overload that accepts a Context — use from Activities for FileProvider URIs
+    // نسخة بديلة تقبل Context — تُستخدم من الأنشطة مع URIs من FileProvider
     public void uploadImage(android.content.Context ctx, Uri imageUri, String path, final UploadCallback callback) {
         if (imageUri == null) { callback.onFailure("Image URI is null"); return; }
         byte[] bytes = readBytesFromUri(imageUri, ctx);
@@ -1172,10 +1082,7 @@ public class JobLinkerFirebaseManager {
         uploadBytes(bytes, path, callback);
     }
 
-    /**
-     * Reads all bytes from any URI type synchronously on calling thread.
-     * Must be called while URI permissions are still valid.
-     */
+    // يقرأ جميع البيانات من أي نوع URI بشكل متزامن على الخيط الحالي — يجب الاستدعاء بينما أذونات URI لا تزال سارية
     private byte[] readBytesFromUri(Uri uri, android.content.Context ctx) {
         try {
             java.io.InputStream is = ctx.getContentResolver().openInputStream(uri);
@@ -1192,10 +1099,7 @@ public class JobLinkerFirebaseManager {
         }
     }
 
-    /**
-     * Uploads image bytes — compresses to JPEG first if decodable as bitmap.
-     * For audio/document files use uploadRawBytes() instead.
-     */
+    // يرفع بيانات الصورة بعد ضغطها إلى JPEG — استخدم uploadRawBytes() للصوت والمستندات
     public void uploadBytes(byte[] rawBytes, String path, UploadCallback callback) {
         if (rawBytes == null || rawBytes.length == 0) {
             callback.onFailure("No data to upload");
@@ -1231,9 +1135,7 @@ public class JobLinkerFirebaseManager {
         }).start();
     }
 
-    /**
-     * Uploads raw bytes without any compression — use for audio and documents.
-     */
+    // يرفع البيانات الخام دون ضغط — يُستخدم للصوت والمستندات
     public void uploadRawBytes(byte[] rawBytes, String path, String mimeType, UploadCallback callback) {
         if (rawBytes == null || rawBytes.length == 0) {
             callback.onFailure("No data to upload");
@@ -1243,6 +1145,7 @@ public class JobLinkerFirebaseManager {
         new Thread(() -> doUpload(fileRef, rawBytes, mimeType, callback)).start();
     }
 
+    // ينفّذ عملية الرفع الفعلية إلى Firebase Storage مع تتبع التقدم
     private void doUpload(StorageReference fileRef, byte[] bytes, String mimeType, UploadCallback callback) {
         com.google.firebase.storage.StorageMetadata metadata =
             new com.google.firebase.storage.StorageMetadata.Builder()
@@ -1268,9 +1171,7 @@ public class JobLinkerFirebaseManager {
             });
     }
 
-    /**
-     * Upload document to Firebase Storage
-     */
+    // رفع مستند إلى Firebase Storage
     public void uploadDocument(Uri documentUri, String path, final UploadCallback callback) {
         if (documentUri == null) {
             callback.onFailure("Document URI is null");
@@ -1298,9 +1199,7 @@ public class JobLinkerFirebaseManager {
         });
     }
 
-    /**
-     * Delete file from Firebase Storage
-     */
+    // حذف ملف من Firebase Storage
     public void deleteFile(String fileUrl, final VoidCallback callback) {
         try {
             StorageReference fileRef = storage.getReferenceFromUrl(fileUrl);
@@ -1321,9 +1220,7 @@ public class JobLinkerFirebaseManager {
 
     // ==================== UTILITY METHODS ====================
 
-    /**
-     * Remove all listeners
-     */
+    // إزالة جميع مستمعي Firestore وتنظيف القائمة
     public void removeAllListeners() {
         for (ListenerRegistration registration : listenerRegistrations) {
             registration.remove();
@@ -1332,10 +1229,7 @@ public class JobLinkerFirebaseManager {
         Log.d(TAG, "All listeners removed");
     }
 
-    /**
-     * Generate conversation ID from two user IDs
-     * Always generates the same ID regardless of order
-     */
+    // يُنشئ معرّف محادثة فريد من معرّفَي مستخدمَين بغض النظر عن الترتيب
     public static String generateConversationId(String userId1, String userId2) {
         if (userId1.compareTo(userId2) < 0) {
             return userId1 + "_" + userId2;
@@ -1344,9 +1238,7 @@ public class JobLinkerFirebaseManager {
         }
     }
 
-    /**
-     * Check if user has saved a job
-     */
+    // التحقق مما إذا كان المستخدم قد حفظ وظيفة معيّنة
     public void hasUserSavedJob(String userId, String jobId, final DataCallback<Boolean> callback) {
         db.collection(SAVED_JOBS_COLLECTION)
                 .document(userId + "_" + jobId)
@@ -1360,9 +1252,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Save job for user
-     */
+    // حفظ وظيفة في قائمة الوظائف المحفوظة للمستخدم
     public void saveJob(String userId, String jobId, final VoidCallback callback) {
         Map<String, Object> data = new HashMap<>();
         data.put("userId", userId);
@@ -1382,9 +1272,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Unsave job for user
-     */
+    // إزالة وظيفة من قائمة الوظائف المحفوظة للمستخدم
     public void unsaveJob(String userId, String jobId, final VoidCallback callback) {
         db.collection(SAVED_JOBS_COLLECTION)
                 .document(userId + "_" + jobId)
@@ -1399,17 +1287,12 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Get all saved job IDs for a user — used by JobsFragment to initialise bookmark icons.
-     * Delegates to getSavedJobs which already queries the savedJobs collection.
-     */
+    // الحصول على معرّفات الوظائف المحفوظة للمستخدم — يُستخدم لتهيئة أيقونات الإشارة المرجعية
     public void getSavedJobIds(String userId, final ListCallback<String> callback) {
         getSavedJobs(userId, callback);
     }
 
-    /**
-     * Get saved jobs for user
-     */
+    // الحصول على الوظائف المحفوظة للمستخدم
     public void getSavedJobs(String userId, final ListCallback<String> callback) {
         db.collection(SAVED_JOBS_COLLECTION)
                 .whereEqualTo("userId", userId)
@@ -1431,9 +1314,7 @@ public class JobLinkerFirebaseManager {
 
     // ==================== APPLICATION OPERATIONS ====================
 
-    /**
-     * Get applications submitted by a job seeker
-     */
+    // الحصول على الطلبات المقدَّمة من قبل باحث عن عمل
     public void getApplicationsByJobSeeker(String jobSeekerUserId,
                                            final ListCallback<com.example.joblinker.models.Application> callback) {
         db.collection(APPLICATIONS_COLLECTION)
@@ -1458,9 +1339,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Get applications for a specific job (for employers)
-     */
+    // الحصول على الطلبات المقدَّمة لوظيفة معيّنة (لأصحاب العمل)
     public void getApplicationsByJob(String jobId,
                                      final ListCallback<com.example.joblinker.models.Application> callback) {
         db.collection(APPLICATIONS_COLLECTION)
@@ -1482,9 +1361,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Submit a new application
-     */
+    // تقديم طلب توظيف جديد
     public void submitApplication(com.example.joblinker.models.Application application,
                                   final VoidCallback callback) {
         DocumentReference docRef = db.collection(APPLICATIONS_COLLECTION).document();
@@ -1502,9 +1379,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Update application status (for employers)
-     */
+    // تحديث حالة طلب التوظيف (لأصحاب العمل)
     public void updateApplicationStatus(String applicationId, String status,
                                         final VoidCallback callback) {
         db.collection(APPLICATIONS_COLLECTION)
@@ -1520,9 +1395,7 @@ public class JobLinkerFirebaseManager {
                 });
     }
 
-    /**
-     * Delete / withdraw an application
-     */
+    // حذف طلب التوظيف أو سحبه
     public void deleteApplication(String applicationId, final VoidCallback callback) {
         db.collection(APPLICATIONS_COLLECTION)
                 .document(applicationId)

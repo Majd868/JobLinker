@@ -37,12 +37,14 @@ public class CallService extends Service {
     private String currentCallId;
     private String callType;
 
+    // يُنشئ قناة الإشعارات عند إنشاء الخدمة
     @Override
     public void onCreate() {
         super.onCreate();
         createNotificationChannel();
     }
 
+    // يوجّه أحداث intent الواردة للمكالمات إلى دالة المعالجة المناسبة
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null) {
@@ -65,6 +67,7 @@ public class CallService extends Service {
         return START_NOT_STICKY;
     }
 
+    // يستخرج تفاصيل المكالمة من intent ويبدأ الخدمة كخدمة أمامية مع إشعار مستمر
     private void handleStartCall(Intent intent) {
         currentCallId = intent.getStringExtra(EXTRA_CALL_ID);
         String callerName = intent.getStringExtra(EXTRA_CALLER_NAME);
@@ -75,12 +78,14 @@ public class CallService extends Service {
         startForeground(NOTIFICATION_ID, notification);
     }
 
+    // يوقف إشعار الخدمة الأمامية ويُنهي الخدمة عند انتهاء المكالمة
     private void handleEndCall() {
         // Clean up and stop service
         stopForeground(true);
         stopSelf();
     }
 
+    // Launches CallActivity with caller details and updates the notification to show the call in progress
     private void handleAnswerCall(Intent intent) {
         String callId    = intent.getStringExtra(EXTRA_CALL_ID);
         String callerName = intent.getStringExtra(EXTRA_CALLER_NAME);
@@ -103,12 +108,14 @@ public class CallService extends Service {
         }
     }
 
+    // Dismisses the incoming call notification and stops the service when the user declines
     private void handleDeclineCall(Intent intent) {
         // Decline the call and stop service
         stopForeground(true);
         stopSelf();
     }
 
+    // Builds and returns a high-priority ongoing notification for the active call with an End Call action
     private Notification createCallNotification(String callerName, String contentText) {
         Intent notificationIntent = new Intent(this, CallActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(
@@ -141,6 +148,7 @@ public class CallService extends Service {
         return builder.build();
     }
 
+    // Registers the call notification channel required on Android O and above
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
@@ -159,12 +167,14 @@ public class CallService extends Service {
         }
     }
 
+    // Returns null because this service does not support binding
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
 
+    // Cleans up resources when the service is destroyed
     @Override
     public void onDestroy() {
         super.onDestroy();

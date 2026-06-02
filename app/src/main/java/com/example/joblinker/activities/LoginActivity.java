@@ -48,12 +48,14 @@ public class LoginActivity extends AppCompatActivity {
         setupClickListeners();
     }
 
+    // يربط مراجع تخطيط التبويب وعارض الصفحات ونص التسجيل
     private void initializeViews() {
         tabLayout = findViewById(R.id.tab_layout);
         viewPager = findViewById(R.id.view_pager);
         tvSignUp = findViewById(R.id.tv_sign_up);
     }
 
+    // يربط ViewPager2 بتخطيط التبويب باستخدام تسميتَي تبويب البريد الإلكتروني والهاتف
     private void setupViewPager() {
         pagerAdapter = new LoginPagerAdapter(this);
         viewPager.setAdapter(pagerAdapter);
@@ -76,6 +78,7 @@ public class LoginActivity extends AppCompatActivity {
         // viewPager.setUserInputEnabled(false);
     }
 
+    // يربط مستمع نقر للانتقال إلى RegisterActivity
     private void setupClickListeners() {
         tvSignUp.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
@@ -157,6 +160,7 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    // يعود إلى التبويب السابق بدلاً من إغلاق النشاط عند عدم التواجد على التبويب الأول
     @Override
     public void onBackPressed() {
         if (viewPager.getCurrentItem() == 0) {

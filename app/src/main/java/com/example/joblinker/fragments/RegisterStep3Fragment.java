@@ -66,6 +66,7 @@ public class RegisterStep3Fragment extends Fragment {
         return view;
     }
 
+    // يبحث عن جميع المكوّنات في تخطيط التحقق عبر الرسائل القصيرة ويخزّنها
     private void initializeViews(View view) {
         tvSmsVerificationMessage = view.findViewById(R.id.tv_sms_verification_message);
         tvPhoneDisplay = view.findViewById(R.id.tv_phone_display);
@@ -80,6 +81,7 @@ public class RegisterStep3Fragment extends Fragment {
         btnCompleteRegistration = view.findViewById(R.id.btn_complete_registration);
     }
 
+    // يربط مستمعي النقر بأزرار الإرسال والتحقق وإعادة الإرسال والتخطي وإتمام التسجيل
     private void setupClickListeners() {
         btnSendSmsCode.setOnClickListener(v -> sendSmsCode());
 
@@ -100,6 +102,7 @@ public class RegisterStep3Fragment extends Fragment {
         btnCompleteRegistration.setOnClickListener(v -> completeRegistration());
     }
 
+    // يعرض رقم هاتف المستخدم المُسترجَع من بيانات التسجيل في RegisterActivity
     private void displayPhoneInfo() {
         if (getActivity() instanceof RegisterActivity) {
             RegisterActivity activity = (RegisterActivity) getActivity();
@@ -111,6 +114,7 @@ public class RegisterStep3Fragment extends Fragment {
         }
     }
 
+    // يبدأ عملية إرسال رمز الرسالة القصيرة (يُفوّض حالياً إلى المحاكاة)
     private void sendSmsCode() {
         btnSendSmsCode.setEnabled(false);
         btnSendSmsCode.setText("Sending...");
@@ -120,6 +124,7 @@ public class RegisterStep3Fragment extends Fragment {
         simulateSendSms();
     }
 
+    // يُحاكي إرسال رسالة قصيرة بتأخير قصير ثم يُظهر حقل التحقق ويبدأ مؤقت إعادة الإرسال
     private void simulateSendSms() {
         // Simulate delay
         new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
@@ -138,6 +143,7 @@ public class RegisterStep3Fragment extends Fragment {
         }, 1500);
     }
 
+    // يتحقق من صحة رمز الرسالة القصيرة المكوّن من 6 أرقام ويُحاكي التحقق من الهاتف قبل إتمام التسجيل
     private void verifySmsCode() {
         String code = etSmsVerificationCode.getText().toString().trim();
 
@@ -170,6 +176,7 @@ public class RegisterStep3Fragment extends Fragment {
         }, 1000);
     }
 
+    // يبدأ عدًّا تنازليًّا مدته 60 ثانية يُعطّل رابط إعادة إرسال الرسالة القصيرة حتى انتهائه
     private void startSmsResendTimer() {
         canResendSms = false;
         tvResendSmsCode.setEnabled(false);
@@ -196,10 +203,12 @@ public class RegisterStep3Fragment extends Fragment {
         smsResendTimer.start();
     }
 
+    // يُستدعى بواسطة زر "التالي" في RegisterActivity لتشغيل إتمام التسجيل النهائي
     public void validateAndCompleteRegistration() {
         completeRegistration();
     }
 
+    // يُسجّل المستخدم في Firebase Auth وينشئ ملفه في Firestore ويحفظ التفضيلات وينتقل للشاشة الرئيسية
     private void completeRegistration() {
         if (getActivity() instanceof RegisterActivity) {
             RegisterActivity activity = (RegisterActivity) getActivity();

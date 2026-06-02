@@ -51,6 +51,7 @@ public class FilterActivity extends AppCompatActivity {
         setupButtons();
     }
 
+    // يربط جميع عناصر إدخال الفلتر من التخطيط
     private void initializeViews() {
         toolbar = findViewById(R.id.toolbar);
 
@@ -65,11 +66,13 @@ public class FilterActivity extends AppCompatActivity {
         btnClear = findViewById(R.id.btn_clear_filters);
     }
 
+    // يضبط شريط الأدوات بمستمع للرجوع للخلف
     private void setupToolbar() {
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(v -> finish());
     }
 
+    // يملأ قوائم نوع الوظيفة والفئة والترتيب بخياراتها ويضبط القيم الافتراضية
     private void setupDropdowns() {
         // You can replace these with values from resources if you want
         String[] jobTypes = new String[]{"All", "Full-time", "Part-time", "Remote", "Contract", "Internship"};
@@ -86,6 +89,7 @@ public class FilterActivity extends AppCompatActivity {
         if (TextUtils.isEmpty(dropdownSort.getText())) dropdownSort.setText("Newest", false);
     }
 
+    // يملأ حقول الفلتر مسبقاً بأي قيم فلتر سبق اختيارها وتم تمريرها عبر intent extras
     private void fillFromIntent() {
         Intent intent = getIntent();
         if (intent == null) return;
@@ -106,11 +110,13 @@ public class FilterActivity extends AppCompatActivity {
         else dropdownSort.setText("Newest", false);
     }
 
+    // يضبط القائمة المنسدلة على القيمة المعطاة إن لم تكن فارغة، وإلا يضبطها على القيمة الافتراضية
     private void setIfPresent(AutoCompleteTextView view, String value, String fallback) {
         if (!TextUtils.isEmpty(value)) view.setText(value, false);
         else view.setText(fallback, false);
     }
 
+    // يضبط مستمعي زرّي تطبيق الفلتر ومسحه لإعادة نتائج الفلتر إلى النشاط المُستدعي
     private void setupButtons() {
         btnApply.setOnClickListener(v -> {
             Intent data = new Intent();
@@ -143,10 +149,12 @@ public class FilterActivity extends AppCompatActivity {
         });
     }
 
+    // يُعيد النص المُقلَّص من EditText، أو سلسلة فارغة إذا كان النص null
     private String safeText(TextInputEditText editText) {
         return editText.getText() == null ? "" : editText.getText().toString().trim();
     }
 
+    // يحوّل سلسلة نصية إلى long، ويُعيد -1 إذا كانت فارغة أو غير صالحة كرقم
     private long parseLongOrMinusOne(String s) {
         if (TextUtils.isEmpty(s)) return -1;
         try {

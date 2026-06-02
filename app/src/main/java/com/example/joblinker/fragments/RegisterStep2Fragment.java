@@ -59,6 +59,7 @@ public class RegisterStep2Fragment extends Fragment {
         return view;
     }
 
+    // يبحث عن جميع المكوّنات في تخطيط التحقق من البريد الإلكتروني ويخزّنها
     private void initializeViews(View view) {
         tvVerificationMessage = view.findViewById(R.id.tv_verification_message);
         tvEmailDisplay = view.findViewById(R.id.tv_email_display);
@@ -70,6 +71,7 @@ public class RegisterStep2Fragment extends Fragment {
         btnSkipVerification = view.findViewById(R.id.btn_skip_verification);
     }
 
+    // يربط مستمعي النقر بأزرار التحقق وإعادة الإرسال والتخطي
     private void setupClickListeners() {
         btnVerify.setOnClickListener(v -> verifyEmailCode());
 
@@ -86,6 +88,7 @@ public class RegisterStep2Fragment extends Fragment {
         btnSkipVerification.setOnClickListener(v -> skipEmailVerification());
     }
 
+    // يعرض عنوان البريد الإلكتروني للمستخدم ورسالة وصفية للتحقق في واجهة المستخدم
     private void displayEmailInfo() {
         if (getActivity() instanceof RegisterActivity) {
             RegisterActivity activity = (RegisterActivity) getActivity();
@@ -102,6 +105,7 @@ public class RegisterStep2Fragment extends Fragment {
         }
     }
 
+    // يحاول إرسال بريد تحقق عبر Firebase، مع الرجوع إلى المحاكاة في حالة الفشل
     private void sendEmailVerification() {
         try {
             // This will attempt to use your custom Firebase Manager
@@ -124,11 +128,13 @@ public class RegisterStep2Fragment extends Fragment {
         }
     }
 
+    // يعرض رسالة محاكاة ويبدأ مؤقت إعادة الإرسال عند عدم توفر التحقق الفعلي
     private void simulateEmailVerification() {
         Toast.makeText(requireContext(), "(Simulation) Code sent to your email", Toast.LENGTH_SHORT).show();
         startResendTimer();
     }
 
+    // يتحقق من صحة مدخل الرمز المكوّن من 6 أرقام ويُحاكي التحقق من البريد قبل الانتقال للخطوة التالية
     private void verifyEmailCode() {
         String code = etVerificationCode.getText().toString().trim();
 
@@ -160,17 +166,20 @@ public class RegisterStep2Fragment extends Fragment {
         }, 1000);
     }
 
+    // يتخطى التحقق من البريد الإلكتروني وينتقل مباشرةً إلى خطوة التسجيل التالية
     private void skipEmailVerification() {
         Toast.makeText(requireContext(), "You can verify your email later in settings", Toast.LENGTH_SHORT).show();
         moveToNextStep();
     }
 
+    // يُعلم RegisterActivity بالانتقال إلى الخطوة التالية في الـ ViewPager
     private void moveToNextStep() {
         if (getActivity() instanceof RegisterActivity) {
             ((RegisterActivity) getActivity()).moveToNextStep();
         }
     }
 
+    // يبدأ مؤقت عد تنازلي مدته 60 ثانية يُعطّل رابط إعادة الإرسال حتى انتهائه
     private void startResendTimer() {
         canResend = false;
         tvResendCode.setEnabled(false);

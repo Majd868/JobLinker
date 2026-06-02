@@ -89,7 +89,7 @@ public class SettingActivity extends BaseActivity {
         setupListeners();
     }
 
-    // ── View binding ──────────────────────────────────
+    // يربط جميع عناصر شاشة الإعدادات ويضبط شريط الأدوات بزر الرجوع
     private void initViews() {
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -124,7 +124,7 @@ public class SettingActivity extends BaseActivity {
         btnLogout        = findViewById(R.id.btnLogout);
     }
 
-    // ── Load saved prefs into switches ────────────────
+    // يقرأ علامات التفضيل المحفوظة ويضبط الحالة المحددة الأولية لجميع مفاتيح التبديل
     private void loadPreferences() {
         boolean notif   = prefsManager.getBoolean("notificationsEnabled", true);
         boolean jobs    = prefsManager.getBoolean("jobAlertsEnabled", true);
@@ -139,7 +139,7 @@ public class SettingActivity extends BaseActivity {
         if (switchOnlineStatus         != null) switchOnlineStatus.setChecked(online);
     }
 
-    // ── Load user data from Firebase ──────────────────
+    // يحمّل اسم المستخدم الحالي وبريده الإلكتروني وحالة التحقق وصورته من Firebase
     private void loadUserData() {
         FirebaseUser fUser = firebaseAuth.getCurrentUser();
         if (fUser == null) return;
@@ -176,7 +176,7 @@ public class SettingActivity extends BaseActivity {
         });
     }
 
-    // ── Click listeners ───────────────────────────────
+    // يسجّل مستمعي النقر والتبديل لجميع عناصر الإعدادات والمفاتيح وأزرار الإجراءات
     private void setupListeners() {
 
         // ── ACCOUNT ──────────────────────────────────
@@ -333,7 +333,7 @@ public class SettingActivity extends BaseActivity {
     // DIALOG IMPLEMENTATIONS
     // ══════════════════════════════════════════════════
 
-    // ── Change Password ───────────────────────────────
+    // يُضخّم تخطيط مربع حوار تغيير كلمة المرور، مع الرجوع إلى مربع حوار بسيط إذا كان التخطيط مفقوداً
     private void showChangePasswordDialog() {
         View dialogView = LayoutInflater.from(this)
                 .inflate(R.layout.dialog_change_password, null);
@@ -362,6 +362,7 @@ public class SettingActivity extends BaseActivity {
                 .show();
     }
 
+    // ينشئ مربع حوار برمجياً بثلاثة حقول لتغيير كلمة المرور عند غياب ملف تخطيط XML
     private void showSimpleChangePasswordDialog() {
         // Current password field
         final EditText etCurrent = new EditText(this);
@@ -402,6 +403,7 @@ public class SettingActivity extends BaseActivity {
                 .show();
     }
 
+    // يُعيد المصادقة بكلمة المرور الحالية ثم يحدّث كلمة مرور Firebase إذا كانت صالحة
     private void performChangePassword(String current, String newPass, String confirm) {
         if (TextUtils.isEmpty(current)) {
             Toast.makeText(this, "Enter your current password", Toast.LENGTH_SHORT).show();
@@ -449,7 +451,7 @@ public class SettingActivity extends BaseActivity {
         });
     }
 
-    // ── Verify email ──────────────────────────────────
+    // يرسل رابط التحقق من البريد الإلكتروني عبر Firebase إلى المستخدم الحالي إذا لم يكن محققاً بعد
     private void sendVerificationEmail() {
         FirebaseUser user = firebaseAuth.getCurrentUser();
         if (user == null) return;
@@ -476,7 +478,7 @@ public class SettingActivity extends BaseActivity {
         });
     }
 
-    // ── Blocked users ─────────────────────────────────
+    // يعرض مربع حوار يسرد المستخدمين المحجوبين (فارغ حالياً؛ مكان مؤقت لميزة مستقبلية)
     private void showBlockedUsersDialog() {
         // Load blocked users from Firestore user document
         if (currentUser == null) {
@@ -494,7 +496,7 @@ public class SettingActivity extends BaseActivity {
         //  populate a real ListView/RecyclerView here.
     }
 
-    // ── Profile visibility ────────────────────────────
+    // يعرض مربع حوار لاختيار من يمكنه رؤية الملف الشخصي ويحفظ الاختيار
     private void showProfileVisibilityDialog() {
         String[] options = {"Everyone", "Registered users only", "Nobody"};
         int saved = prefsManager.getInt("profileVisibility", 0);
@@ -513,7 +515,7 @@ public class SettingActivity extends BaseActivity {
                 .show();
     }
 
-    // ── Help ──────────────────────────────────────────
+    // يعرض مربع حوار يحتوي على الأسئلة الشائعة ومعلومات التواصل مع الدعم
     private void showHelpDialog() {
         new AlertDialog.Builder(this)
                 .setTitle("Help & Support")
@@ -532,7 +534,7 @@ public class SettingActivity extends BaseActivity {
                 .show();
     }
 
-    // ── Generic text dialog ───────────────────────────
+    // يعرض مربع تنبيه بسيط قابل للإغلاق بالعنوان والمحتوى النصي المعطيين
     private void showTextDialog(String title, String content) {
         new AlertDialog.Builder(this)
                 .setTitle(title)
@@ -541,7 +543,7 @@ public class SettingActivity extends BaseActivity {
                 .show();
     }
 
-    // ── Generic info screen (for activities not built yet) ─
+    // يعرض مربع حوار إعلامي كمكان مؤقت للميزات غير المنفّذة بعد
     private void showSimpleInfo(String title, String message) {
         new AlertDialog.Builder(this)
                 .setTitle(title)
@@ -550,7 +552,7 @@ public class SettingActivity extends BaseActivity {
                 .show();
     }
 
-    // ── Delete account ────────────────────────────────
+    // يعرض مربع حوار تحذيري يصف ما سيُحذف قبل الانتقال إلى تأكيد كلمة المرور
     private void showDeleteAccountDialog() {
         new AlertDialog.Builder(this)
                 .setTitle("⚠️ Delete Account")
@@ -566,6 +568,7 @@ public class SettingActivity extends BaseActivity {
                 .show();
     }
 
+    // يطلب من المستخدم إدخال كلمة المرور لتأكيد الحذف الدائم للحساب
     private void confirmDeleteWithPassword() {
         final EditText etPassword = new EditText(this);
         etPassword.setHint("Enter your password to confirm");
@@ -592,6 +595,7 @@ public class SettingActivity extends BaseActivity {
                 .show();
     }
 
+    // يُعيد المصادقة بكلمة المرور المقدَّمة ويحذف حساب Firebase والبيانات المحلية نهائياً
     private void performDeleteAccount(String password) {
         FirebaseUser user = firebaseAuth.getCurrentUser();
         if (user == null || user.getEmail() == null) return;

@@ -20,6 +20,7 @@ public class JobLinkerFireBaseMessagingServices extends FirebaseMessagingService
     private static final String TAG = "FCMService";
     private static final String CHANNEL_ID = "joblinker_notifications";
 
+    // Handles incoming FCM messages by displaying a notification for notification payloads and logging data payloads
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
@@ -40,6 +41,7 @@ public class JobLinkerFireBaseMessagingServices extends FirebaseMessagingService
         }
     }
 
+    // Called when the FCM registration token is refreshed; log it and forward to the server as needed
     @Override
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
@@ -47,6 +49,7 @@ public class JobLinkerFireBaseMessagingServices extends FirebaseMessagingService
         // Send token to your server if needed
     }
 
+    // Builds and posts a high-priority notification that opens MainActivity when tapped
     private void sendNotification(String title, String messageBody) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

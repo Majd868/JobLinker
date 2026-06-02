@@ -138,6 +138,7 @@ public class ChatActivity extends AppCompatActivity {
         loadUserStatus();
     }
 
+    // يستخرج معرّف المستخدم الآخر واسمه وصورته ومعرّف المحادثة من Intent المُطلِق
     private void getIntentData() {
         Intent i        = getIntent();
         otherUserId     = i.getStringExtra(EXTRA_USER_ID);
@@ -155,6 +156,7 @@ public class ChatActivity extends AppCompatActivity {
             conversationId = JobLinkerFirebaseManager.generateConversationId(currentUserId, otherUserId);
     }
 
+    // يربط جميع عناصر واجهة الدردشة ويضبط اسم المستخدم الآخر وصورته في منطقة شريط الأدوات
     private void initializeViews() {
         toolbar              = findViewById(R.id.toolbar);
         ivUserAvatar         = findViewById(R.id.iv_user_avatar);
@@ -184,11 +186,13 @@ public class ChatActivity extends AppCompatActivity {
         ImageUtils.loadCircularImage(this, otherUserAvatar, ivUserAvatar);
     }
 
+    // يضبط شريط الأدوات بمستمع للرجوع للخلف
     private void setupToolbar() {
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
     }
 
+    // يضبط RecyclerView الرسائل بتخطيط خطي مرسوخ في الأسفل ومحوّل الرسائل
     private void setupRecyclerView() {
         messageAdapter = new MessageAdapter(this, messages, currentUserId);
         LinearLayoutManager lm = new LinearLayoutManager(this);
@@ -197,6 +201,7 @@ public class ChatActivity extends AppCompatActivity {
         recyclerMessages.setAdapter(messageAdapter);
     }
 
+    // يربط جميع أزرار إجراءات الدردشة بما فيها الإرسال والصوت والمرفقات والكاميرا وعناصر الدرج
     private void setupClickListeners() {
         btnVoiceCall.setOnClickListener(v -> initiateCall("voice"));
         btnVideoCall.setOnClickListener(v -> initiateCall("video"));
@@ -243,6 +248,7 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
+    // يبدّل ظهور درج خيارات المرفقات ويحدّث أيقونة زر المرفقات
     private void toggleAttachmentTray() {
         if (layoutAttachmentTray.getVisibility() == View.VISIBLE) closeTray();
         else {
@@ -251,11 +257,13 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
+    // يخفي درج المرفقات ويعيد ضبط أيقونة زر المرفقات
     private void closeTray() {
         layoutAttachmentTray.setVisibility(View.GONE);
         btnAttachment.setImageResource(R.drawable.ic_attachment);
     }
 
+    // يطلب إذن الكاميرا إن لزم ثم يشغّلها لالتقاط صورة للدردشة
     private void openCamera() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -275,12 +283,14 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
+    // ينشئ ملف JPEG مؤقتاً بمسمى فريد في التخزين الخارجي لناتج الكاميرا
     private File createTempImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         File storageDir  = getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES);
         return File.createTempFile("IMG_" + timeStamp, ".jpg", storageDir);
     }
 
+    // يشغّل المعرض أو منتقي الصور لاختيار صورة لإرسالها في الدردشة
     private void openGallery() {
         Intent intent;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
@@ -290,6 +300,7 @@ public class ChatActivity extends AppCompatActivity {
         galleryLauncher.launch(intent);
     }
 
+    // يشغّل منتقي الملفات لاختيار أي نوع مستند لإرساله في الدردشة
     private void openDocument() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
@@ -297,6 +308,7 @@ public class ChatActivity extends AppCompatActivity {
         documentLauncher.launch(Intent.createChooser(intent, "Select Document"));
     }
 
+    // يحصل على آخر موقع GPS معروف للجهاز ويرسله كرسالة رابط Google Maps
     private void shareLocation() {
         android.location.LocationManager lm =
                 (android.location.LocationManager) getSystemService(LOCATION_SERVICE);
@@ -324,12 +336,14 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
+    // يفتح منتقي جهات الاتصال ليتمكن المستخدم من اختيار جهة اتصال لمشاركتها في الدردشة
     private void shareContact() {
         Intent intent = new Intent(Intent.ACTION_PICK,
                 android.provider.ContactsContract.Contacts.CONTENT_URI);
         startActivityForResult(intent, 204);
     }
 
+    // يعالج نتيجة اختيار جهة الاتصال ويرسلها كرسالة في الدردشة
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -355,6 +369,7 @@ public class ChatActivity extends AppCompatActivity {
     // ══════════════════════════════════════════════
     // VOICE RECORDING
     // ══════════════════════════════════════════════
+    // يطلب إذن الصوت إن لزم ثم يبدأ تسجيل رسالة صوتية مع واجهة مؤقت
     private void startVoiceRecording() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -417,6 +432,7 @@ public class ChatActivity extends AppCompatActivity {
         }).start();
     }
 
+    // يوقف التسجيل النشط ويقرأ بيانات الملف الصوتي ويرفعها ويرسل رسالة صوتية
     private void stopRecordingAndSend() {
         if (!isRecording) return;
         stopRecording();
@@ -459,6 +475,7 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
+    // يوقف التسجيل ويحذف الملف الصوتي دون إرساله
     private void cancelRecording() {
         if (!isRecording) return;
         stopRecording();
@@ -467,6 +484,7 @@ public class ChatActivity extends AppCompatActivity {
         Toast.makeText(this, "Recording cancelled", Toast.LENGTH_SHORT).show();
     }
 
+    // يوقف MediaRecorder ويحرّره ويخفي شريط واجهة التسجيل
     private void stopRecording() {
         isRecording = false;
         recordingHandler.removeCallbacks(recordingTimerRunnable);
@@ -484,6 +502,7 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
+    // يحرّك نقطة مؤشر التسجيل بتأثير وميض أثناء التسجيل
     private void startRecordingDotAnimation() {
         Runnable blink = new Runnable() {
             @Override public void run() {
@@ -499,6 +518,7 @@ public class ChatActivity extends AppCompatActivity {
     // ══════════════════════════════════════════════
     // SEND MESSAGES
     // ══════════════════════════════════════════════
+    // ينشئ كائن رسالة نصية ويرسله ثم يمسح حقل الإدخال
     private void sendTextMessage(String text) {
         Message message = new Message(conversationId, currentUserId, otherUserId, text);
         message.setMessageType("text");
@@ -506,6 +526,7 @@ public class ChatActivity extends AppCompatActivity {
         etMessage.setText("");
     }
 
+    // يقرأ بيانات الصورة من URI ويرفعها إلى Firebase Storage ويرسل رسالة صورة
     private void sendImageMessage(Uri imageUri) {
         byte[] bytes = readUriBytes(imageUri);
         if (bytes == null || bytes.length == 0) {
@@ -529,6 +550,7 @@ public class ChatActivity extends AppCompatActivity {
                 });
     }
 
+    // يقرأ جميع بيانات URI المحتوى في مصفوفة بايت للرفع
     private byte[] readUriBytes(Uri uri) {
         try {
             java.io.InputStream is = getContentResolver().openInputStream(uri);
@@ -544,6 +566,7 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
+    // يحدّد الاسم المعروض للمستند ويرفع بياناته ويرسل رسالة مستند
     private void sendDocumentMessage(Uri documentUri) {
         String fileName = "document";
         try {
@@ -581,6 +604,7 @@ public class ChatActivity extends AppCompatActivity {
                 });
     }
 
+    // يرسل كائن رسالة إلى Firebase ويضيفه إلى القائمة المحلية عند النجاح
     private void sendMessageObject(Message message) {
         firebaseManager.sendMessage(message, new JobLinkerFirebaseManager.DataCallback<String>() {
             @Override public void onSuccess(String id) {
@@ -599,6 +623,7 @@ public class ChatActivity extends AppCompatActivity {
     // ══════════════════════════════════════════════
     // REAL-TIME LISTENER
     // ══════════════════════════════════════════════
+    // يربط مستمع Firestore في الوقت الفعلي يحدّث قائمة الرسائل عند وصول رسائل جديدة
     private void setupMessageListener() {
         messageListener = firebaseManager.listenToMessages(conversationId,
                 new JobLinkerFirebaseManager.ListCallback<Message>() {
@@ -617,6 +642,7 @@ public class ChatActivity extends AppCompatActivity {
                 });
     }
 
+    // يجلب حالة اتصال المستخدم الآخر من Firebase ويعرضها في حقل نص الحالة
     private void loadUserStatus() {
         firebaseManager.getUser(otherUserId, new JobLinkerFirebaseManager.DataCallback<User>() {
             @Override public void onSuccess(User user) {
@@ -632,6 +658,7 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
+    // يضع علامة مقروء على جميع الرسائل غير المقروءة الموجّهة للمستخدم الحالي في Firebase
     private void markMessagesAsRead() {
         for (Message m : messages) {
             if (!m.isMessageRead() && currentUserId.equals(m.getMessageReceiverId())) {
@@ -644,6 +671,7 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
+    // يشغّل CallActivity مع تفاصيل المستخدم الآخر ونوع المكالمة المحدد (صوت/فيديو)
     private void initiateCall(String callType) {
         Intent intent = new Intent(this, CallActivity.class);
         intent.putExtra(CallActivity.EXTRA_RECEIVER_ID,     otherUserId);
@@ -656,6 +684,7 @@ public class ChatActivity extends AppCompatActivity {
     // ══════════════════════════════════════════════
     // PERMISSIONS
     // ══════════════════════════════════════════════
+    // يعالج نتائج طلبات الأذونات للميكروفون والكاميرا ويشغّل الإجراء المناسب عند منح الإذن
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
@@ -676,6 +705,7 @@ public class ChatActivity extends AppCompatActivity {
     // ══════════════════════════════════════════════
     // AUDIO PLAYBACK  (called by MessageAdapter)
     // ══════════════════════════════════════════════
+    // يشغّل أو يوقف رابط صوتي بعيداً باستخدام MediaPlayer مع استدعاء callbacks عند البدء والإيقاف
     public void playVoiceMessage(String url, Runnable onStart, Runnable onStop) {
         // ✅ FIX #5: guard null URL before calling .equals()
         if (url == null || url.isEmpty()) {
@@ -747,6 +777,7 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
+    // يطلب تركيز صوتي مؤقت من النظام لمنع كتم الصوت أثناء التشغيل
     private boolean requestAudioFocus() {
         if (audioManager == null)
             audioManager = (android.media.AudioManager) getSystemService(AUDIO_SERVICE);
@@ -769,6 +800,7 @@ public class ChatActivity extends AppCompatActivity {
                 == android.media.AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
     }
 
+    // يُعيد تركيز الصوت إلى النظام بعد انتهاء التشغيل أو إلغائه
     private void abandonAudioFocus() {
         if (audioManager != null && audioFocusRequest != null) {
             audioManager.abandonAudioFocusRequest(audioFocusRequest);
@@ -776,6 +808,7 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
+    // يوقف MediaPlayer ويحرّره ويتخلى عن تركيز الصوت بأمان ضد الاستدعاءات المتداخلة
     public void stopAudioPlayer() {
         // ✅ FIX #4: capture then null — prevents double-release on re-entrant calls
         MediaPlayer p = audioPlayer;
@@ -791,6 +824,7 @@ public class ChatActivity extends AppCompatActivity {
     // ══════════════════════════════════════════════
     // LIFECYCLE
     // ══════════════════════════════════════════════
+    // يوقف مشغّل الصوت ويزيل مستمع الرسائل ويوقف التسجيل عند تدمير النشاط
     @Override
     protected void onDestroy() {
         super.onDestroy();
