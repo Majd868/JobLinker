@@ -18,7 +18,7 @@ public class JobLinkerApplication extends Application {
     public static final String CHANNEL_CALLS = "calls_channel";
     public static final String CHANNEL_GENERAL = "general_channel";
 
-    // Initializes Firebase and creates all notification channels when the application process starts
+    // يُهيّئ Firebase ويُنشئ جميع قنوات الإشعارات عند بدء تشغيل التطبيق
     @Override
     public void onCreate() {
         super.onCreate();
@@ -35,9 +35,7 @@ public class JobLinkerApplication extends Application {
         // GlideApp is auto-generated
     }
 
-    /**
-     * Create notification channels for Android O and above
-     */
+    // يُنشئ قنوات الإشعارات لنظام Android O وما فوق
     private void createNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager manager = getSystemService(NotificationManager.class);

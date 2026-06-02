@@ -85,7 +85,7 @@ public class CallService extends Service {
         stopSelf();
     }
 
-    // Launches CallActivity with caller details and updates the notification to show the call in progress
+    // يُطلق CallActivity مع تفاصيل المتصل ويُحدّث الإشعار ليُظهر أن المكالمة جارية
     private void handleAnswerCall(Intent intent) {
         String callId    = intent.getStringExtra(EXTRA_CALL_ID);
         String callerName = intent.getStringExtra(EXTRA_CALLER_NAME);
@@ -108,14 +108,14 @@ public class CallService extends Service {
         }
     }
 
-    // Dismisses the incoming call notification and stops the service when the user declines
+    // يرفض المكالمة الواردة ويوقف الخدمة عند رفض المستخدم
     private void handleDeclineCall(Intent intent) {
         // Decline the call and stop service
         stopForeground(true);
         stopSelf();
     }
 
-    // Builds and returns a high-priority ongoing notification for the active call with an End Call action
+    // يُنشئ ويُعيد إشعاراً مستمراً عالي الأولوية للمكالمة النشطة مع إجراء إنهاء المكالمة
     private Notification createCallNotification(String callerName, String contentText) {
         Intent notificationIntent = new Intent(this, CallActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(
@@ -148,7 +148,7 @@ public class CallService extends Service {
         return builder.build();
     }
 
-    // Registers the call notification channel required on Android O and above
+    // يُسجّل قناة إشعارات المكالمات المطلوبة على Android O وما فوق
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
@@ -167,14 +167,14 @@ public class CallService extends Service {
         }
     }
 
-    // Returns null because this service does not support binding
+    // تُعيد null لأن هذه الخدمة لا تدعم الربط
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
 
-    // Cleans up resources when the service is destroyed
+    // يُنظّف الموارد عند تدمير الخدمة
     @Override
     public void onDestroy() {
         super.onDestroy();
